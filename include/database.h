@@ -7,7 +7,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QString>
-#include <Qdir>
+#include <QDir>
 #include <QFileInfo>
 #include <QDebug>
 
