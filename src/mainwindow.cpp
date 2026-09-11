@@ -3,15 +3,40 @@
 #include "mainwindow.h"
 #include "ui_MainWindow.h"
 
+#include "createactwidget.h"
+
 
 MainWindow::MainWindow(Database &database, QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow), m_database(database)
 {
     ui->setupUi(this);
 
-    setupNavigation();
+    setWindowTitle("Акты приборов учета");
 
-    setCurrentPage(0);
+    // создаем виджет первого окна и добавляем его в stackWidget
+    auto* createActWidget = new CreateActWidget(m_database, this);
+    ui->stackedWidget->insertWidget(0, createActWidget);
+
+
+    // создаем группу кнопок для возможности уникального выбора
+    auto *navigationGroup = new QButtonGroup(this);
+    // разрешаем только уникальный выбор
+    navigationGroup->setExclusive(true);
+    // добавляем кнопки в группу
+    navigationGroup->addButton(ui->createActButton, 0);
+    navigationGroup->addButton(ui->metersButton, 1);
+    navigationGroup->addButton(ui->archiveButton, 2);
+    navigationGroup->addButton(ui->directoriesButton, 3);
+    navigationGroup->addButton(ui->settingsButton, 4);
+    // прописываем условие работы кнопок
+    connect(navigationGroup, &QButtonGroup::idClicked, this,
+        [this](int id)
+            {
+                ui->stackedWidget->setCurrentIndex(id);
+            });
+    // выбираем начальные условия создания окна
+    ui->createActButton->setChecked(true);
+    ui->stackedWidget->setCurrentIndex(0);
 
 
 
@@ -25,29 +50,4 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::setupNavigation()
-{
-    auto *navigationGroup = new QButtonGroup(this);
 
-    navigationGroup->setExclusive(true);
-
-    navigationGroup->addButton(ui->createActButton, 0);
-    navigationGroup->addButton(ui->mettersButton, 1);
-    navigationGroup->addButton(ui->archiveButton, 2);
-    navigationGroup->addButton(ui->directoriesButton, 3);
-    navigationGroup->addButton(ui->settingsButton, 4);
-
-
-    connect(navigationGroup, &QButtonGroup::idClicked, this,
-        [this](int id)
-            {
-                ui->stackedWidget->setCurrentIndex(id);
-            });
-
-
-}
-
-void MainWindow::setCurrentPage(const int index) const
-{
-    ui->stackedWidget->setCurrentIndex(index);
-}

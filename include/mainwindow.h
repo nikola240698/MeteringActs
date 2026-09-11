@@ -32,9 +32,6 @@ private:
 
     Database &m_database;
 
-    void setupNavigation();
-
-    void setCurrentPage(int index) const;
 };
 
 
