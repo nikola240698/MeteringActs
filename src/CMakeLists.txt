@@ -5,8 +5,12 @@ set(CMAKE_AUTORCC ON)
 add_executable(MeteringActs
         main.cpp
         database.cpp
+        mainwindow.cpp
 
         ${MY_INCLUDE_DIR}/database.h
+        ${MY_INCLUDE_DIR}/mainwindow.h
+
+        ${MY_UI_DIR}/mainwindow.ui
 )
 
 target_include_directories(MeteringActs PRIVATE

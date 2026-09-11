@@ -1,15 +1,16 @@
 #include <QApplication>
 #include <QPushButton>
 #include <QMessageBox>
+#include <ui_MainWindow.h>
 
 
 #include "database.h"
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    qDebug() << "Available SQL drivers:"
-                 << QSqlDatabase::drivers();
+
     Database db;
 
     if (!db.open())
@@ -19,8 +20,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    QPushButton button("Hello world!", nullptr);
-    button.resize(200, 100);
-    button.show();
+    MainWindow w(db);
+    w.show();
+
     return QApplication::exec();
 }
