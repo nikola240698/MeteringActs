@@ -82,46 +82,17 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
             loadConnectionData(connectionId);
         });
 
-    // загружаем данные прибора
-    loadMeters();
+    // вводим текст-подскахку в поле
+    ui->serialNumberLineEdit->setPlaceholderText("Введите серийный номер...");
 
-    // подключаем сигнал выбора прибора из списка
-    connect(ui->meterComboBox, &QComboBox::currentIndexChanged, this,
-        [this](int)
-        {
-            // получаем выбранные данные
-            QVariant data = ui->meterComboBox->currentData();
-            // очищаем поля
-            ui->meterNameLineEdit->clear();
-            ui->serialNumberLineEdit->clear();
-            ui->accuracyClassLineEdit->clear();
-            ui->verificationYearLineEdit->clear();
-            // проверяем полученные данные
-            if (!data.isValid())
-                return;
-            // загружаем данные прибора
-            loadMeterData(data.toInt());
-        });
-
-    // слот нажатия на кнопку "+Новый прибор"
-    connect(ui->addMeterButton, &QPushButton::clicked, this,
+    // слот нажатия Enter при вводе серийного номера
+    connect(ui->serialNumberLineEdit, &QLineEdit::returnPressed, this,
         [this]()
         {
-            // создаем диалоговое окно
-            MeterDialog dialog(m_database, this);
-            // проверяем, что оно запускается и сохраняются изменения
-            if (dialog.exec() != QDialog::Accepted)
-                return;
-            // получаем id созданного прибора
-            int newMeterId = dialog.createdMeterId();
-            // перезагружаем список приборов
-            loadMeters();
-            // получаем индекс при поиске нашего прибора в общем списке
-            int index = ui->meterComboBox->findData(newMeterId);
-            // если индекс найден
-            if (index >= 0)
-                ui->meterComboBox->setCurrentIndex(index);
+            findMeterBySerial();
         });
+    // слот нажатия кнопки "Найти"
+    connect(ui->findMeterButton, &QPushButton::clicked, this, &CreateActWidget::findMeterBySerial);
 
 }
 
@@ -306,32 +277,7 @@ void CreateActWidget::loadConnectionData(int connectionId) const
     ui->ctRatioLineEdit->setText(ctRatio);
 }
 
-void CreateActWidget::loadMeters() const
-{
-    // очищаем поле и добавляем значение по-умолчанию
-    ui->meterComboBox->clear();
-    ui->meterComboBox->addItem("Выберите прибор...", QVariant());
-    // создаем запрос
-    QSqlQuery query(m_database.getDatabase());
-    // пробуем выполнить его
-    if (!query.exec(
-        "SELECT id, name, serial_number "
-        "FROM meters "
-        "ORDER BY name, serial_number;"))
-    {
-        qDebug() << "loadMeters error: " << query.lastError().text();
-        return;
-    }
-    // получаем значения из запроса
-    while (query.next())
-    {
-        int id = query.value("id").toInt();
-        QString name = query.value("name").toString();
-        QString serial = query.value("serial_number").toString();
-        QString text = name + " - №" + serial;
-        ui->meterComboBox->addItem(text, id);
-    }
-}
+
 
 void CreateActWidget::loadMeterData(int meterId) const
 {
@@ -358,6 +304,60 @@ void CreateActWidget::loadMeterData(int meterId) const
     ui->accuracyClassLineEdit->setText(query.value("accuracy_class").toString());
     ui->verificationYearLineEdit->setText(query.value("verification_year").toString());
 
+}
+
+// метод поиска прибора по серийному номеру
+void CreateActWidget::findMeterBySerial()
+{
+    // получаем серийный номер
+    QString serial = ui->serialNumberLineEdit->text().trimmed();
+    // если не ввели серийный номер
+    if (serial.isEmpty())
+        return;
+    // создаем запрос и подготавливаем его
+    QSqlQuery query(m_database.getDatabase());
+    query.prepare(
+        "SELECT id, name, serial_number, accuracy_class, verification_year "
+        "FROM meters "
+        "WHERE serial_number = :serial;");
+    // биндим значение
+    query.bindValue(":serial", serial);
+    // проверяем, что он выполняется
+    if (!query.exec())
+    {
+        qDebug() << "finMeterBySerial error: " << query.lastError().text();
+        return;
+    }
+    // если найдет прибор
+    if (query.next())
+    {
+        // получаем его id
+        m_currentMeterId = query.value("id").toInt();
+        // вставляем остальные значения
+        ui->meterNameLineEdit->setText(query.value("name").toString());
+        ui->accuracyClassLineEdit->setText(query.value("accuracy_class").toString());
+        ui->verificationYearLineEdit->setText(query.value("verification_year").toString());
+        return;
+    }
+    // если прибор не найден
+    auto answer = QMessageBox::question(
+        this,
+        "Прибор не найден",
+        "Прибор с серийным номером " + serial +
+        " не найден. \n\nДобавить новый прибор?",
+        QMessageBox::Yes | QMessageBox::No);
+
+    if (answer == QMessageBox::Yes)
+    {
+        MeterDialog dialog(m_database, serial, this);
+
+        if (dialog.exec() == QDialog::Accepted)
+        {
+            m_currentMeterId = dialog.createdMeterId();
+
+            loadMeterData(m_currentMeterId);
+        }
+    }
 }
 
 

@@ -23,7 +23,7 @@ class MeterDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit MeterDialog(Database &database, QWidget *parent = nullptr);
+    explicit MeterDialog(Database &database, QString serial, QWidget *parent = nullptr);
 
     ~MeterDialog() override;
 
@@ -32,6 +32,7 @@ public:
 private:
     Ui::MeterDialog *ui;
     Database &m_database;
+
 
     int m_createdMeterId = -1;
 

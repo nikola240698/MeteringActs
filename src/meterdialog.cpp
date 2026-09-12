@@ -3,7 +3,7 @@
 #include "ui_MeterDialog.h"
 
 
-MeterDialog::MeterDialog(Database &database, QWidget *parent)
+MeterDialog::MeterDialog(Database &database, QString serial, QWidget *parent)
         : QDialog(parent), ui(new Ui::MeterDialog), m_database(database)
 {
     ui->setupUi(this);
@@ -11,6 +11,8 @@ MeterDialog::MeterDialog(Database &database, QWidget *parent)
     connect(ui->saveButton, &QPushButton::clicked, this, &MeterDialog::saveMeter);
     // слот нажатия кнопки Cancel
     connect(ui->cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+
+    ui->serialLineEdit->setText(serial);
 
 }
 

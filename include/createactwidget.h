@@ -33,6 +33,8 @@ private:
 
     Database &m_database;
 
+    int m_currentMeterId = -1;
+
     void loadActTypes() const;
     void loadAreas() const;
     void loadEmployees() const;
@@ -41,8 +43,10 @@ private:
     void loadConnections(int substationId) const;
     void loadConnectionData(int connectionId) const;
 
-    void loadMeters() const;
+
     void loadMeterData(int meterId) const;
+
+    void findMeterBySerial();
 };
 
 
