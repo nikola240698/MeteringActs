@@ -30,6 +30,10 @@ private:
     Ui::CreateActWidget *ui;
 
     Database &m_database;
+
+    void loadActTypes();
+    void loadAreas();
+    void loadEmplyees();
 };
 
 
