@@ -7,13 +7,16 @@ add_executable(MeteringActs
         database.cpp
         mainwindow.cpp
         createactwidget.cpp
+        meterdialog.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
         ${MY_INCLUDE_DIR}/createactwidget.h
+        ${MY_INCLUDE_DIR}/meterdialog.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui
+        ${MY_UI_DIR}/meterdialog.ui
 )
 
 target_include_directories(MeteringActs PRIVATE

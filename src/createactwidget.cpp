@@ -82,6 +82,47 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
             loadConnectionData(connectionId);
         });
 
+    // загружаем данные прибора
+    loadMeters();
+
+    // подключаем сигнал выбора прибора из списка
+    connect(ui->meterComboBox, &QComboBox::currentIndexChanged, this,
+        [this](int)
+        {
+            // получаем выбранные данные
+            QVariant data = ui->meterComboBox->currentData();
+            // очищаем поля
+            ui->meterNameLineEdit->clear();
+            ui->serialNumberLineEdit->clear();
+            ui->accuracyClassLineEdit->clear();
+            ui->verificationYearLineEdit->clear();
+            // проверяем полученные данные
+            if (!data.isValid())
+                return;
+            // загружаем данные прибора
+            loadMeterData(data.toInt());
+        });
+
+    // слот нажатия на кнопку "+Новый прибор"
+    connect(ui->addMeterButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            // создаем диалоговое окно
+            MeterDialog dialog(m_database, this);
+            // проверяем, что оно запускается и сохраняются изменения
+            if (dialog.exec() != QDialog::Accepted)
+                return;
+            // получаем id созданного прибора
+            int newMeterId = dialog.createdMeterId();
+            // перезагружаем список приборов
+            loadMeters();
+            // получаем индекс при поиске нашего прибора в общем списке
+            int index = ui->meterComboBox->findData(newMeterId);
+            // если индекс найден
+            if (index >= 0)
+                ui->meterComboBox->setCurrentIndex(index);
+        });
+
 }
 
 CreateActWidget::~CreateActWidget()
@@ -263,6 +304,60 @@ void CreateActWidget::loadConnectionData(int connectionId) const
     QString ctRatio = query.value("ct_ratio").toString();
     ui->voltageLineEdit->setText(voltage + " кВ");
     ui->ctRatioLineEdit->setText(ctRatio);
+}
+
+void CreateActWidget::loadMeters() const
+{
+    // очищаем поле и добавляем значение по-умолчанию
+    ui->meterComboBox->clear();
+    ui->meterComboBox->addItem("Выберите прибор...", QVariant());
+    // создаем запрос
+    QSqlQuery query(m_database.getDatabase());
+    // пробуем выполнить его
+    if (!query.exec(
+        "SELECT id, name, serial_number "
+        "FROM meters "
+        "ORDER BY name, serial_number;"))
+    {
+        qDebug() << "loadMeters error: " << query.lastError().text();
+        return;
+    }
+    // получаем значения из запроса
+    while (query.next())
+    {
+        int id = query.value("id").toInt();
+        QString name = query.value("name").toString();
+        QString serial = query.value("serial_number").toString();
+        QString text = name + " - №" + serial;
+        ui->meterComboBox->addItem(text, id);
+    }
+}
+
+void CreateActWidget::loadMeterData(int meterId) const
+{
+    // создаем запрос и подготавливаем его
+    QSqlQuery query(m_database.getDatabase());
+    query.prepare(
+        "SELECT name, serial_number, accuracy_class, verification_year "
+        "FROM meters "
+        "WHERE id = :meterId;");
+    // биндим значения в запрос
+    query.bindValue(":meterId", meterId);
+    // проверяем что запрос выполняется
+    if (!query.exec())
+    {
+        qDebug() << "loadMeterData error: " << query.lastError().text();
+        return;
+    }
+    // проверяем, что нашлось хоть одно значение
+    if (!query.next())
+        return;
+    // вставляем в поля полученные данные
+    ui->meterNameLineEdit->setText(query.value("name").toString());
+    ui->serialNumberLineEdit->setText(query.value("serial_number").toString());
+    ui->accuracyClassLineEdit->setText(query.value("accuracy_class").toString());
+    ui->verificationYearLineEdit->setText(query.value("verification_year").toString());
+
 }
 
 

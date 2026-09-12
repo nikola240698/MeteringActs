@@ -6,6 +6,8 @@
 #include <QWidget>
 
 #include "database.h"
+#include "meterdialog.h"
+
 
 
 QT_BEGIN_NAMESPACE
@@ -38,6 +40,9 @@ private:
     void loadSubstations(int areaId) const;
     void loadConnections(int substationId) const;
     void loadConnectionData(int connectionId) const;
+
+    void loadMeters() const;
+    void loadMeterData(int meterId) const;
 };
 
 

@@ -189,10 +189,18 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="voltageLineEdit"/>
+           <widget class="QLineEdit" name="voltageLineEdit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="ctRatioLineEdit"/>
+           <widget class="QLineEdit" name="ctRatioLineEdit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -260,16 +268,32 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="meterNameLineEdit"/>
+           <widget class="QLineEdit" name="meterNameLineEdit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QLineEdit" name="meterSerialLineEdit"/>
+           <widget class="QLineEdit" name="serialNumberLineEdit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QLineEdit" name="meterClassLineEdit"/>
+           <widget class="QLineEdit" name="accuracyClassLineEdit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="4" column="1">
-           <widget class="QLineEdit" name="meterYearLineEdit"/>
+           <widget class="QLineEdit" name="verificationYearLineEdit">
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
