@@ -31,9 +31,13 @@ private:
 
     Database &m_database;
 
-    void loadActTypes();
-    void loadAreas();
-    void loadEmplyees();
+    void loadActTypes() const;
+    void loadAreas() const;
+    void loadEmployees() const;
+
+    void loadSubstations(int areaId) const;
+    void loadConnections(int substationId) const;
+    void loadConnectionData(int connectionId) const;
 };
 
 
