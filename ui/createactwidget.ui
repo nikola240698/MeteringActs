@@ -32,7 +32,11 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QDateEdit" name="dateEdit"/>
+           <widget class="QDateEdit" name="actDateEdit">
+            <property name="calendarPopup">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
@@ -316,11 +320,11 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QTextEdit" name="reasonLextEdit">
+           <widget class="QPlainTextEdit" name="reasonPlainTextEdit">
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>0</height>
+              <height>50</height>
              </size>
             </property>
             <property name="maximumSize">
@@ -328,16 +332,28 @@
               <width>16777215</width>
               <height>80</height>
              </size>
+            </property>
+            <property name="placeholderText">
+             <string>Укажите причину выполнения работ...</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QTextEdit" name="resultLextEdit">
+           <widget class="QPlainTextEdit" name="resultPlainTextEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>50</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>16777215</width>
               <height>80</height>
              </size>
+            </property>
+            <property name="placeholderText">
+             <string>Укажите результат выполнения работ...</string>
             </property>
            </widget>
           </item>

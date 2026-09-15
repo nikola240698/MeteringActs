@@ -5,6 +5,7 @@
 
 #include <QWidget>
 #include <QDoubleValidator>
+#include <QDate>
 
 #include "database.h"
 #include "meterdialog.h"
