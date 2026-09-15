@@ -7,6 +7,8 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         : QWidget(parent), ui(new Ui::CreateActWidget), m_database(database)
 {
     ui->setupUi(this);
+    // настраиваем отображение года
+    ui->verificationYearLineEdit->setValidator(new QIntValidator(1900, 2100, this));
     // устанавливаем сегодняшнюю дату
     ui->actDateEdit->setDate(QDate::currentDate());
     // вызываем метод настройки показаний
@@ -87,7 +89,7 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
             loadConnectionData(connectionId);
         });
 
-    // вводим текст-подскахку в поле
+    // вводим текст-подсказку в поле
     ui->serialNumberLineEdit->setPlaceholderText("Введите серийный номер...");
 
     // слот нажатия Enter при вводе серийного номера
@@ -98,6 +100,24 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         });
     // слот нажатия кнопки "Найти"
     connect(ui->findMeterButton, &QPushButton::clicked, this, &CreateActWidget::findMeterBySerial);
+    // слот изменения найденный параметров при изменения текста в поле "Серийный номер"
+    connect(ui->serialNumberLineEdit, &QLineEdit::textEdited, this,
+        [this]()
+        {
+            m_currentMeterId = -1;
+            ui->meterNameLineEdit->clear();
+            ui->accuracyClassLineEdit->clear();
+            ui->verificationYearLineEdit->clear();
+        });
+    // сигнал нажатия кнопки сохранения
+    connect(ui->createButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            if (!validateForm())
+                return;
+            QMessageBox::information(this, "Проверка", "Все данные заполнены корректно");
+        });
+
 
 }
 
@@ -434,6 +454,159 @@ void CreateActWidget::setupReadings()
     ui->reactiveExportLineEdit->setValidator(validator);
 
 }
+
+// метод проверки правильности заполнения формы
+bool CreateActWidget::validateForm()
+{
+    // 1. Проверяем тип акта
+    if (!ui->actTypeComboBox->currentData().isValid())
+    {
+        QMessageBox::warning(this, "Не заполнено поле", "Выберите тип акта");
+        ui->actTypeComboBox->setFocus();
+        return false;
+    }
+
+    // 2. Проверяем дату
+    if (!ui->actDateEdit->date().isValid())
+    {
+        QMessageBox::warning(this, "Не заполнено поле", "Укажите корректную дату акта.");
+        ui->actDateEdit->setFocus();
+        return false;
+    }
+
+    // 3. Проверяем выбранный ЛПУ
+    if (!ui->areaComboBox->currentData().isValid())
+    {
+        QMessageBox::warning(this, "Не заполнено поле", "Выберите участок.");
+        ui->areaComboBox->setFocus();
+        return false;
+    }
+
+    // 4. Проверяем подстанцию
+    if (!ui->substationComboBox->currentData().isValid())
+    {
+        QMessageBox::warning(this, "Не заполнено поле", "Выберите подстанцию");
+        ui->substationComboBox->setFocus();
+        return false;
+    }
+
+    // 5. Проверяем присоединение
+    if (!ui->connectionComboBox->currentData().isValid())
+    {
+        QMessageBox::warning(this, "Не заполнено поле", "Выберите присоединение.");
+        ui->connectionComboBox->setFocus();
+        return false;
+    }
+
+    // 6. Проверяем представителя предприятия
+    if (!ui->employeeComboBox->currentData().isValid())
+    {
+        QMessageBox::warning(this, "Не заполнено поле", "Выберите представителя предприятия.");
+        ui->employeeComboBox->setFocus();
+        return false;
+    }
+
+    // 7. Проверяем, что прибор существует в БД
+    if (m_currentMeterId < 0)
+    {
+        QMessageBox::warning(this, "Прибор не выбран",
+            "Найдите прибор по серийному номеру или добавьте новый прибор.");
+        ui->serialNumberLineEdit->setFocus();
+        return false;
+    }
+
+    // 8, Проверяем год поверки
+    QString verificationYear = ui->verificationYearLineEdit->text().trimmed();
+
+    if (verificationYear.isEmpty())
+    {
+        QMessageBox::warning(this, "Не заполнено поле", "Укажите год поверки прибора.");
+        ui->verificationYearLineEdit->setFocus();
+        return false;
+    }
+
+    // 9. Проверяем показания
+    if (!ui->activeImportCheckBox->isChecked() &&
+        !ui->activeExportCheckBox->isChecked() &&
+        !ui->reactiveImportCheckBox->isChecked() &&
+        !ui->reactiveExportCheckBox->isChecked())
+    {
+        QMessageBox::warning(this, "Не выбраны показания",
+            "Выберите хотя бы один вид показаний прибора.");
+
+        ui->activeImportCheckBox->setFocus();
+        return false;
+    }
+
+    // 10. Проверяем значений выбранных показаний
+    // создаем лямбда-функцию для проверки правильного ввода показаний
+    QLocale locale(QLocale::Russian);
+
+    auto checkReading = [this, &locale](QCheckBox *checkBox,
+                                        QLineEdit *lineEdit,
+                                        const QString &name) -> bool
+    {
+        if (!checkBox->isChecked())
+            return true;
+
+        QString text = lineEdit->text().trimmed();
+
+        if (text.isEmpty())
+        {
+            QMessageBox::warning(this, "Не заполнено показание",
+                "Введите показкние " + name + ".");
+            lineEdit->setFocus();
+            return false;
+        }
+
+        bool ok = false;
+        locale.toDouble(text, &ok);
+
+        if (!ok)
+        {
+            QMessageBox::warning(this, "Некорректное показание",
+                "Показание " + name + " содержит некорректное значение.");
+
+            lineEdit->setFocus();
+            lineEdit->selectAll();
+            return false;
+        }
+
+        return true;
+    };
+
+    if (!checkReading(ui->activeImportCheckBox, ui->activeImportLineEdit, "A+"))
+        return false;
+    if (!checkReading(ui->activeExportCheckBox, ui->activeExportLineEdit, "A-"))
+        return false;
+    if (!checkReading(ui->reactiveImportCheckBox, ui->reactiveImportLineEdit, "R+"))
+        return false;
+    if (!checkReading(ui->reactiveExportCheckBox, ui->reactiveExportLineEdit, "R-"))
+        return false;
+
+
+
+    // 11. Проверка ввода причины проверки
+    if (ui->resultPlainTextEdit->toPlainText().trimmed().isEmpty())
+    {
+        QMessageBox::warning(this, "Не заполнено поле",
+            "Укажите причину выполнения работ.");
+        ui->reasonPlainTextEdit->setFocus();
+        return false;
+    }
+
+    // 12. Проверяем ввод заключения
+    if (ui->resultPlainTextEdit->toPlainText().trimmed().isEmpty())
+    {
+        QMessageBox::warning(this, "Не заполнено поле",
+            "Укажите заключение по результатам выполнения работ. ");
+        ui->resultPlainTextEdit->setFocus();
+        return false;
+    }
+
+    return true;
+}
+
 
 
 

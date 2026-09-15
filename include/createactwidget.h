@@ -5,7 +5,9 @@
 
 #include <QWidget>
 #include <QDoubleValidator>
+#include <QIntValidator>
 #include <QDate>
+#include <QMessageBox>
 
 #include "database.h"
 #include "meterdialog.h"
@@ -64,6 +66,8 @@ private:
     void findMeterBySerial();
     // метод настройки ввода показаний
     void setupReadings();
+    // метод проверки правильности ввода данных
+    bool validateForm();
 };
 
 
