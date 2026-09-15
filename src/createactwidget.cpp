@@ -113,9 +113,7 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     connect(ui->createButton, &QPushButton::clicked, this,
         [this]()
         {
-            if (!validateForm())
-                return;
-            QMessageBox::information(this, "Проверка", "Все данные заполнены корректно");
+            saveAct();
         });
 
 
@@ -516,12 +514,19 @@ bool CreateActWidget::validateForm()
     }
 
     // 8, Проверяем год поверки
-    QString verificationYear = ui->verificationYearLineEdit->text().trimmed();
+    QString verificationYearText = ui->verificationYearLineEdit->text().trimmed();
 
-    if (verificationYear.isEmpty())
+    bool yearOk = false;
+    int verificationYear = verificationYearText.toInt(&yearOk);
+
+    if (!yearOk ||
+        verificationYear < 1900 ||
+        verificationYear > 2100)
     {
-        QMessageBox::warning(this, "Не заполнено поле", "Укажите год поверки прибора.");
+        QMessageBox::warning(this, "Некорректный год",
+            "Укажите корректный год поверки прибора.");
         ui->verificationYearLineEdit->setFocus();
+        ui->verificationYearLineEdit->selectAll();
         return false;
     }
 
@@ -606,6 +611,280 @@ bool CreateActWidget::validateForm()
 
     return true;
 }
+
+// главный метод сохранения акта
+bool CreateActWidget::saveAct()
+{
+    // проверяем, что форма заполнена правильно
+    if (!validateForm())
+        return false;
+    // пробуем начать транзакцию
+    if (!m_database.transaction())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось начать транзакцию: " + m_database.lastError());
+        return false;
+    }
+    // вставляем сам акт и получаем id
+    int actId = insertAct();
+    // проверяем, что всё нормально
+    if (actId < 0)
+    {
+        m_database.rollback();
+        return false;
+    }
+    // вставляем данные прибора и получаем его id
+    int actMeterId = insertActMeter(actId);
+    // проверяем успех
+    if (actMeterId < 0)
+    {
+        m_database.rollback();
+        return false;
+    }
+    // пробуем вставить показания по id прибора
+    if (!insertReadings(actMeterId))
+    {
+        m_database.rollback();
+        return false;
+    }
+    // пробуем обновить год поверки прибора учета
+    if (!updateMeterVerificationYear())
+    {
+        m_database.rollback();
+        return false;
+    }
+    // пробуем применить изменения в БД
+    if (!m_database.commit())
+    {
+        QString error = m_database.lastError();
+
+        m_database.rollback();
+
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось завершить транзакцию: " + error);
+        return false;
+    }
+
+    QMessageBox::information(this, "Акт сохранен", "Данные акта успешно сохранены");
+
+    return true;
+}
+
+// метод сохранения самого акта
+int CreateActWidget::insertAct()
+{
+    // получаем необходимые данные с формы ввода
+    int actTypeId = ui->actTypeComboBox->currentData().toInt();
+    int connectionId = ui->connectionComboBox->currentData().toInt();
+    int employeeId = ui->employeeComboBox->currentData().toInt();
+    QString actDate = ui->actDateEdit->date().toString(Qt::ISODate);
+    QString reason = ui->reasonPlainTextEdit->toPlainText().trimmed();
+    QString result = ui->resultPlainTextEdit->toPlainText().trimmed();
+    // получаем необходимый тип данных представителей предприятия
+    QSqlQuery employeeQuery(m_database.getDatabase());
+
+    employeeQuery.prepare(
+        "SELECT short_name, position "
+        "FROM employees "
+        "WHERE id = :employeeId;");
+
+    employeeQuery.bindValue(":employeeId", employeeId);
+
+    if (!employeeQuery.exec() || !employeeQuery.next())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось получить данные представителя: "
+            + employeeQuery.lastError().text());
+        return -1;
+    }
+
+    QString employeeName = employeeQuery.value("short_name").toString();
+
+    QString employeePosition = employeeQuery.value("position").toString();
+
+    // вносим данные в базу данных
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "INSERT INTO acts ("
+        "act_type_id, "
+        "act_date, "
+        "connection_id, "
+        "employee_id, "
+        "employee_name, "
+        "employee_position, "
+        "reason, "
+        "result"
+        ") "
+        "VALUES ("
+        ":actTypeId, "
+        ":actDate, "
+        ":connectionId, "
+        ":employeeId, "
+        ":employeeName, "
+        ":employeePosition, "
+        ":reason, "
+        ":result"
+        ");");
+
+    query.bindValue(":actTypeId", actTypeId);
+    query.bindValue(":actDate", actDate);
+    query.bindValue(":connectionId", connectionId);
+    query.bindValue(":employeeId", employeeId);
+    query.bindValue(":employeeName", employeeName);
+    query.bindValue(":employeePosition", employeePosition);
+    query.bindValue(":reason", reason);
+    query.bindValue(":result", result);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(
+            this, "Ошибка базы данных",
+            "Не удалось сохранить акт: " + query.lastError().text());
+
+        return -1;
+    }
+    // возвращаем id внесенного акта
+    return query.lastInsertId().toInt();
+}
+
+// сохраняем прибор с привязкой к акту
+int CreateActWidget::insertActMeter(int actId)
+{
+    // создаем запрос для поиска выбранного прибора в БД
+    QSqlQuery meterQuery(m_database.getDatabase());
+
+    meterQuery.prepare(
+        "SELECT name, serial_number, accuracy_class "
+        "FROM meters "
+        "WHERE id = :meterId;");
+
+    meterQuery.bindValue(":meterId", m_currentMeterId);
+
+    if (!meterQuery.exec() || !meterQuery.next())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось получить данные прибора: " + meterQuery.lastError().text());
+
+        return -1;
+    }
+    // получаем необходимые данные
+    QString meterName = meterQuery.value("name").toString();
+    QString serialNumber = meterQuery.value("serial_number").toString();
+    QString accuracyClass = meterQuery.value("accuracy_class").toString();
+    int verificationYear = ui->verificationYearLineEdit->text().toInt();
+    // вставляем полученные данные в нашу таблицу связи акта и прибора
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "INSERT INTO act_meters ("
+        "act_id, "
+        "meter_id, "
+        "role, "
+        "meter_name, "
+        "serial_number, "
+        "accuracy_class, "
+        "verification_year"
+        ") "
+        "VALUES ("
+        ":actId, "
+        ":meterId, "
+        ":role, "
+        ":meterName, "
+        ":serialNumber, "
+        ":accuracyClass, "
+        ":verificationYear"
+        ");");
+
+    query.bindValue(":actId", actId);
+    query.bindValue(":meterId", m_currentMeterId);
+    // пока что вставляем 1, потому что пробуем
+    query.bindValue(":role", 1);
+    query.bindValue(":meterName", meterName);
+    query.bindValue(":serialNumber", serialNumber);
+    query.bindValue(":accuracyClass", accuracyClass);
+    query.bindValue(":verificationYear", verificationYear);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось сохранить данные прибора в акте: " + query.lastError().text());
+
+        return -1;
+    }
+    // возвращаем id введенного прибора
+    return query.lastInsertId().toInt();
+}
+
+// метод вставки показаний с привязкой к прибору
+bool CreateActWidget::insertReadings(int actMeterId)
+{
+    // получаем показания из метода
+    const auto readings = getReadings();
+    // вставляем их в нашу БД
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "INSERT INTO meter_readings ("
+        "act_meter_id, "
+        "reading_type_id, "
+        "value"
+        ")"
+        "VALUES ("
+        ":actMeterId, "
+        ":readingTypeId, "
+        ":value"
+        ");");
+
+    for (const auto &reading : readings)
+    {
+        query.bindValue(":actMeterId", actMeterId);
+
+        query.bindValue(":readingTypeId", reading.typeId);
+
+        query.bindValue(":value", reading.value);
+
+        if (!query.exec())
+        {
+            QMessageBox::critical(this, "Ошибка базы данных",
+                " Не удалось сохранить показания прибора: " + query.lastError().text());
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// метод обновления актуального года поверки прибора
+bool CreateActWidget::updateMeterVerificationYear()
+{
+    // получаем введенный год
+    int verificationYear = ui->verificationYearLineEdit->text().toInt();
+    // обновляем значение в БД
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "UPDATE meters "
+        "SET verification_year = :verificationYear "
+        "WHERE id = :meterId;");
+
+    query.bindValue("verificationYear", verificationYear);
+
+    query.bindValue(":meterId", m_currentMeterId);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось обновить год поверки прибора: "
+            + query.lastError().text());
+
+        return false;
+    }
+
+    return true;
+}
+
+
 
 
 

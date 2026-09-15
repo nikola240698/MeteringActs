@@ -68,6 +68,18 @@ private:
     void setupReadings();
     // метод проверки правильности ввода данных
     bool validateForm();
+
+    // методы сохранения акта
+    // главный метод сохранения
+    bool saveAct();
+    // метод сохранения параметров акта
+    int insertAct();
+    // метод вставки прибора с привязкой к акту
+    int insertActMeter(int actId);
+    // метод вставки показаний с привязкой к прибору
+    bool insertReadings(int actMeterId);
+    // метод обновления актуального года поверки прибора
+    bool updateMeterVerificationYear();
 };
 
 
