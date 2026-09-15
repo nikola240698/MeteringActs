@@ -23,7 +23,7 @@ class MeterDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit MeterDialog(Database &database, QString serial, QWidget *parent = nullptr);
+    explicit MeterDialog(Database &database, const QString &serial, QWidget *parent = nullptr);
 
     ~MeterDialog() override;
 

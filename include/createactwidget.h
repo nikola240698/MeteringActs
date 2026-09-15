@@ -4,10 +4,17 @@
 #define METERINGACTS_CREATEACTWIDGET_H
 
 #include <QWidget>
+#include <QDoubleValidator>
 
 #include "database.h"
 #include "meterdialog.h"
 
+// структура для упрощения сохранения показаний
+struct MeterReading
+{
+    int typeId;
+    double value;
+};
 
 
 QT_BEGIN_NAMESPACE
@@ -28,6 +35,9 @@ public:
 
     ~CreateActWidget() override;
 
+    // метод получения показаний
+    QList<MeterReading> getReadings() const;
+
 private:
     Ui::CreateActWidget *ui;
 
@@ -35,18 +45,24 @@ private:
 
     int m_currentMeterId = -1;
 
+    // метод загрузки типов актов
     void loadActTypes() const;
+    // метод загрузки всех ЛПУ
     void loadAreas() const;
+    // метод загрузки представителей предприятия
     void loadEmployees() const;
-
+    // метод загрузки подстанций
     void loadSubstations(int areaId) const;
+    // метод загрузки присоединений
     void loadConnections(int substationId) const;
+    // метод загрузки параметров присоединения
     void loadConnectionData(int connectionId) const;
-
-
+    // метод загрузки данных прибора
     void loadMeterData(int meterId) const;
-
+    // метод поиска данных прибора по серийному номеру
     void findMeterBySerial();
+    // метод настройки ввода показаний
+    void setupReadings();
 };
 
 

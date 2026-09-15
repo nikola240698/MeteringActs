@@ -7,6 +7,8 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         : QWidget(parent), ui(new Ui::CreateActWidget), m_database(database)
 {
     ui->setupUi(this);
+    // вызываем метод настройки показаний
+    setupReadings();
 
     // вызываем загрузку типов актов
     loadActTypes();
@@ -99,6 +101,33 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
 CreateActWidget::~CreateActWidget()
 {
     delete ui;
+}
+
+// метод получения списка показаний
+QList<MeterReading> CreateActWidget::getReadings() const
+{
+    // создаем список
+    QList<MeterReading> readings;
+    // настраиваем русскоязычное представление запятой
+    QLocale locale(QLocale::Russian);
+    // вводим те значения, которые выбраны
+    if (ui->activeImportCheckBox->isChecked())
+    {
+        readings.append({1, locale.toDouble(ui->activeImportLineEdit->text())});
+    }
+    if (ui->activeExportCheckBox->isChecked())
+    {
+        readings.append({2, locale.toDouble(ui->activeExportLineEdit->text())});
+    }
+    if (ui->reactiveImportCheckBox->isChecked())
+    {
+        readings.append({3, locale.toDouble(ui->reactiveImportLineEdit->text())});
+    }
+    if (ui->reactiveExportCheckBox->isChecked())
+    {
+        readings.append({4, locale.toDouble(ui->reactiveExportLineEdit->text())});
+    }
+    return readings;
 }
 
 // метод загрузки типов актов
@@ -309,6 +338,13 @@ void CreateActWidget::loadMeterData(int meterId) const
 // метод поиска прибора по серийному номеру
 void CreateActWidget::findMeterBySerial()
 {
+    //сбрасываем текущий прибор
+    m_currentMeterId = -1;
+    // очищаем на всякий случай поля
+    ui->meterNameLineEdit->clear();
+    ui->accuracyClassLineEdit->clear();
+    ui->verificationYearLineEdit->clear();
+
     // получаем серийный номер
     QString serial = ui->serialNumberLineEdit->text().trimmed();
     // если не ввели серийный номер
@@ -325,7 +361,7 @@ void CreateActWidget::findMeterBySerial()
     // проверяем, что он выполняется
     if (!query.exec())
     {
-        qDebug() << "finMeterBySerial error: " << query.lastError().text();
+        qDebug() << "findMeterBySerial error: " << query.lastError().text();
         return;
     }
     // если найдет прибор
@@ -358,6 +394,42 @@ void CreateActWidget::findMeterBySerial()
             loadMeterData(m_currentMeterId);
         }
     }
+}
+
+// метод настройки блока ввода показаний
+void CreateActWidget::setupReadings()
+{
+    // отмечаем автоматически выбранный А+
+    ui->activeImportCheckBox->setChecked(true);
+    // переводим поля в режим соответствующий текущим измерениям
+    ui->activeImportLineEdit->setEnabled(true);
+    ui->activeExportLineEdit->setEnabled(false);
+    ui->reactiveImportLineEdit->setEnabled(false);
+    ui->reactiveExportLineEdit->setEnabled(false);
+    // слоты связи выбора CheckBox и включения LineEdit
+    connect(ui->activeImportCheckBox, &QCheckBox::toggled,
+        ui->activeImportLineEdit, &QLineEdit::setEnabled);
+
+    connect(ui->activeExportCheckBox, &QCheckBox::toggled,
+        ui->activeExportLineEdit, &QLineEdit::setEnabled);
+
+    connect(ui->reactiveImportCheckBox, &QCheckBox::toggled,
+        ui->reactiveImportLineEdit, &QLineEdit::setEnabled);
+
+    connect(ui->reactiveExportCheckBox, &QCheckBox::toggled,
+        ui->reactiveExportLineEdit, &QLineEdit::setEnabled);
+
+    // создаем валидатор десятичных чисел
+    auto *validator = new QDoubleValidator(0.0,  9999999.999, 3, this);
+    // настраиваем валидатор
+    validator->setNotation(QDoubleValidator::StandardNotation);
+    validator->setLocale(QLocale(QLocale::Russian));
+    // применяем его к полям
+    ui->activeImportLineEdit->setValidator(validator);
+    ui->activeExportLineEdit->setValidator(validator);
+    ui->reactiveImportLineEdit->setValidator(validator);
+    ui->reactiveExportLineEdit->setValidator(validator);
+
 }
 
 

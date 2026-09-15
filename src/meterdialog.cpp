@@ -3,7 +3,7 @@
 #include "ui_MeterDialog.h"
 
 
-MeterDialog::MeterDialog(Database &database, QString serial, QWidget *parent)
+MeterDialog::MeterDialog(Database &database, const QString &serial, QWidget *parent)
         : QDialog(parent), ui(new Ui::MeterDialog), m_database(database)
 {
     ui->setupUi(this);

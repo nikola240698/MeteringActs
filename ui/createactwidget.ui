@@ -78,44 +78,44 @@
         <item row="0" column="0">
          <layout class="QFormLayout" name="formLayout_3">
           <item row="0" column="0">
-           <widget class="QCheckBox" name="activPosCheckBox">
+           <widget class="QCheckBox" name="activeImportCheckBox">
             <property name="text">
              <string>A+</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QCheckBox" name="activNegCheckBox">
+           <widget class="QCheckBox" name="activeExportCheckBox">
             <property name="text">
              <string>A-</string>
             </property>
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QCheckBox" name="reactivPosCheckBox">
+           <widget class="QCheckBox" name="reactiveImportCheckBox">
             <property name="text">
              <string>R+</string>
             </property>
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QCheckBox" name="reactivNegCheckBox">
+           <widget class="QCheckBox" name="reactiveExportCheckBox">
             <property name="text">
              <string>R-</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="activPosLineEdit"/>
+           <widget class="QLineEdit" name="activeImportLineEdit"/>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="activNegLineEdit"/>
+           <widget class="QLineEdit" name="activeExportLineEdit"/>
           </item>
           <item row="2" column="1">
-           <widget class="QLineEdit" name="reactivPosLineEdit"/>
+           <widget class="QLineEdit" name="reactiveImportLineEdit"/>
           </item>
           <item row="3" column="1">
-           <widget class="QLineEdit" name="reactivNegLineEdit"/>
+           <widget class="QLineEdit" name="reactiveExportLineEdit"/>
           </item>
          </layout>
         </item>
