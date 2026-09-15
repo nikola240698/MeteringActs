@@ -11,14 +11,9 @@
 
 #include "database.h"
 #include "meterdialog.h"
+#include "meteractwidget.h"
 
-// структура для упрощения сохранения показаний
-struct MeterReading
-{
-    int typeId;
-    double value;
-};
-
+class MeterActWidget;
 
 QT_BEGIN_NAMESPACE
 
@@ -34,12 +29,22 @@ class CreateActWidget : public QWidget
     Q_OBJECT
 
 public:
+
+    // структура для упрощения сохранения показаний
+    struct MeterReading
+    {
+        int typeId;
+        double value;
+    };
+
+
+
+
     explicit CreateActWidget(Database &database, QWidget *parent = nullptr);
 
     ~CreateActWidget() override;
 
-    // метод получения показаний
-    QList<MeterReading> getReadings() const;
+
 
 private:
     Ui::CreateActWidget *ui;
@@ -47,6 +52,8 @@ private:
     Database &m_database;
 
     int m_currentMeterId = -1;
+
+    MeterActWidget* m_meterWidget = nullptr;
 
     // метод загрузки типов актов
     void loadActTypes() const;
@@ -60,8 +67,7 @@ private:
     void loadConnections(int substationId) const;
     // метод загрузки параметров присоединения
     void loadConnectionData(int connectionId) const;
-    // метод загрузки данных прибора
-    void loadMeterData(int meterId) const;
+
     // метод поиска данных прибора по серийному номеру
     void findMeterBySerial();
     // метод настройки ввода показаний
@@ -75,11 +81,11 @@ private:
     // метод сохранения параметров акта
     int insertAct();
     // метод вставки прибора с привязкой к акту
-    int insertActMeter(int actId);
+    int insertActMeter(int actId, MeterActWidget* meterWidget, int role);
     // метод вставки показаний с привязкой к прибору
-    bool insertReadings(int actMeterId);
+    bool insertReadings(int actMeterId, MeterActWidget* meterWidget);
     // метод обновления актуального года поверки прибора
-    bool updateMeterVerificationYear();
+    bool updateMeterVerificationYear(MeterActWidget* meterWidget);
 };
 
 

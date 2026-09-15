@@ -7,8 +7,11 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         : QWidget(parent), ui(new Ui::CreateActWidget), m_database(database)
 {
     ui->setupUi(this);
-    // настраиваем отображение года
-    ui->verificationYearLineEdit->setValidator(new QIntValidator(1900, 2100, this));
+    // настраиваем виджет прибора и показаний
+    m_meterWidget = new MeterActWidget(m_database, ui->meterContainerWidget);
+    // добавляем виджет
+    ui->meterContainerWidget->layout()->addWidget(m_meterWidget);
+
     // устанавливаем сегодняшнюю дату
     ui->actDateEdit->setDate(QDate::currentDate());
     // вызываем метод настройки показаний
@@ -89,26 +92,7 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
             loadConnectionData(connectionId);
         });
 
-    // вводим текст-подсказку в поле
-    ui->serialNumberLineEdit->setPlaceholderText("Введите серийный номер...");
 
-    // слот нажатия Enter при вводе серийного номера
-    connect(ui->serialNumberLineEdit, &QLineEdit::returnPressed, this,
-        [this]()
-        {
-            findMeterBySerial();
-        });
-    // слот нажатия кнопки "Найти"
-    connect(ui->findMeterButton, &QPushButton::clicked, this, &CreateActWidget::findMeterBySerial);
-    // слот изменения найденный параметров при изменения текста в поле "Серийный номер"
-    connect(ui->serialNumberLineEdit, &QLineEdit::textEdited, this,
-        [this]()
-        {
-            m_currentMeterId = -1;
-            ui->meterNameLineEdit->clear();
-            ui->accuracyClassLineEdit->clear();
-            ui->verificationYearLineEdit->clear();
-        });
     // сигнал нажатия кнопки сохранения
     connect(ui->createButton, &QPushButton::clicked, this,
         [this]()
@@ -124,32 +108,7 @@ CreateActWidget::~CreateActWidget()
     delete ui;
 }
 
-// метод получения списка показаний
-QList<MeterReading> CreateActWidget::getReadings() const
-{
-    // создаем список
-    QList<MeterReading> readings;
-    // настраиваем русскоязычное представление запятой
-    QLocale locale(QLocale::Russian);
-    // вводим те значения, которые выбраны
-    if (ui->activeImportCheckBox->isChecked())
-    {
-        readings.append({1, locale.toDouble(ui->activeImportLineEdit->text())});
-    }
-    if (ui->activeExportCheckBox->isChecked())
-    {
-        readings.append({2, locale.toDouble(ui->activeExportLineEdit->text())});
-    }
-    if (ui->reactiveImportCheckBox->isChecked())
-    {
-        readings.append({3, locale.toDouble(ui->reactiveImportLineEdit->text())});
-    }
-    if (ui->reactiveExportCheckBox->isChecked())
-    {
-        readings.append({4, locale.toDouble(ui->reactiveExportLineEdit->text())});
-    }
-    return readings;
-}
+
 
 // метод загрузки типов актов
 void CreateActWidget::loadActTypes() const
@@ -329,129 +288,7 @@ void CreateActWidget::loadConnectionData(int connectionId) const
 
 
 
-void CreateActWidget::loadMeterData(int meterId) const
-{
-    // создаем запрос и подготавливаем его
-    QSqlQuery query(m_database.getDatabase());
-    query.prepare(
-        "SELECT name, serial_number, accuracy_class, verification_year "
-        "FROM meters "
-        "WHERE id = :meterId;");
-    // биндим значения в запрос
-    query.bindValue(":meterId", meterId);
-    // проверяем что запрос выполняется
-    if (!query.exec())
-    {
-        qDebug() << "loadMeterData error: " << query.lastError().text();
-        return;
-    }
-    // проверяем, что нашлось хоть одно значение
-    if (!query.next())
-        return;
-    // вставляем в поля полученные данные
-    ui->meterNameLineEdit->setText(query.value("name").toString());
-    ui->serialNumberLineEdit->setText(query.value("serial_number").toString());
-    ui->accuracyClassLineEdit->setText(query.value("accuracy_class").toString());
-    ui->verificationYearLineEdit->setText(query.value("verification_year").toString());
 
-}
-
-// метод поиска прибора по серийному номеру
-void CreateActWidget::findMeterBySerial()
-{
-    //сбрасываем текущий прибор
-    m_currentMeterId = -1;
-    // очищаем на всякий случай поля
-    ui->meterNameLineEdit->clear();
-    ui->accuracyClassLineEdit->clear();
-    ui->verificationYearLineEdit->clear();
-
-    // получаем серийный номер
-    QString serial = ui->serialNumberLineEdit->text().trimmed();
-    // если не ввели серийный номер
-    if (serial.isEmpty())
-        return;
-    // создаем запрос и подготавливаем его
-    QSqlQuery query(m_database.getDatabase());
-    query.prepare(
-        "SELECT id, name, serial_number, accuracy_class, verification_year "
-        "FROM meters "
-        "WHERE serial_number = :serial;");
-    // биндим значение
-    query.bindValue(":serial", serial);
-    // проверяем, что он выполняется
-    if (!query.exec())
-    {
-        qDebug() << "findMeterBySerial error: " << query.lastError().text();
-        return;
-    }
-    // если найдет прибор
-    if (query.next())
-    {
-        // получаем его id
-        m_currentMeterId = query.value("id").toInt();
-        // вставляем остальные значения
-        ui->meterNameLineEdit->setText(query.value("name").toString());
-        ui->accuracyClassLineEdit->setText(query.value("accuracy_class").toString());
-        ui->verificationYearLineEdit->setText(query.value("verification_year").toString());
-        return;
-    }
-    // если прибор не найден
-    auto answer = QMessageBox::question(
-        this,
-        "Прибор не найден",
-        "Прибор с серийным номером " + serial +
-        " не найден. \n\nДобавить новый прибор?",
-        QMessageBox::Yes | QMessageBox::No);
-
-    if (answer == QMessageBox::Yes)
-    {
-        MeterDialog dialog(m_database, serial, this);
-
-        if (dialog.exec() == QDialog::Accepted)
-        {
-            m_currentMeterId = dialog.createdMeterId();
-
-            loadMeterData(m_currentMeterId);
-        }
-    }
-}
-
-// метод настройки блока ввода показаний
-void CreateActWidget::setupReadings()
-{
-    // отмечаем автоматически выбранный А+
-    ui->activeImportCheckBox->setChecked(true);
-    // переводим поля в режим соответствующий текущим измерениям
-    ui->activeImportLineEdit->setEnabled(true);
-    ui->activeExportLineEdit->setEnabled(false);
-    ui->reactiveImportLineEdit->setEnabled(false);
-    ui->reactiveExportLineEdit->setEnabled(false);
-    // слоты связи выбора CheckBox и включения LineEdit
-    connect(ui->activeImportCheckBox, &QCheckBox::toggled,
-        ui->activeImportLineEdit, &QLineEdit::setEnabled);
-
-    connect(ui->activeExportCheckBox, &QCheckBox::toggled,
-        ui->activeExportLineEdit, &QLineEdit::setEnabled);
-
-    connect(ui->reactiveImportCheckBox, &QCheckBox::toggled,
-        ui->reactiveImportLineEdit, &QLineEdit::setEnabled);
-
-    connect(ui->reactiveExportCheckBox, &QCheckBox::toggled,
-        ui->reactiveExportLineEdit, &QLineEdit::setEnabled);
-
-    // создаем валидатор десятичных чисел
-    auto *validator = new QDoubleValidator(0.0,  9999999.999, 3, this);
-    // настраиваем валидатор
-    validator->setNotation(QDoubleValidator::StandardNotation);
-    validator->setLocale(QLocale(QLocale::Russian));
-    // применяем его к полям
-    ui->activeImportLineEdit->setValidator(validator);
-    ui->activeExportLineEdit->setValidator(validator);
-    ui->reactiveImportLineEdit->setValidator(validator);
-    ui->reactiveExportLineEdit->setValidator(validator);
-
-}
 
 // метод проверки правильности заполнения формы
 bool CreateActWidget::validateForm()
@@ -504,91 +341,9 @@ bool CreateActWidget::validateForm()
         return false;
     }
 
-    // 7. Проверяем, что прибор существует в БД
-    if (m_currentMeterId < 0)
-    {
-        QMessageBox::warning(this, "Прибор не выбран",
-            "Найдите прибор по серийному номеру или добавьте новый прибор.");
-        ui->serialNumberLineEdit->setFocus();
+    // 7-10. Объединили теперь так как это всё в одном классе
+    if (!m_meterWidget->validate())
         return false;
-    }
-
-    // 8, Проверяем год поверки
-    QString verificationYearText = ui->verificationYearLineEdit->text().trimmed();
-
-    bool yearOk = false;
-    int verificationYear = verificationYearText.toInt(&yearOk);
-
-    if (!yearOk ||
-        verificationYear < 1900 ||
-        verificationYear > 2100)
-    {
-        QMessageBox::warning(this, "Некорректный год",
-            "Укажите корректный год поверки прибора.");
-        ui->verificationYearLineEdit->setFocus();
-        ui->verificationYearLineEdit->selectAll();
-        return false;
-    }
-
-    // 9. Проверяем показания
-    if (!ui->activeImportCheckBox->isChecked() &&
-        !ui->activeExportCheckBox->isChecked() &&
-        !ui->reactiveImportCheckBox->isChecked() &&
-        !ui->reactiveExportCheckBox->isChecked())
-    {
-        QMessageBox::warning(this, "Не выбраны показания",
-            "Выберите хотя бы один вид показаний прибора.");
-
-        ui->activeImportCheckBox->setFocus();
-        return false;
-    }
-
-    // 10. Проверяем значений выбранных показаний
-    // создаем лямбда-функцию для проверки правильного ввода показаний
-    QLocale locale(QLocale::Russian);
-
-    auto checkReading = [this, &locale](QCheckBox *checkBox,
-                                        QLineEdit *lineEdit,
-                                        const QString &name) -> bool
-    {
-        if (!checkBox->isChecked())
-            return true;
-
-        QString text = lineEdit->text().trimmed();
-
-        if (text.isEmpty())
-        {
-            QMessageBox::warning(this, "Не заполнено показание",
-                "Введите показкние " + name + ".");
-            lineEdit->setFocus();
-            return false;
-        }
-
-        bool ok = false;
-        locale.toDouble(text, &ok);
-
-        if (!ok)
-        {
-            QMessageBox::warning(this, "Некорректное показание",
-                "Показание " + name + " содержит некорректное значение.");
-
-            lineEdit->setFocus();
-            lineEdit->selectAll();
-            return false;
-        }
-
-        return true;
-    };
-
-    if (!checkReading(ui->activeImportCheckBox, ui->activeImportLineEdit, "A+"))
-        return false;
-    if (!checkReading(ui->activeExportCheckBox, ui->activeExportLineEdit, "A-"))
-        return false;
-    if (!checkReading(ui->reactiveImportCheckBox, ui->reactiveImportLineEdit, "R+"))
-        return false;
-    if (!checkReading(ui->reactiveExportCheckBox, ui->reactiveExportLineEdit, "R-"))
-        return false;
-
 
 
     // 11. Проверка ввода причины проверки
@@ -749,30 +504,8 @@ int CreateActWidget::insertAct()
 }
 
 // сохраняем прибор с привязкой к акту
-int CreateActWidget::insertActMeter(int actId)
+int CreateActWidget::insertActMeter(int actId, MeterActWidget* meterWidget, int role)
 {
-    // создаем запрос для поиска выбранного прибора в БД
-    QSqlQuery meterQuery(m_database.getDatabase());
-
-    meterQuery.prepare(
-        "SELECT name, serial_number, accuracy_class "
-        "FROM meters "
-        "WHERE id = :meterId;");
-
-    meterQuery.bindValue(":meterId", m_currentMeterId);
-
-    if (!meterQuery.exec() || !meterQuery.next())
-    {
-        QMessageBox::critical(this, "Ошибка базы данных",
-            "Не удалось получить данные прибора: " + meterQuery.lastError().text());
-
-        return -1;
-    }
-    // получаем необходимые данные
-    QString meterName = meterQuery.value("name").toString();
-    QString serialNumber = meterQuery.value("serial_number").toString();
-    QString accuracyClass = meterQuery.value("accuracy_class").toString();
-    int verificationYear = ui->verificationYearLineEdit->text().toInt();
     // вставляем полученные данные в нашу таблицу связи акта и прибора
     QSqlQuery query(m_database.getDatabase());
 
@@ -797,13 +530,12 @@ int CreateActWidget::insertActMeter(int actId)
         ");");
 
     query.bindValue(":actId", actId);
-    query.bindValue(":meterId", m_currentMeterId);
-    // пока что вставляем 1, потому что пробуем
-    query.bindValue(":role", 1);
-    query.bindValue(":meterName", meterName);
-    query.bindValue(":serialNumber", serialNumber);
-    query.bindValue(":accuracyClass", accuracyClass);
-    query.bindValue(":verificationYear", verificationYear);
+    query.bindValue(":meterId", meterWidget->meterId());
+    query.bindValue(":role", role);
+    query.bindValue(":meterName", meterWidget->meterName());
+    query.bindValue(":serialNumber", meterWidget->serilaNumber());
+    query.bindValue(":accuracyClass", meterWidget->accuracyClass());
+    query.bindValue(":verificationYear", meterWidget->verificationYear());
 
     if (!query.exec())
     {
@@ -817,10 +549,10 @@ int CreateActWidget::insertActMeter(int actId)
 }
 
 // метод вставки показаний с привязкой к прибору
-bool CreateActWidget::insertReadings(int actMeterId)
+bool CreateActWidget::insertReadings(int actMeterId, MeterActWidget* meterWidget)
 {
     // получаем показания из метода
-    const auto readings = getReadings();
+    const auto readings = meterWidget->readings();
     // вставляем их в нашу БД
     QSqlQuery query(m_database.getDatabase());
 
@@ -856,7 +588,7 @@ bool CreateActWidget::insertReadings(int actMeterId)
 }
 
 // метод обновления актуального года поверки прибора
-bool CreateActWidget::updateMeterVerificationYear()
+bool CreateActWidget::updateMeterVerificationYear(MeterActWidget* meterWidget)
 {
     // получаем введенный год
     int verificationYear = ui->verificationYearLineEdit->text().toInt();
@@ -870,7 +602,7 @@ bool CreateActWidget::updateMeterVerificationYear()
 
     query.bindValue("verificationYear", verificationYear);
 
-    query.bindValue(":meterId", m_currentMeterId);
+    query.bindValue(":meterId", meterWidget->meterId());
 
     if (!query.exec())
     {
