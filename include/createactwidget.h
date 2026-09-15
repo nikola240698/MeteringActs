@@ -30,15 +30,6 @@ class CreateActWidget : public QWidget
 
 public:
 
-    // структура для упрощения сохранения показаний
-    struct MeterReading
-    {
-        int typeId;
-        double value;
-    };
-
-
-
 
     explicit CreateActWidget(Database &database, QWidget *parent = nullptr);
 
@@ -51,7 +42,7 @@ private:
 
     Database &m_database;
 
-    int m_currentMeterId = -1;
+
 
     MeterActWidget* m_meterWidget = nullptr;
 
@@ -68,10 +59,7 @@ private:
     // метод загрузки параметров присоединения
     void loadConnectionData(int connectionId) const;
 
-    // метод поиска данных прибора по серийному номеру
-    void findMeterBySerial();
-    // метод настройки ввода показаний
-    void setupReadings();
+
     // метод проверки правильности ввода данных
     bool validateForm();
 

@@ -1,6 +1,5 @@
 
 #include "meteractwidget.h"
-#include "meteractwidget.h"
 #include "ui_MeterActWidget.h"
 
 

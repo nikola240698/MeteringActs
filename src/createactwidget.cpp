@@ -14,8 +14,7 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
 
     // устанавливаем сегодняшнюю дату
     ui->actDateEdit->setDate(QDate::currentDate());
-    // вызываем метод настройки показаний
-    setupReadings();
+
 
 
     // вызываем загрузку типов актов
@@ -347,7 +346,7 @@ bool CreateActWidget::validateForm()
 
 
     // 11. Проверка ввода причины проверки
-    if (ui->resultPlainTextEdit->toPlainText().trimmed().isEmpty())
+    if (ui->reasonPlainTextEdit->toPlainText().trimmed().isEmpty())
     {
         QMessageBox::warning(this, "Не заполнено поле",
             "Укажите причину выполнения работ.");
@@ -389,7 +388,7 @@ bool CreateActWidget::saveAct()
         return false;
     }
     // вставляем данные прибора и получаем его id
-    int actMeterId = insertActMeter(actId);
+    int actMeterId = insertActMeter(actId, m_meterWidget, 1);
     // проверяем успех
     if (actMeterId < 0)
     {
@@ -397,13 +396,13 @@ bool CreateActWidget::saveAct()
         return false;
     }
     // пробуем вставить показания по id прибора
-    if (!insertReadings(actMeterId))
+    if (!insertReadings(actMeterId, m_meterWidget))
     {
         m_database.rollback();
         return false;
     }
     // пробуем обновить год поверки прибора учета
-    if (!updateMeterVerificationYear())
+    if (!updateMeterVerificationYear(m_meterWidget))
     {
         m_database.rollback();
         return false;
@@ -533,7 +532,7 @@ int CreateActWidget::insertActMeter(int actId, MeterActWidget* meterWidget, int 
     query.bindValue(":meterId", meterWidget->meterId());
     query.bindValue(":role", role);
     query.bindValue(":meterName", meterWidget->meterName());
-    query.bindValue(":serialNumber", meterWidget->serilaNumber());
+    query.bindValue(":serialNumber", meterWidget->serialNumber());
     query.bindValue(":accuracyClass", meterWidget->accuracyClass());
     query.bindValue(":verificationYear", meterWidget->verificationYear());
 
@@ -591,7 +590,7 @@ bool CreateActWidget::insertReadings(int actMeterId, MeterActWidget* meterWidget
 bool CreateActWidget::updateMeterVerificationYear(MeterActWidget* meterWidget)
 {
     // получаем введенный год
-    int verificationYear = ui->verificationYearLineEdit->text().toInt();
+    int verificationYear = meterWidget->verificationYear();
     // обновляем значение в БД
     QSqlQuery query(m_database.getDatabase());
 
@@ -600,7 +599,7 @@ bool CreateActWidget::updateMeterVerificationYear(MeterActWidget* meterWidget)
         "SET verification_year = :verificationYear "
         "WHERE id = :meterId;");
 
-    query.bindValue("verificationYear", verificationYear);
+    query.bindValue(":verificationYear", verificationYear);
 
     query.bindValue(":meterId", meterWidget->meterId());
 
