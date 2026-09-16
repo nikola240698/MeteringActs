@@ -17,6 +17,14 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     // отключаем по стандарту видимость второго прибора
     ui->secondaryMeterGroupBox->setVisible(false);
 
+    // создаем виджет векторной диаграммы
+    m_vectorDiagramWidget = new VectorDiagramWidget(ui->vectorDiagramContainerWidget);
+    // добавляем поля векторной диаграммы на главный экран
+    ui->vectorDiagramContainerWidget->layout()->addWidget(m_vectorDiagramWidget);
+    // сразу скрываем все поля
+    ui->vectorDiagramContainerWidget->setVisible(false);
+    ui->replacementDurationWidget->setVisible(false);
+
     // устанавливаем сегодняшнюю дату
     ui->actDateEdit->setDate(QDate::currentDate());
 
@@ -107,6 +115,13 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         [this]()
         {
             addExternalRepresentative();
+        });
+
+    // слот привязки чекбокса наличия векторной диаграммы
+    connect(ui->hasVectorDiagramCheckBox, &QCheckBox::toggled, this,
+        [this]()
+        {
+            updateVectorDiagramUi();
         });
 
     // сигнал нажатия кнопки сохранения
@@ -393,6 +408,20 @@ bool CreateActWidget::validateForm()
         if (!representative->validate())
             return false;
     }
+
+    // 15. Проверка валидности векторной диаграммы
+    // Условие наличия векторной по типам актов
+    const bool supportsVectorDiagram =
+        actTypeId == 1 ||
+        actTypeId == 2 ||
+        actTypeId == 5;
+    // проверяем по типам актов и отмеченной галочке
+    if (supportsVectorDiagram && ui->hasVectorDiagramCheckBox->isChecked())
+    {
+        if (!m_vectorDiagramWidget->validate())
+            return false;
+    }
+
     return true;
 }
 
@@ -687,6 +716,8 @@ void CreateActWidget::updateActTypeUi()
         ui->secondaryMeterGroupBox->setVisible(false);
         // скрываем поле пломбы пока не выберется тип акта
         ui->sealWidget->setVisible(false);
+        // Обновляем отображение полей векторной диаграммы
+        updateVectorDiagramUi();
         return;
     }
     // получаем id выбранного акта
@@ -734,6 +765,8 @@ void CreateActWidget::updateActTypeUi()
             break;
         }
     }
+    // Обновляем отображение полей векторной диаграммы
+    updateVectorDiagramUi();
 }
 
 // метод определения роли первого прибора
@@ -850,6 +883,46 @@ bool CreateActWidget::insertExternalRepresentatives(int actId)
         }
     }
     return true;
+}
+
+// метод управления блоком векторной диаграммы
+void CreateActWidget::updateVectorDiagramUi()
+{
+    // Проверяем на наличие действительного значения
+    if (!ui->actTypeComboBox->currentData().isValid())
+    {
+        // устанавливаем видимость
+        ui->vectorDiagramGroupBox->setVisible(false);
+        return;
+    }
+    // получаем id типа акта
+    const int actTypeId = ui->actTypeComboBox->currentData().toInt();
+    // булева переменная состояние необходимости отображения поля
+    const bool supportsVectorDiagram =
+            actTypeId == 1 ||   // Проверка
+            actTypeId == 2 ||   // Замена
+            actTypeId == 5;     // Установка
+    // устанавливаем видимость согласно переменной
+    ui->vectorDiagramGroupBox->setVisible(supportsVectorDiagram);
+    // меняем видимость в случае изменения переменной
+    if (!supportsVectorDiagram)
+    {
+        ui->vectorDiagramContainerWidget->setVisible(false);
+        ui->replacementDurationWidget->setVisible(false);
+        return;
+    }
+    // булева переменная выбора наличия векторной диаграммы
+    const bool hasVectorDiagram = ui->hasVectorDiagramCheckBox->isChecked();
+    // устанавливаем видимость
+    ui->vectorDiagramContainerWidget->setVisible(hasVectorDiagram);
+    // переменная показа времени замены прибора
+    const bool showReplacementDuration = actTypeId == 2 && hasVectorDiagram;
+    // меняем видимость
+    ui->replacementDurationWidget->setVisible(showReplacementDuration);
+
+    // изменяем размер самого окна
+    if (window())
+        window()->adjustSize();
 }
 
 

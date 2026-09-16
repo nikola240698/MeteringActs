@@ -10,6 +10,7 @@ add_executable(MeteringActs
         meterdialog.cpp
         meteractwidget.cpp
         externalrepresentativewidget.cpp
+        vectordiagramwidget.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -17,12 +18,14 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/meterdialog.h
         ${MY_INCLUDE_DIR}/meteractwidget.h
         ${MY_INCLUDE_DIR}/externalrepresentativewidget.h
+        ${MY_INCLUDE_DIR}/vectordiagramwidget.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui
         ${MY_UI_DIR}/meterdialog.ui
         ${MY_UI_DIR}/meteractwidget.ui
         ${MY_UI_DIR}/externalrepresentativewidget.ui
+        ${MY_UI_DIR}/vectordiagramwidget.ui
 )
 
 target_include_directories(MeteringActs PRIVATE

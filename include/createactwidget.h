@@ -13,6 +13,7 @@
 #include "database.h"
 #include "meteractwidget.h"
 #include "externalrepresentativewidget.h"
+#include "vectordiagramwidget.h"
 
 
 
@@ -52,6 +53,8 @@ private:
 
     MeterActWidget* m_primaryMeterWidget = nullptr;
     MeterActWidget* m_secondaryMeterWidget = nullptr;
+
+    VectorDiagramWidget* m_vectorDiagramWidget = nullptr;
 
     QList<ExternalRepresentativeWidget *> m_externalRepresentativeWidgets;
 
@@ -93,6 +96,10 @@ private:
     void removeExternalRepresentative(ExternalRepresentativeWidget *representative);
     // метод сохранения представителей в БД
     bool insertExternalRepresentatives(int actId);
+
+    // метод управления блоком векторной диаграммы
+    void updateVectorDiagramUi();
+
 };
 
 
