@@ -30,6 +30,13 @@ class CreateActWidget : public QWidget
 
 public:
 
+    enum MeterRole
+    {
+        CheckedMeter = 1,
+        RemovedMeter = 2,
+        InstalledMeter = 3,
+        ReadingMeter = 4
+    };
 
     explicit CreateActWidget(Database &database, QWidget *parent = nullptr);
 
@@ -44,7 +51,8 @@ private:
 
 
 
-    MeterActWidget* m_meterWidget = nullptr;
+    MeterActWidget* m_primaryMeterWidget = nullptr;
+    MeterActWidget* m_secondaryMeterWidget = nullptr;
 
     // метод загрузки типов актов
     void loadActTypes() const;
@@ -74,6 +82,10 @@ private:
     bool insertReadings(int actMeterId, MeterActWidget* meterWidget);
     // метод обновления актуального года поверки прибора
     bool updateMeterVerificationYear(MeterActWidget* meterWidget);
+    // метод показа/скрытия поля для второго прибора учета
+    void updateActTypeUi();
+    // метод определения роли первого прибора учета
+    int primaryMeterRole() const;
 };
 
 

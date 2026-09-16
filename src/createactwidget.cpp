@@ -7,18 +7,27 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         : QWidget(parent), ui(new Ui::CreateActWidget), m_database(database)
 {
     ui->setupUi(this);
-    // настраиваем виджет прибора и показаний
-    m_meterWidget = new MeterActWidget(m_database, ui->meterContainerWidget);
+    // настраиваем виджет первого прибора и показаний
+    m_primaryMeterWidget = new MeterActWidget(m_database, ui->meterContainerWidget);
     // добавляем виджет
-    ui->meterContainerWidget->layout()->addWidget(m_meterWidget);
+    ui->meterContainerWidget->layout()->addWidget(m_primaryMeterWidget);
+    // подобно настраиваем второй виджет
+    m_secondaryMeterWidget = new MeterActWidget(m_database, ui->secondaryMeterGroupBox);
+    ui->secondMeterContainerWidget->layout()->addWidget(m_secondaryMeterWidget);
+    // отключаем по стандарту видимость второго прибора
+    ui->secondaryMeterGroupBox->setVisible(false);
 
     // устанавливаем сегодняшнюю дату
     ui->actDateEdit->setDate(QDate::currentDate());
 
-
-
     // вызываем загрузку типов актов
     loadActTypes();
+    // сигнал изменения типа акта для показа полей для второго прибора
+    connect(ui->actTypeComboBox, &QComboBox::currentIndexChanged, this,
+        [this]()
+        {
+            updateActTypeUi();
+        });
     // вызываем загрузку списка участков
     loadAreas();
     // вызываем загрузку списка представителей
@@ -91,23 +100,18 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
             loadConnectionData(connectionId);
         });
 
-
     // сигнал нажатия кнопки сохранения
     connect(ui->createButton, &QPushButton::clicked, this,
         [this]()
         {
             saveAct();
         });
-
-
 }
 
 CreateActWidget::~CreateActWidget()
 {
     delete ui;
 }
-
-
 
 // метод загрузки типов актов
 void CreateActWidget::loadActTypes() const
@@ -252,7 +256,6 @@ void CreateActWidget::loadConnections(int substationId) const
         QString name = query.value("name").toString();
         ui->connectionComboBox->addItem(name, id);
     }
-
 }
 
 // метод загрузки данные присоединения
@@ -265,7 +268,6 @@ void CreateActWidget::loadConnectionData(int connectionId) const
         "FROM connections "
         "WHERE id = :connectionId;");
     // биндим переменные в запрос
-
     query.bindValue(":connectionId", connectionId);
     // проверяем, что запрос выполняется
     if (!query.exec())
@@ -284,10 +286,6 @@ void CreateActWidget::loadConnectionData(int connectionId) const
     ui->voltageLineEdit->setText(voltage + " кВ");
     ui->ctRatioLineEdit->setText(ctRatio);
 }
-
-
-
-
 
 // метод проверки правильности заполнения формы
 bool CreateActWidget::validateForm()
@@ -341,9 +339,16 @@ bool CreateActWidget::validateForm()
     }
 
     // 7-10. Объединили теперь так как это всё в одном классе
-    if (!m_meterWidget->validate())
+    if (!m_primaryMeterWidget->validate())
         return false;
-
+    // добавляем проверку введенных полей второго прибора учета, если он видим
+    // в данном типе акта
+    const int actTypeId = ui->actTypeComboBox->currentData().toInt();
+    if (actTypeId == 2)
+    {
+        if (!m_secondaryMeterWidget->validate())
+            return false;
+    }
 
     // 11. Проверка ввода причины проверки
     if (ui->reasonPlainTextEdit->toPlainText().trimmed().isEmpty())
@@ -362,7 +367,6 @@ bool CreateActWidget::validateForm()
         ui->resultPlainTextEdit->setFocus();
         return false;
     }
-
     return true;
 }
 
@@ -387,26 +391,47 @@ bool CreateActWidget::saveAct()
         m_database.rollback();
         return false;
     }
-    // вставляем данные прибора и получаем его id
-    int actMeterId = insertActMeter(actId, m_meterWidget, 1);
-    // проверяем успех
-    if (actMeterId < 0)
+    // сохраняем первый прибор
+    int primaryActMeterId = insertActMeter(actId, m_primaryMeterWidget, primaryMeterRole());
+    if (primaryActMeterId < 0)
     {
         m_database.rollback();
         return false;
     }
-    // пробуем вставить показания по id прибора
-    if (!insertReadings(actMeterId, m_meterWidget))
+    // и его показания
+    if (!insertReadings(primaryActMeterId, m_primaryMeterWidget))
     {
         m_database.rollback();
         return false;
     }
     // пробуем обновить год поверки прибора учета
-    if (!updateMeterVerificationYear(m_meterWidget))
+    if (!updateMeterVerificationYear(m_primaryMeterWidget))
     {
         m_database.rollback();
         return false;
     }
+    // проверяем на предмет наличия замены и сохраняем при наличии
+    int actTypeId = ui->actTypeComboBox->currentData().toInt();
+    if (actTypeId == 2)
+    {
+        int secondaryActMeterId = insertActMeter(actId, m_secondaryMeterWidget, InstalledMeter);
+        if (secondaryActMeterId < 0)
+        {
+            m_database.rollback();
+            return false;
+        }
+        if (!insertReadings(secondaryActMeterId, m_secondaryMeterWidget))
+        {
+            m_database.rollback();
+            return false;
+        }
+        if (!updateMeterVerificationYear(m_secondaryMeterWidget))
+        {
+            m_database.rollback();
+            return false;
+        }
+    }
+
     // пробуем применить изменения в БД
     if (!m_database.commit())
     {
@@ -420,7 +445,6 @@ bool CreateActWidget::saveAct()
     }
 
     QMessageBox::information(this, "Акт сохранен", "Данные акта успешно сохранены");
-
     return true;
 }
 
@@ -453,7 +477,6 @@ int CreateActWidget::insertAct()
     }
 
     QString employeeName = employeeQuery.value("short_name").toString();
-
     QString employeePosition = employeeQuery.value("position").toString();
 
     // вносим данные в базу данных
@@ -611,8 +634,84 @@ bool CreateActWidget::updateMeterVerificationYear(MeterActWidget* meterWidget)
 
         return false;
     }
-
     return true;
+}
+
+// метод показа/скрытия поля для второго прибора учета
+void CreateActWidget::updateActTypeUi()
+{
+    // проверяем, что ничего не выбрано
+    if (!ui->actTypeComboBox->currentData().isValid())
+    {
+        ui->primaryMeterGroupBox->setTitle("Прибор учета");
+        ui->secondaryMeterGroupBox->setVisible(false);
+        return;
+    }
+    // получаем id выбранного акта
+    int actTypeId = ui->actTypeComboBox->currentData().toInt();
+    // отображаем окна и подписи согласно выбранному типу акта
+    switch (actTypeId)
+    {
+        case 1:     // проверка
+        {
+            ui->primaryMeterGroupBox->setTitle("Проверяемый прибор");
+            ui->secondaryMeterGroupBox->setVisible(false);
+            break;
+        }
+        case 2:     // Замена
+        {
+            ui->primaryMeterGroupBox->setTitle("Устнавливаемый прибор");
+            ui->secondaryMeterGroupBox->setVisible(true);
+            break;
+        }
+        case 3:     // Снятие показаний
+        {
+            ui->primaryMeterGroupBox->setTitle("Прибор учета");
+            ui->secondaryMeterGroupBox->setVisible(false);
+            break;
+        }
+        case 4:     // Демонтаж
+        {
+            ui->primaryMeterGroupBox->setTitle("Демонтируемый прибор");
+            ui->secondaryMeterGroupBox->setVisible(false);
+            break;
+        }
+        case 5:     // Установка
+        {
+            ui->primaryMeterGroupBox->setTitle("Устанавливаемый прибор");
+            ui->secondaryMeterGroupBox->setVisible(false);
+            break;
+        }
+        default:
+        {
+            ui->primaryMeterGroupBox->setTitle("Прибор учета");
+            ui->secondaryMeterGroupBox->setVisible(false);
+            break;
+        }
+    }
+}
+
+// метод определения роли первого прибора
+int CreateActWidget::primaryMeterRole() const
+{
+    // определяем тип акта
+    int actTypeId = ui->actTypeComboBox->currentData().toInt();
+    // возвращаем номер роли согласно выбранному акту
+    switch (actTypeId)
+    {
+        case 1:     // Проверка
+            return CheckedMeter;
+        case 2:     // Замена
+            return RemovedMeter;
+        case 3:     // Снятие показаний
+            return ReadingMeter;
+        case 4:     // Демонтаж
+            return RemovedMeter;
+        case 5:     // Установка
+            return InstalledMeter;
+        default:
+            return -1;
+    }
 }
 
 
