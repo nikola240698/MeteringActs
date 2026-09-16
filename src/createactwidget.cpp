@@ -102,6 +102,13 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
             loadConnectionData(connectionId);
         });
 
+    // сигнал добавления нового представителя
+    connect(ui->addExternalRepresentativeButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            addExternalRepresentative();
+        });
+
     // сигнал нажатия кнопки сохранения
     connect(ui->createButton, &QPushButton::clicked, this,
         [this]()
@@ -736,6 +743,39 @@ int CreateActWidget::primaryMeterRole() const
         default:
             return -1;
     }
+}
+
+// метод добавления полей стороннего представителя
+void CreateActWidget::addExternalRepresentative()
+{
+    // создаем новый виджет представителя
+    auto *representative = new ExternalRepresentativeWidget(ui->externalRepresentativesContainer);
+
+    // добавляем его в контейнер
+    ui->externalRepresentativesContainer->layout()->addWidget(representative);
+
+    // запоминаем указатель
+    m_externalRepresentativeWidget.append(representative);
+    // Сигнал на удаление полей
+    connect(representative, &ExternalRepresentativeWidget::removeRequested, this,
+        [this, representative]()
+        {
+            removeExternalRepresentative(representative);
+        });
+}
+
+// метод удаления созданного поля добавления представителя
+void CreateActWidget::removeExternalRepresentative(ExternalRepresentativeWidget *representative)
+{
+    // проверяем отсутствие полей
+    if (!representative)
+        return;
+
+    // удаляем указатель из списка
+    m_externalRepresentativeWidget.removeOne(representative);
+
+    // удаляем сами поля
+    representative->deleteLater();
 }
 
 

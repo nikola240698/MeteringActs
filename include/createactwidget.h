@@ -8,9 +8,11 @@
 #include <QIntValidator>
 #include <QDate>
 #include <QMessageBox>
+#include <QList>
 
 #include "database.h"
 #include "meteractwidget.h"
+#include "externalrepresentativewidget.h"
 
 
 
@@ -48,10 +50,10 @@ private:
 
     Database &m_database;
 
-
-
     MeterActWidget* m_primaryMeterWidget = nullptr;
     MeterActWidget* m_secondaryMeterWidget = nullptr;
+
+    QList<ExternalRepresentativeWidget *> m_externalRepresentativeWidget;
 
     // метод загрузки типов актов
     void loadActTypes() const;
@@ -65,7 +67,6 @@ private:
     void loadConnections(int substationId) const;
     // метод загрузки параметров присоединения
     void loadConnectionData(int connectionId) const;
-
 
     // метод проверки правильности ввода данных
     bool validateForm();
@@ -85,6 +86,11 @@ private:
     void updateActTypeUi();
     // метод определения роли первого прибора учета
     int primaryMeterRole() const;
+
+    // метод добавления полей ввода представителя
+    void addExternalRepresentative();
+    // метод удаления полей представителя
+    void removeExternalRepresentative(ExternalRepresentativeWidget *representative);
 };
 
 
