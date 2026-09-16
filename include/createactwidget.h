@@ -53,7 +53,7 @@ private:
     MeterActWidget* m_primaryMeterWidget = nullptr;
     MeterActWidget* m_secondaryMeterWidget = nullptr;
 
-    QList<ExternalRepresentativeWidget *> m_externalRepresentativeWidget;
+    QList<ExternalRepresentativeWidget *> m_externalRepresentativeWidgets;
 
     // метод загрузки типов актов
     void loadActTypes() const;
@@ -91,6 +91,8 @@ private:
     void addExternalRepresentative();
     // метод удаления полей представителя
     void removeExternalRepresentative(ExternalRepresentativeWidget *representative);
+    // метод сохранения представителей в БД
+    bool insertExternalRepresentatives(int actId);
 };
 
 

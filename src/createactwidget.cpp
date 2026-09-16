@@ -385,6 +385,14 @@ bool CreateActWidget::validateForm()
         ui->sealLineEdit->setFocus();
         return false;
     }
+
+    // 14. Проверяем сторонник представителей, если есть
+    for (ExternalRepresentativeWidget *representative :
+        m_externalRepresentativeWidgets)
+    {
+        if (!representative->validate())
+            return false;
+    }
     return true;
 }
 
@@ -405,6 +413,12 @@ bool CreateActWidget::saveAct()
     int actId = insertAct();
     // проверяем, что всё нормально
     if (actId < 0)
+    {
+        m_database.rollback();
+        return false;
+    }
+    // пробуем записать представителей
+    if (!insertExternalRepresentatives(actId))
     {
         m_database.rollback();
         return false;
@@ -755,7 +769,7 @@ void CreateActWidget::addExternalRepresentative()
     ui->externalRepresentativesContainer->layout()->addWidget(representative);
 
     // запоминаем указатель
-    m_externalRepresentativeWidget.append(representative);
+    m_externalRepresentativeWidgets.append(representative);
     // Сигнал на удаление полей
     connect(representative, &ExternalRepresentativeWidget::removeRequested, this,
         [this, representative]()
@@ -772,10 +786,70 @@ void CreateActWidget::removeExternalRepresentative(ExternalRepresentativeWidget 
         return;
 
     // удаляем указатель из списка
-    m_externalRepresentativeWidget.removeOne(representative);
+    m_externalRepresentativeWidgets.removeOne(representative);
+
+    // убираем виджет из поля
+    ui->externalRepresentativesContainer->layout()->removeWidget(representative);
+
+    // сразу скрываем его
+    representative->hide();
 
     // удаляем сами поля
     representative->deleteLater();
+
+    // Заставляем layout пересчитать размеры
+    ui->externalRepresentativesContainer->layout()->invalidate();
+    ui->externalRepresentativesContainer->adjustSize();
+    adjustSize();
+
+    // изменяем размер самого окна
+    if (window())
+        window()->adjustSize();
+}
+
+// метод сохранения сторонних представителей в базу данных
+bool CreateActWidget::insertExternalRepresentatives(int actId)
+{
+    // проверяем на заполненность данными
+    if (m_externalRepresentativeWidgets.isEmpty())
+        return true;
+
+    // создаем запрос и подготавливаем его
+    QSqlQuery query(m_database.getDatabase());
+    query.prepare(
+        "INSERT INTO external_representatives ("
+        "act_id, "
+        "organization, "
+        "short_name, "
+        "position"
+        ")"
+        "VALUES ("
+        ":actId, "
+        ":organization, "
+        ":shortName, "
+        ":position"
+        ");");
+
+    // пробегаемся по каждому созданному представителю
+    for (ExternalRepresentativeWidget* representative :
+        m_externalRepresentativeWidgets)
+    {
+        // биндим значения в запрос
+        query.bindValue(":actId", actId);
+        query.bindValue(":organization", representative->organization());
+        query.bindValue(":shortName", representative->shortName());
+        query.bindValue(":position", representative->position());
+        // пытаемся выполнить запрос
+        if (!query.exec())
+        {
+            QMessageBox::critical(this, "Ошибка базы данных",
+                "Не удалось сохранить стороннего представителя: "
+                + query.lastError().text());
+
+            return false;
+        }
+    }
+    return true;
 }
 
 
