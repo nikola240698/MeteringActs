@@ -10,10 +10,9 @@
 #include <QMessageBox>
 
 #include "database.h"
-#include "meterdialog.h"
 #include "meteractwidget.h"
 
-class MeterActWidget;
+
 
 QT_BEGIN_NAMESPACE
 

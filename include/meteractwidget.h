@@ -50,6 +50,8 @@ public:
 
     int verificationYear() const;
 
+
+
     QList<MeterReading> readings() const;
 
     bool validate();

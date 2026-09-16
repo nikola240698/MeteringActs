@@ -60,6 +60,7 @@ int MeterActWidget::verificationYear() const
     return ui->verificationYearLineEdit->text().toInt();
 }
 
+
 QList<MeterActWidget::MeterReading> MeterActWidget::readings() const
 {
     QList<MeterReading> result;

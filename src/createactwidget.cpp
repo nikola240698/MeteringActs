@@ -12,7 +12,7 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     // добавляем виджет
     ui->meterContainerWidget->layout()->addWidget(m_primaryMeterWidget);
     // подобно настраиваем второй виджет
-    m_secondaryMeterWidget = new MeterActWidget(m_database, ui->secondaryMeterGroupBox);
+    m_secondaryMeterWidget = new MeterActWidget(m_database, ui->secondMeterContainerWidget);
     ui->secondMeterContainerWidget->layout()->addWidget(m_secondaryMeterWidget);
     // отключаем по стандарту видимость второго прибора
     ui->secondaryMeterGroupBox->setVisible(false);
@@ -28,6 +28,8 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         {
             updateActTypeUi();
         });
+    // Обновляем показ UI лдя правильного отображения
+    updateActTypeUi();
     // вызываем загрузку списка участков
     loadAreas();
     // вызываем загрузку списка представителей
@@ -367,6 +369,15 @@ bool CreateActWidget::validateForm()
         ui->resultPlainTextEdit->setFocus();
         return false;
     }
+
+    // 13. Проверяем правильно введенную пломбу
+    if (ui->sealWidget->isVisible() &&
+        ui->sealLineEdit->text().trimmed().isEmpty())
+    {
+        QMessageBox::warning(this, "Поле не заполнено", "Укажите номер пломбы");
+        ui->sealLineEdit->setFocus();
+        return false;
+    }
     return true;
 }
 
@@ -458,6 +469,11 @@ int CreateActWidget::insertAct()
     QString actDate = ui->actDateEdit->date().toString(Qt::ISODate);
     QString reason = ui->reasonPlainTextEdit->toPlainText().trimmed();
     QString result = ui->resultPlainTextEdit->toPlainText().trimmed();
+    QString sealNumber;
+    if (ui->sealWidget->isVisible())
+    {
+        sealNumber = ui->sealLineEdit->text().trimmed();
+    }
     // получаем необходимый тип данных представителей предприятия
     QSqlQuery employeeQuery(m_database.getDatabase());
 
@@ -491,7 +507,8 @@ int CreateActWidget::insertAct()
         "employee_name, "
         "employee_position, "
         "reason, "
-        "result"
+        "result, "
+        "seal_number"
         ") "
         "VALUES ("
         ":actTypeId, "
@@ -501,7 +518,8 @@ int CreateActWidget::insertAct()
         ":employeeName, "
         ":employeePosition, "
         ":reason, "
-        ":result"
+        ":result, "
+        ":sealNumber"
         ");");
 
     query.bindValue(":actTypeId", actTypeId);
@@ -512,6 +530,7 @@ int CreateActWidget::insertAct()
     query.bindValue(":employeePosition", employeePosition);
     query.bindValue(":reason", reason);
     query.bindValue(":result", result);
+    query.bindValue(":sealNumber", sealNumber);
 
     if (!query.exec())
     {
@@ -640,15 +659,19 @@ bool CreateActWidget::updateMeterVerificationYear(MeterActWidget* meterWidget)
 // метод показа/скрытия поля для второго прибора учета
 void CreateActWidget::updateActTypeUi()
 {
-    // проверяем, что ничего не выбрано
+    // Если тип акта не выбран
     if (!ui->actTypeComboBox->currentData().isValid())
     {
         ui->primaryMeterGroupBox->setTitle("Прибор учета");
         ui->secondaryMeterGroupBox->setVisible(false);
+        // скрываем поле пломбы пока не выберется тип акта
+        ui->sealWidget->setVisible(false);
         return;
     }
     // получаем id выбранного акта
     int actTypeId = ui->actTypeComboBox->currentData().toInt();
+    // Отображаем поле пломбы везде кроме демонтажа
+    ui->sealWidget->setVisible(actTypeId != 4);
     // отображаем окна и подписи согласно выбранному типу акта
     switch (actTypeId)
     {
@@ -660,7 +683,8 @@ void CreateActWidget::updateActTypeUi()
         }
         case 2:     // Замена
         {
-            ui->primaryMeterGroupBox->setTitle("Устнавливаемый прибор");
+            ui->primaryMeterGroupBox->setTitle("Снимаемый прибор");
+            ui->secondaryMeterGroupBox->setTitle("Устанавливаемый прибор");
             ui->secondaryMeterGroupBox->setVisible(true);
             break;
         }
