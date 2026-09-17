@@ -11,6 +11,7 @@ add_executable(MeteringActs
         meteractwidget.cpp
         externalrepresentativewidget.cpp
         vectordiagramwidget.cpp
+        currenttransformeractwidget.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -19,6 +20,7 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/meteractwidget.h
         ${MY_INCLUDE_DIR}/externalrepresentativewidget.h
         ${MY_INCLUDE_DIR}/vectordiagramwidget.h
+        ${MY_INCLUDE_DIR}/currenttransformeractwidget.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui
@@ -26,6 +28,7 @@ add_executable(MeteringActs
         ${MY_UI_DIR}/meteractwidget.ui
         ${MY_UI_DIR}/externalrepresentativewidget.ui
         ${MY_UI_DIR}/vectordiagramwidget.ui
+        ${MY_UI_DIR}/currenttransformeractwidget.ui
 )
 
 target_include_directories(MeteringActs PRIVATE

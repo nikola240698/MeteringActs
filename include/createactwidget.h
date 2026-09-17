@@ -32,6 +32,7 @@ class CreateActWidget : public QWidget
 
 public:
 
+    // Роли прибора учета
     enum MeterRole
     {
         CheckedMeter = 1,
@@ -39,6 +40,12 @@ public:
         InstalledMeter = 3,
         ReadingMeter = 4,
         ExistingMeter = 5
+    };
+    // Роли трансформатора тока
+    enum CurrentTransformerRole
+    {
+        RemovedCurrentTransformer = 1,
+        InstalledCurrentTransformer = 2
     };
 
     explicit CreateActWidget(Database &database, QWidget *parent = nullptr);

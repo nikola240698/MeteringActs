@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CurrentTransformerActWidget</class>
+ <widget class="QWidget" name="CurrentTransformerActWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>80</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CurrentTransformerActWidget</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="firstRowLayout">
+     <item>
+      <widget class="QLabel" name="phaseLabel">
+       <property name="text">
+        <string>Фаза:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="phaseComboBox"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="serialNumberLabel">
+       <property name="text">
+        <string>Заводской №</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="serialNumberLineEdit"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="findButton">
+       <property name="text">
+        <string>Найти</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="SecondRowLayout">
+     <item>
+      <widget class="QLabel" name="nameLabel">
+       <property name="text">
+        <string>Тип:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="nameLineEdit"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="ratioLabel">
+       <property name="text">
+        <string>Ктт:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="ratioLineEdit"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="accuracyLabel">
+       <property name="text">
+        <string>Кл.точности:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="accuracyLineEdit"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="removeButton">
+       <property name="text">
+        <string>Удалить</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
