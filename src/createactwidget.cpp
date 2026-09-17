@@ -583,6 +583,36 @@ bool CreateActWidget::saveAct()
         }
     }
 
+    // пробуем записать трансформаторы тока
+    if (actTypeId == 6)
+    {
+        if (!insertActCurrentTransformers(
+            actId, m_installedCurrentTransformerWidgets, InstalledCurrentTransformer))
+        {
+            m_database.rollback();
+            return false;
+        }
+    }
+    if (actTypeId == 7)
+    {
+        // снятые ТТ
+        if (!insertActCurrentTransformers(
+            actId, m_installedCurrentTransformerWidgets, InstalledCurrentTransformer))
+        {
+            m_database.rollback();
+            return false;
+        }
+        // установленные ТТ
+        for (CurrentTransformerActWidget* transformer : m_installedCurrentTransformerWidgets)
+        {
+            if (!insertActCurrentTransformer(actId, transformer, InstalledCurrentTransformer))
+            {
+                m_database.rollback();
+                return false;
+            }
+        }
+    }
+
     // пробуем записать векторную диаграмму
     if (!insertVectorDiagram(actId))
     {
@@ -1223,6 +1253,72 @@ bool CreateActWidget::validateCurrentTransformers(const QList<CurrentTransformer
         }
         // добавляем найденную фазу в набор
         usedPhases.insert(phase);
+    }
+    return true;
+}
+
+bool CreateActWidget::insertActCurrentTransformer(int actId, CurrentTransformerActWidget *transformer, int role)
+{
+    // проверяем что существует поля для ввода
+    if (!transformer)
+        return false;
+
+    // создаем запрос и подготавливаем его
+    QSqlQuery query(m_database.getDatabase());
+    query.prepare(
+        "INSERT INTO act_current_transformers ("
+        "act_id, "
+        "current_transformer_id, "
+        "role, "
+        "phase, "
+        "name, "
+        "serial_number, "
+        "transformation_ratio, "
+        "accuracy_class"
+        ") "
+        "VALUES ("
+        ":actId, "
+        ":currentTransformerId, "
+        ":role, "
+        ":phase, "
+        ":name, "
+        ":serialNumber, "
+        ":transformationRatio, "
+        ":accuracyClass"
+        ");");
+
+    query.bindValue(":actId", actId);
+
+    query.bindValue(":currentTransformerId", transformer->currentTransformerId());
+    query.bindValue(":role", role);
+    query.bindValue(":phase", transformer->phase());
+    query.bindValue(":name", transformer->name());
+    query.bindValue(":serialNumber", transformer->serialNumber());
+    query.bindValue(":transformationRatio", transformer->transformerRatio());
+    query.bindValue(":accuracyClass", transformer->accuracyClass());
+
+    if (!query.exec())
+    {
+        QMessageBox::warning(this, "Ошибка базы данных",
+            "Не удалось добавить акт трансформатора тока: "
+            + query.lastError().text());
+
+        return false;
+    }
+
+    return true;
+}
+
+bool CreateActWidget::insertActCurrentTransformers(int actId, const QList<CurrentTransformerActWidget *> &transformers,
+    int role)
+{
+    for (CurrentTransformerActWidget* transformer : transformers)
+    {
+        if (!insertActCurrentTransformer(
+            actId, transformer, role))
+        {
+            return false;
+        }
     }
     return true;
 }

@@ -127,6 +127,13 @@ private:
     bool validateCurrentTransformers(
         const QList<CurrentTransformerActWidget *> &transformers,
         const QString &groupName);
+    // метод сохранения акта трансформаторов тока
+    bool insertActCurrentTransformer(
+        int actId, CurrentTransformerActWidget* transformer, int role);
+    // маленький метод упрощения созданения актов ТТ
+    bool insertActCurrentTransformers(
+        int actId, const QList<CurrentTransformerActWidget *> &transformers, int role);
+
 
 };
 
