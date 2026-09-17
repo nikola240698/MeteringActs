@@ -317,6 +317,9 @@ bool CreateActWidget::validateForm()
     // 1. Проверяем тип акта
     if (!ui->actTypeComboBox->currentData().isValid())
     {
+        // переключаемся на нужную вкладку
+        ui->actTabWidget->setCurrentWidget(ui->mainTab);
+        // выводим сообщение и выставляем фокус на поле
         QMessageBox::warning(this, "Не заполнено поле", "Выберите тип акта");
         ui->actTypeComboBox->setFocus();
         return false;
@@ -325,6 +328,9 @@ bool CreateActWidget::validateForm()
     // 2. Проверяем дату
     if (!ui->actDateEdit->date().isValid())
     {
+        // переключаемся на нужную вкладку
+        ui->actTabWidget->setCurrentWidget(ui->mainTab);
+        // выводим сообщение и выставляем фокус на поле
         QMessageBox::warning(this, "Не заполнено поле", "Укажите корректную дату акта.");
         ui->actDateEdit->setFocus();
         return false;
@@ -333,6 +339,9 @@ bool CreateActWidget::validateForm()
     // 3. Проверяем выбранный ЛПУ
     if (!ui->areaComboBox->currentData().isValid())
     {
+        // переключаемся на нужную вкладку
+        ui->actTabWidget->setCurrentWidget(ui->mainTab);
+        // выводим сообщение и выставляем фокус на поле
         QMessageBox::warning(this, "Не заполнено поле", "Выберите участок.");
         ui->areaComboBox->setFocus();
         return false;
@@ -341,6 +350,9 @@ bool CreateActWidget::validateForm()
     // 4. Проверяем подстанцию
     if (!ui->substationComboBox->currentData().isValid())
     {
+        // переключаемся на нужную вкладку
+        ui->actTabWidget->setCurrentWidget(ui->mainTab);
+        // выводим сообщение и выставляем фокус на поле
         QMessageBox::warning(this, "Не заполнено поле", "Выберите подстанцию");
         ui->substationComboBox->setFocus();
         return false;
@@ -349,6 +361,9 @@ bool CreateActWidget::validateForm()
     // 5. Проверяем присоединение
     if (!ui->connectionComboBox->currentData().isValid())
     {
+        // переключаемся на нужную вкладку
+        ui->actTabWidget->setCurrentWidget(ui->mainTab);
+        // выводим сообщение и выставляем фокус на поле
         QMessageBox::warning(this, "Не заполнено поле", "Выберите присоединение.");
         ui->connectionComboBox->setFocus();
         return false;
@@ -357,26 +372,41 @@ bool CreateActWidget::validateForm()
     // 6. Проверяем представителя предприятия
     if (!ui->employeeComboBox->currentData().isValid())
     {
+        // переключаемся на нужную вкладку
+        ui->actTabWidget->setCurrentWidget(ui->mainTab);
+        // выводим сообщение и выставляем фокус на поле
         QMessageBox::warning(this, "Не заполнено поле", "Выберите представителя предприятия.");
         ui->employeeComboBox->setFocus();
         return false;
     }
 
-    // 7-10. Объединили теперь так как это всё в одном классе
+    // 7-10. Проверяем введенные данные прибора.
+    // Объединили теперь так как это всё в одном классе
     if (!m_primaryMeterWidget->validate())
+    {
+        // переключаемся на нужную вкладку
+        ui->actTabWidget->setCurrentWidget(ui->metersTab);
         return false;
+    }
     // добавляем проверку введенных полей второго прибора учета, если он видим
     // в данном типе акта
     const int actTypeId = ui->actTypeComboBox->currentData().toInt();
     if (actTypeId == 2)
     {
         if (!m_secondaryMeterWidget->validate())
+        {
+            // переключаемся на нужную вкладку
+            ui->actTabWidget->setCurrentWidget(ui->metersTab);
             return false;
+        }
     }
 
     // 11. Проверка ввода причины проверки
     if (ui->reasonPlainTextEdit->toPlainText().trimmed().isEmpty())
     {
+        // переключаемся на нужную вкладку
+        ui->actTabWidget->setCurrentWidget(ui->conclusionTab);
+        // выводим сообщение и выставляем фокус на поле
         QMessageBox::warning(this, "Не заполнено поле",
             "Укажите причину выполнения работ.");
         ui->reasonPlainTextEdit->setFocus();
@@ -386,6 +416,9 @@ bool CreateActWidget::validateForm()
     // 12. Проверяем ввод заключения
     if (ui->resultPlainTextEdit->toPlainText().trimmed().isEmpty())
     {
+        // переключаемся на нужную вкладку
+        ui->actTabWidget->setCurrentWidget(ui->conclusionTab);
+        // выводим сообщение и выставляем фокус на поле
         QMessageBox::warning(this, "Не заполнено поле",
             "Укажите заключение по результатам выполнения работ. ");
         ui->resultPlainTextEdit->setFocus();
@@ -396,6 +429,9 @@ bool CreateActWidget::validateForm()
     if (ui->sealWidget->isVisible() &&
         ui->sealLineEdit->text().trimmed().isEmpty())
     {
+        // переключаемся на нужную вкладку
+        ui->actTabWidget->setCurrentWidget(ui->conclusionTab);
+        // выводим сообщение и выставляем фокус на поле
         QMessageBox::warning(this, "Поле не заполнено", "Укажите номер пломбы");
         ui->sealLineEdit->setFocus();
         return false;
@@ -406,7 +442,11 @@ bool CreateActWidget::validateForm()
         m_externalRepresentativeWidgets)
     {
         if (!representative->validate())
+        {
+            // переключаемся на нужную вкладку
+            ui->actTabWidget->setCurrentWidget(ui->measurementsTab);
             return false;
+        }
     }
 
     // 15. Проверка валидности векторной диаграммы
@@ -513,17 +553,25 @@ bool CreateActWidget::saveAct()
 int CreateActWidget::insertAct()
 {
     // получаем необходимые данные с формы ввода
-    int actTypeId = ui->actTypeComboBox->currentData().toInt();
-    int connectionId = ui->connectionComboBox->currentData().toInt();
-    int employeeId = ui->employeeComboBox->currentData().toInt();
-    QString actDate = ui->actDateEdit->date().toString(Qt::ISODate);
-    QString reason = ui->reasonPlainTextEdit->toPlainText().trimmed();
-    QString result = ui->resultPlainTextEdit->toPlainText().trimmed();
+    const int actTypeId = ui->actTypeComboBox->currentData().toInt();
+    const int connectionId = ui->connectionComboBox->currentData().toInt();
+    const int employeeId = ui->employeeComboBox->currentData().toInt();
+    const QString actDate = ui->actDateEdit->date().toString(Qt::ISODate);
+    const QString reason = ui->reasonPlainTextEdit->toPlainText().trimmed();
+    const QString result = ui->resultPlainTextEdit->toPlainText().trimmed();
     QString sealNumber;
     if (ui->sealWidget->isVisible())
     {
         sealNumber = ui->sealLineEdit->text().trimmed();
     }
+    // Получаем время замены прибора учета
+    QVariant replacementDuration;
+
+    if (actTypeId == 2 && ui->hasVectorDiagramCheckBox->isChecked())
+    {
+        replacementDuration = ui->replacementDurationSpinBox->value();
+    }
+
     // получаем необходимый тип данных представителей предприятия
     QSqlQuery employeeQuery(m_database.getDatabase());
 
@@ -558,7 +606,8 @@ int CreateActWidget::insertAct()
         "employee_position, "
         "reason, "
         "result, "
-        "seal_number"
+        "seal_number, "
+        "replacement_duration_minures"
         ") "
         "VALUES ("
         ":actTypeId, "
@@ -569,7 +618,8 @@ int CreateActWidget::insertAct()
         ":employeePosition, "
         ":reason, "
         ":result, "
-        ":sealNumber"
+        ":sealNumber,"
+        ":replacementDuration"
         ");");
 
     query.bindValue(":actTypeId", actTypeId);
@@ -581,6 +631,7 @@ int CreateActWidget::insertAct()
     query.bindValue(":reason", reason);
     query.bindValue(":result", result);
     query.bindValue(":sealNumber", sealNumber);
+    query.bindValue(":replacemnetDuration", replacementDuration);
 
     if (!query.exec())
     {
