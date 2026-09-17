@@ -824,20 +824,12 @@ void CreateActWidget::removeExternalRepresentative(ExternalRepresentativeWidget 
     // убираем виджет из поля
     ui->externalRepresentativesContainer->layout()->removeWidget(representative);
 
-    // сразу скрываем его
-    representative->hide();
-
     // удаляем сами поля
     representative->deleteLater();
 
     // Заставляем layout пересчитать размеры
     ui->externalRepresentativesContainer->layout()->invalidate();
-    ui->externalRepresentativesContainer->adjustSize();
-    adjustSize();
 
-    // изменяем размер самого окна
-    if (window())
-        window()->adjustSize();
 }
 
 // метод сохранения сторонних представителей в базу данных
