@@ -28,6 +28,10 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     // устанавливаем сегодняшнюю дату
     ui->actDateEdit->setDate(QDate::currentDate());
 
+    // скрываем поля для ввода данных про трансформаторы тока
+    ui->removedCurrentTransformersGroupBox->setVisible(false);
+    ui->installedCurrentTransformersGroupBox->setVisible(false);
+
     // вызываем загрузку типов актов
     loadActTypes();
     // сигнал изменения типа акта для показа полей для второго прибора
@@ -122,6 +126,18 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         [this]()
         {
             updateVectorDiagramUi();
+        });
+
+    // сигналы для кнопок работы с трансформаторами тока
+    connect(ui->addRemoveCtButton, &QPushButton::clicked, this,
+    [this]()
+    {
+        addRemovedCurrentTransformer();
+    });
+    connect(ui->addInstalledCtButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            addInstalledCurrentTransformer();
         });
 
     // сигнал нажатия кнопки сохранения
@@ -789,6 +805,7 @@ void CreateActWidget::updateActTypeUi()
     // Отображаем поле пломбы везде кроме демонтажа
     ui->sealWidget->setVisible(actTypeId != 4);
     // отображаем окна и подписи согласно выбранному типу акта
+
     switch (actTypeId)
     {
         case 1:     // проверка
@@ -826,12 +843,32 @@ void CreateActWidget::updateActTypeUi()
         {
             ui->primaryMeterGroupBox->setTitle("Устанавливаемый прибор");
             ui->secondaryMeterGroupBox->setVisible(false);
+            // поля для ввода трансформаторов тока
+            ui->removedCurrentTransformersGroupBox->setVisible(false);
+            ui->installedCurrentTransformersGroupBox->setVisible(true);
+            // сразу добавляем окно для ввода данных
+            if (m_installedCurrentTransformerWidgets.isEmpty())
+            {
+                addInstalledCurrentTransformer();
+            }
             break;
         }
         case 7:     // Замена ТТ
         {
             ui->primaryMeterGroupBox->setTitle("Прибор учета");
             ui->secondaryMeterGroupBox->setVisible(false);
+            // поля для ввода трансформаторов тока
+            ui->removedCurrentTransformersGroupBox->setVisible(true);
+            ui->installedCurrentTransformersGroupBox->setVisible(true);
+            // сразу добавляем по одному полю для вода данных
+            if (m_removedCurrentTransformerWidgets.isEmpty())
+            {
+                addRemovedCurrentTransformer();
+            }
+            if (m_installedCurrentTransformerWidgets.isEmpty())
+            {
+                addInstalledCurrentTransformer();
+            }
             break;
         }
         default:
@@ -1062,6 +1099,62 @@ bool CreateActWidget::insertVectorDiagram(int actId)
     }
 
     return true;
+}
+
+void CreateActWidget::addRemovedCurrentTransformer()
+{
+    auto* transformer = new CurrentTransformerActWidget(
+        m_database, ui->removedCtContainerWidget);
+
+    ui->removedCtContainerWidget->layout()->addWidget(transformer);
+
+    m_removedCurrentTransformerWidgets.append(transformer);
+
+    connect(transformer, &CurrentTransformerActWidget::removeRequested, this,
+        [this, transformer]()
+        {
+            removeInstalledCurrentTransformer(transformer);
+        });
+}
+
+void CreateActWidget::addInstalledCurrentTransformer()
+{
+    auto* transformer = new CurrentTransformerActWidget(
+        m_database, ui->installedCtContainerWidget);
+
+    ui->installedCtContainerWidget->layout()->addWidget(transformer);
+
+    m_installedCurrentTransformerWidgets.append(transformer);
+
+    connect(transformer, &CurrentTransformerActWidget::removeRequested, this,
+        [this, transformer]()
+        {
+            removeInstalledCurrentTransformer(transformer);
+        });
+}
+
+void CreateActWidget::removeRemovedCurrentTransformer(CurrentTransformerActWidget *transformer)
+{
+    if (!transformer)
+        return;
+
+    m_removedCurrentTransformerWidgets.removeOne(transformer);
+
+    ui->removedCtContainerWidget->layout()->removeWidget(transformer);
+
+    transformer->deleteLater();
+}
+
+void CreateActWidget::removeInstalledCurrentTransformer(CurrentTransformerActWidget *transformer)
+{
+    if (!transformer)
+        return;
+
+    m_installedCurrentTransformerWidgets.removeOne(transformer);
+
+    ui->installedCtContainerWidget->layout()->removeWidget(transformer);
+
+    transformer->deleteLater();
 }
 
 

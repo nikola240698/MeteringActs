@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>714</width>
+    <width>625</width>
     <height>644</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    <item row="0" column="0" colspan="2">
     <widget class="QTabWidget" name="actTabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="mainTab">
       <attribute name="title">
@@ -293,7 +293,7 @@
                        <rect>
                         <x>0</x>
                         <y>0</y>
-                        <width>265</width>
+                        <width>253</width>
                         <height>130</height>
                        </rect>
                       </property>
@@ -372,7 +372,7 @@
      </widget>
      <widget class="QWidget" name="metersTab">
       <attribute name="title">
-       <string>Приборы учета</string>
+       <string>Оборудование</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <property name="spacing">
@@ -422,6 +422,48 @@
           <item>
            <widget class="QWidget" name="secondMeterContainerWidget" native="true">
             <layout class="QVBoxLayout" name="verticalLayout_5"/>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="removedCurrentTransformersGroupBox">
+         <property name="title">
+          <string>Снятые трансформаторы тока</string>
+         </property>
+         <layout class="QVBoxLayout" name="removedCtLayout">
+          <item>
+           <widget class="QWidget" name="removedCtContainerWidget" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_14"/>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="addRemoveCtButton">
+            <property name="text">
+             <string>Добавить</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="installedCurrentTransformersGroupBox">
+         <property name="title">
+          <string>Установленные трансформаторы тока</string>
+         </property>
+         <layout class="QVBoxLayout" name="installedCtLayout">
+          <item>
+           <widget class="QWidget" name="installedCtContainerWidget" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_15"/>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="addInstalledCtButton">
+            <property name="text">
+             <string>Добавить</string>
+            </property>
            </widget>
           </item>
          </layout>

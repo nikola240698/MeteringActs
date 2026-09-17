@@ -14,7 +14,7 @@
 #include "meteractwidget.h"
 #include "externalrepresentativewidget.h"
 #include "vectordiagramwidget.h"
-
+#include "currenttransformeractwidget.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -48,6 +48,8 @@ public:
         InstalledCurrentTransformer = 2
     };
 
+
+
     explicit CreateActWidget(Database &database, QWidget *parent = nullptr);
 
     ~CreateActWidget() override;
@@ -64,7 +66,11 @@ private:
 
     VectorDiagramWidget* m_vectorDiagramWidget = nullptr;
 
+    // Коллекция для сторонних представителей
     QList<ExternalRepresentativeWidget *> m_externalRepresentativeWidgets;
+    // Коллекции для трансформаторов тока
+    QList<CurrentTransformerActWidget *> m_removedCurrentTransformerWidgets;
+    QList<CurrentTransformerActWidget *> m_installedCurrentTransformerWidgets;
 
     // метод загрузки типов актов
     void loadActTypes() const;
@@ -109,6 +115,13 @@ private:
     void updateVectorDiagramUi();
     // метод сохранения векторной диаграммы
     bool insertVectorDiagram(int actId);
+
+    // методы для работы с трансформаторами тока
+    void addRemovedCurrentTransformer();
+    void addInstalledCurrentTransformer();
+
+    void removeRemovedCurrentTransformer(CurrentTransformerActWidget* transformer);
+    void removeInstalledCurrentTransformer(CurrentTransformerActWidget* transformer);
 
 };
 

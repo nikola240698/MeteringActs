@@ -55,7 +55,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="nameLineEdit"/>
+      <widget class="QLineEdit" name="nameLineEdit">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="ratioLabel">
@@ -65,7 +69,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="ratioLineEdit"/>
+      <widget class="QLineEdit" name="ratioLineEdit">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="accuracyLabel">
@@ -75,7 +83,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="accuracyLineEdit"/>
+      <widget class="QLineEdit" name="accuracyLineEdit">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="removeButton">
