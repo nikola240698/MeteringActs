@@ -484,6 +484,34 @@ bool CreateActWidget::validateForm()
         }
     }
 
+    // 16. Проверка ввода параметров трансформаторов тока
+    // для акта установки ТТ
+    if (actTypeId == 6)
+    {
+        if (!validateCurrentTransformers(
+            m_installedCurrentTransformerWidgets, "Установленные трансформаторы тока"))
+        {
+            ui->actTabWidget->setCurrentWidget(ui->metersTab);
+            return false;
+        }
+    }
+    // для акта замены ТТ
+    if (actTypeId == 7)
+    {
+        if (!validateCurrentTransformers(
+            m_removedCurrentTransformerWidgets, "Снятые трансформаторы тока"))
+        {
+            ui->actTabWidget->setCurrentWidget(ui->metersTab);
+            return false;
+        }
+
+        if (!validateCurrentTransformers(
+            m_installedCurrentTransformerWidgets, "Установленные трансформаторы тока"));
+        {
+            ui->actTabWidget->setCurrentWidget(ui->metersTab);
+        }
+    }
+
     return true;
 }
 
@@ -1155,6 +1183,48 @@ void CreateActWidget::removeInstalledCurrentTransformer(CurrentTransformerActWid
     ui->installedCtContainerWidget->layout()->removeWidget(transformer);
 
     transformer->deleteLater();
+}
+
+// универсальный метод проверки заполненности формы ТТ
+bool CreateActWidget::validateCurrentTransformers(const QList<CurrentTransformerActWidget *> &transformers,
+    const QString &groupName)
+{
+    // проверяем, что добавлены поля ввода ТТ
+    if (transformers.isEmpty())
+    {
+        QMessageBox::warning(this, "Не добавлены трансформаторы тока",
+            "Добавьте хотя бы один ТТ в группу \"" + groupName + "\".");
+        return false;
+    }
+    // создаем набор фаз
+    QSet<QString> usedPhases;
+    // пробегаемся по каждому блоку трансформатора
+    for (CurrentTransformerActWidget *transformer : transformers)
+    {
+        // проверяем, что он существует
+        if (!transformer)
+            continue;
+        // проверяем найден ли ТТ и введена ли фаза
+        if (!transformer->validate())
+        {
+            return false;
+        }
+        // получаем название фазы
+        const QString phase = transformer->phase();
+
+        // проверяем на повторение фазы
+        if (usedPhases.contains(phase))
+        {
+            QMessageBox::warning(this, "Повторение фазы",
+                "В группе \"" + groupName + "\" фаза " + phase
+                + " указана более одного раза.");
+
+            return false;
+        }
+        // добавляем найденную фазу в набор
+        usedPhases.insert(phase);
+    }
+    return true;
 }
 
 

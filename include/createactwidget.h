@@ -9,6 +9,7 @@
 #include <QDate>
 #include <QMessageBox>
 #include <QList>
+#include <QSet>
 
 #include "database.h"
 #include "meteractwidget.h"
@@ -119,9 +120,13 @@ private:
     // методы для работы с трансформаторами тока
     void addRemovedCurrentTransformer();
     void addInstalledCurrentTransformer();
-
     void removeRemovedCurrentTransformer(CurrentTransformerActWidget* transformer);
     void removeInstalledCurrentTransformer(CurrentTransformerActWidget* transformer);
+
+    // универсальный метод проверки заполнения формы ТТ
+    bool validateCurrentTransformers(
+        const QList<CurrentTransformerActWidget *> &transformers,
+        const QString &groupName);
 
 };
 
