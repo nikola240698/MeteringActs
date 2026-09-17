@@ -99,6 +99,8 @@ private:
 
     // метод управления блоком векторной диаграммы
     void updateVectorDiagramUi();
+    // метод сохранения векторной диаграммы
+    bool insertVectorDiagram(int actId);
 
 };
 

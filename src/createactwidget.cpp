@@ -533,6 +533,13 @@ bool CreateActWidget::saveAct()
         }
     }
 
+    // пробуем записать векторную диаграмму
+    if (!insertVectorDiagram(actId))
+    {
+        m_database.rollback();
+        return false;
+    }
+
     // пробуем применить изменения в БД
     if (!m_database.commit())
     {
@@ -607,7 +614,7 @@ int CreateActWidget::insertAct()
         "reason, "
         "result, "
         "seal_number, "
-        "replacement_duration_minures"
+        "replacement_duration_minutes"
         ") "
         "VALUES ("
         ":actTypeId, "
@@ -631,7 +638,7 @@ int CreateActWidget::insertAct()
     query.bindValue(":reason", reason);
     query.bindValue(":result", result);
     query.bindValue(":sealNumber", sealNumber);
-    query.bindValue(":replacemnetDuration", replacementDuration);
+    query.bindValue(":replacementDuration", replacementDuration);
 
     if (!query.exec())
     {
@@ -964,6 +971,71 @@ void CreateActWidget::updateVectorDiagramUi()
     ui->replacementDurationWidget->setVisible(showReplacementDuration);
 
 
+}
+
+// Метод сохранения векторной диаграммы
+bool CreateActWidget::insertVectorDiagram(int actId)
+{
+    const int actTypeId = ui->actTypeComboBox->currentData().toInt();
+
+    const bool supportsVectorDiagram =
+        actTypeId == 1 ||
+        actTypeId == 2 ||
+        actTypeId == 5;
+
+    // Отключаем запись диаграммы для выбранных типов актов
+    if (!supportsVectorDiagram)
+        return true;
+
+    // Если диаграмма не была снята
+    if (!ui->hasVectorDiagramCheckBox->isChecked())
+        return true;
+
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "INSERT INTO vector_diagrams "
+        "("
+        "act_id, "
+        "ia, angle_a, angle_a_type, "
+        "ib, angle_b, angle_b_type, "
+        "ic, angle_c, angle_c_type, "
+        "uab, ubc, uca"
+        ") "
+        "VALUES ("
+        ":actId,"
+        ":ia, :angleA, :angleAType, "
+        ":ib, :angleB, :angleBType, "
+        ":ic, :angleC, :angleCType, "
+        ":uab, :ubc, :uca);");
+
+    query.bindValue(":actId", actId);
+
+    query.bindValue(":ia", m_vectorDiagramWidget->currentA());
+    query.bindValue(":angleA", m_vectorDiagramWidget->angleA());
+    query.bindValue(":angleAType", m_vectorDiagramWidget->angleAType());
+
+    query.bindValue(":ib", m_vectorDiagramWidget->currentB());
+    query.bindValue(":angleB", m_vectorDiagramWidget->angleB());
+    query.bindValue(":angleBType", m_vectorDiagramWidget->angleBType());
+
+    query.bindValue(":ic", m_vectorDiagramWidget->currentC());
+    query.bindValue(":angleC", m_vectorDiagramWidget->angleC());
+    query.bindValue(":angleCType", m_vectorDiagramWidget->angleCType());
+
+    query.bindValue(":uab", m_vectorDiagramWidget->uab());
+    query.bindValue(":ubc", m_vectorDiagramWidget->ubc());
+    query.bindValue(":uca", m_vectorDiagramWidget->uca());
+
+    if (!query.exec())
+    {
+        QMessageBox::warning(this, "Ошибка базы данных",
+            "Не удалось записать векторную диаграмму: "
+            + query.lastError().text());
+        return false;
+    }
+
+    return true;
 }
 
 
