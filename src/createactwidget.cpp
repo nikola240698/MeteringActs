@@ -444,7 +444,7 @@ bool CreateActWidget::validateForm()
         if (!representative->validate())
         {
             // переключаемся на нужную вкладку
-            ui->actTabWidget->setCurrentWidget(ui->measurementsTab);
+            ui->actTabWidget->setCurrentWidget(ui->mainTab);
             return false;
         }
     }
@@ -454,12 +454,18 @@ bool CreateActWidget::validateForm()
     const bool supportsVectorDiagram =
         actTypeId == 1 ||
         actTypeId == 2 ||
-        actTypeId == 5;
+        actTypeId == 5 ||
+        actTypeId == 6 ||
+        actTypeId == 7;
     // проверяем по типам актов и отмеченной галочке
     if (supportsVectorDiagram && ui->hasVectorDiagramCheckBox->isChecked())
     {
         if (!m_vectorDiagramWidget->validate())
+        {
+            // переключаемся на нужную вкладку
+            ui->actTabWidget->setCurrentWidget(ui->measurementsTab);
             return false;
+        }
     }
 
     return true;
@@ -816,6 +822,18 @@ void CreateActWidget::updateActTypeUi()
             ui->secondaryMeterGroupBox->setVisible(false);
             break;
         }
+        case 6:     // Установка прибора учета и ТТ
+        {
+            ui->primaryMeterGroupBox->setTitle("Устанавливаемый прибор");
+            ui->secondaryMeterGroupBox->setVisible(false);
+            break;
+        }
+        case 7:     // Замена ТТ
+        {
+            ui->primaryMeterGroupBox->setTitle("Прибор учета");
+            ui->secondaryMeterGroupBox->setVisible(false);
+            break;
+        }
         default:
         {
             ui->primaryMeterGroupBox->setTitle("Прибор учета");
@@ -845,6 +863,10 @@ int CreateActWidget::primaryMeterRole() const
             return RemovedMeter;
         case 5:     // Установка
             return InstalledMeter;
+        case 6:     // Установка прибора и ТТ
+            return InstalledMeter;
+        case 7:     // Замена ТТ
+            return ExistingMeter;
         default:
             return -1;
     }
@@ -951,7 +973,9 @@ void CreateActWidget::updateVectorDiagramUi()
     const bool supportsVectorDiagram =
             actTypeId == 1 ||   // Проверка
             actTypeId == 2 ||   // Замена
-            actTypeId == 5;     // Установка
+            actTypeId == 5 ||   // Установка
+            actTypeId == 6 ||   // Установка прибора и ТТ
+            actTypeId == 7;     // Замена ТТ
     // устанавливаем видимость согласно переменной
     ui->vectorDiagramGroupBox->setVisible(supportsVectorDiagram);
     // меняем видимость в случае изменения переменной
@@ -981,7 +1005,9 @@ bool CreateActWidget::insertVectorDiagram(int actId)
     const bool supportsVectorDiagram =
         actTypeId == 1 ||
         actTypeId == 2 ||
-        actTypeId == 5;
+        actTypeId == 5 ||
+        actTypeId == 6 ||
+        actTypeId == 7;
 
     // Отключаем запись диаграммы для выбранных типов актов
     if (!supportsVectorDiagram)

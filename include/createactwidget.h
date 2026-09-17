@@ -37,7 +37,8 @@ public:
         CheckedMeter = 1,
         RemovedMeter = 2,
         InstalledMeter = 3,
-        ReadingMeter = 4
+        ReadingMeter = 4,
+        ExistingMeter = 5
     };
 
     explicit CreateActWidget(Database &database, QWidget *parent = nullptr);
