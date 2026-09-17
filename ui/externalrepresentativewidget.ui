@@ -70,6 +70,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>organizationLineEdit</tabstop>
+  <tabstop>positionLineEdit</tabstop>
+  <tabstop>nameLineEdit</tabstop>
+  <tabstop>removeButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

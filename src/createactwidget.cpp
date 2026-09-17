@@ -912,9 +912,7 @@ void CreateActWidget::updateVectorDiagramUi()
     // меняем видимость
     ui->replacementDurationWidget->setVisible(showReplacementDuration);
 
-    // изменяем размер самого окна
-    if (window())
-        window()->adjustSize();
+
 }
 
 

@@ -94,6 +94,24 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="1" colspan="3">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLineEdit" name="serialNumberLineEdit">
+         <property name="readOnly">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="findMeterButton">
+         <property name="text">
+          <string>Найти</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
      <item row="4" column="3">
       <widget class="QLineEdit" name="reactiveImportLineEdit"/>
      </item>
@@ -130,41 +148,25 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="0" colspan="4">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Orientation::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="1" colspan="3">
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLineEdit" name="serialNumberLineEdit">
-         <property name="readOnly">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="findMeterButton">
-         <property name="text">
-          <string>Найти</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
     </layout>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>serialNumberLineEdit</tabstop>
+  <tabstop>findMeterButton</tabstop>
+  <tabstop>meterNameLineEdit</tabstop>
+  <tabstop>accuracyClassLineEdit</tabstop>
+  <tabstop>verificationYearLineEdit</tabstop>
+  <tabstop>activeImportCheckBox</tabstop>
+  <tabstop>activeImportLineEdit</tabstop>
+  <tabstop>activeExportCheckBox</tabstop>
+  <tabstop>activeExportLineEdit</tabstop>
+  <tabstop>reactiveImportCheckBox</tabstop>
+  <tabstop>reactiveImportLineEdit</tabstop>
+  <tabstop>reactiveExportCheckBox</tabstop>
+  <tabstop>reactiveExportLineEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

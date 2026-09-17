@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>388</width>
-    <height>320</height>
+    <height>238</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,12 +38,11 @@
          <string>Токи и углы</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>Фаза А</string>
-           </property>
-          </widget>
+         <item row="3" column="3">
+          <widget class="QComboBox" name="angleCTypeComboBox"/>
+         </item>
+         <item row="2" column="2">
+          <widget class="QLineEdit" name="angleBLineEdit"/>
          </item>
          <item row="0" column="3">
           <widget class="QLabel" name="label_3">
@@ -59,12 +58,8 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Фаза В</string>
-           </property>
-          </widget>
+         <item row="1" column="2">
+          <widget class="QLineEdit" name="angleALineEdit"/>
          </item>
          <item row="0" column="2">
           <widget class="QLabel" name="label_2">
@@ -73,39 +68,44 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_6">
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>Фаза С</string>
+            <string>Фаза А</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
           <widget class="QLineEdit" name="currentALineEdit"/>
          </item>
-         <item row="1" column="2">
-          <widget class="QLineEdit" name="angleALineEdit"/>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="currentBLineEdit"/>
-         </item>
-         <item row="2" column="2">
-          <widget class="QLineEdit" name="angleBLineEdit"/>
+         <item row="1" column="3">
+          <widget class="QComboBox" name="angleATypeComboBox"/>
          </item>
          <item row="3" column="1">
           <widget class="QLineEdit" name="currentCLineEdit"/>
          </item>
-         <item row="3" column="2">
-          <widget class="QLineEdit" name="angleCLineEdit"/>
-         </item>
-         <item row="1" column="3">
-          <widget class="QComboBox" name="angleATypeComboBox"/>
-         </item>
          <item row="2" column="3">
           <widget class="QComboBox" name="angleBTypeComboBox"/>
          </item>
-         <item row="3" column="3">
-          <widget class="QComboBox" name="angleCTypeComboBox"/>
+         <item row="3" column="2">
+          <widget class="QLineEdit" name="angleCLineEdit"/>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Фаза В</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="currentBLineEdit"/>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Фаза С</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -116,15 +116,32 @@
          <string>Линейные напряжения</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_7">
+         <item row="0" column="4">
+          <widget class="QLineEdit" name="ubcLineEdit"/>
+         </item>
+         <item row="0" column="6">
+          <widget class="QLabel" name="label_9">
            <property name="text">
-            <string>Uab</string>
+            <string>Uca</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="uabLineEdit"/>
+         <item row="0" column="5">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>B</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="7">
+          <widget class="QLineEdit" name="ucaLineEdit"/>
+         </item>
+         <item row="0" column="3">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Ubc</string>
+           </property>
+          </widget>
          </item>
          <item row="0" column="2">
           <widget class="QLabel" name="label_10">
@@ -133,39 +150,22 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_8">
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="uabLineEdit"/>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_7">
            <property name="text">
-            <string>Ubc</string>
+            <string>Uab</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="2">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>B</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_9">
-           <property name="text">
-            <string>Uca</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="ucaLineEdit"/>
-         </item>
-         <item row="2" column="2">
+         <item row="0" column="8">
           <widget class="QLabel" name="label_12">
            <property name="text">
             <string>B</string>
            </property>
           </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="ubcLineEdit"/>
          </item>
         </layout>
        </widget>
@@ -175,6 +175,20 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>currentALineEdit</tabstop>
+  <tabstop>angleALineEdit</tabstop>
+  <tabstop>angleATypeComboBox</tabstop>
+  <tabstop>currentBLineEdit</tabstop>
+  <tabstop>angleBLineEdit</tabstop>
+  <tabstop>angleBTypeComboBox</tabstop>
+  <tabstop>currentCLineEdit</tabstop>
+  <tabstop>angleCLineEdit</tabstop>
+  <tabstop>angleCTypeComboBox</tabstop>
+  <tabstop>uabLineEdit</tabstop>
+  <tabstop>ubcLineEdit</tabstop>
+  <tabstop>ucaLineEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
