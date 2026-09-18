@@ -95,7 +95,7 @@ private:
     // метод сохранения параметров акта
     int insertAct();
     // метод вставки прибора с привязкой к акту
-    int insertActMeter(int actId, MeterActWidget* meterWidget, int role);
+    int insertActMeter(int actId, const MeterActWidget* meterWidget, int role);
     // метод вставки показаний с привязкой к прибору
     bool insertReadings(int actMeterId, MeterActWidget* meterWidget);
     // метод обновления актуального года поверки прибора

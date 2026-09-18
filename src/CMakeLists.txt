@@ -13,6 +13,7 @@ add_executable(MeteringActs
         vectordiagramwidget.cpp
         currenttransformeractwidget.cpp
         currenttransformerdialog.cpp
+        actrepository.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -23,6 +24,8 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/vectordiagramwidget.h
         ${MY_INCLUDE_DIR}/currenttransformeractwidget.h
         ${MY_INCLUDE_DIR}/currenttransformerdialog.h
+        ${MY_INCLUDE_DIR}/actrepository.h
+        ${MY_INCLUDE_DIR}/actdata.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui

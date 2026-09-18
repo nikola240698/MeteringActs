@@ -286,7 +286,7 @@ void CreateActWidget::loadConnections(int substationId) const
         "ORDER BY name;");
     // биндим значения в запрос
     query.bindValue(":substationId", substationId);
-    // проверяем, что запрос выполенен
+    // проверяем, что запрос выполнен
     if (!query.exec())
     {
         qDebug() << "loadConnection error: " << query.lastError().text();
@@ -749,7 +749,8 @@ int CreateActWidget::insertAct()
 }
 
 // сохраняем прибор с привязкой к акту
-int CreateActWidget::insertActMeter(int actId, MeterActWidget* meterWidget, int role)
+int CreateActWidget::insertActMeter(
+    const int actId, const MeterActWidget* meterWidget, const int role)
 {
     // вставляем полученные данные в нашу таблицу связи акта и прибора
     QSqlQuery query(m_database.getDatabase());
@@ -965,9 +966,8 @@ void CreateActWidget::updateActTypeUi()
 int CreateActWidget::primaryMeterRole() const
 {
     // определяем тип акта
-    int actTypeId = ui->actTypeComboBox->currentData().toInt();
     // возвращаем номер роли согласно выбранному акту
-    switch (actTypeId)
+    switch (int actTypeId = ui->actTypeComboBox->currentData().toInt())
     {
         case 1:     // Проверка
             return CheckedMeter;
@@ -1293,7 +1293,7 @@ bool CreateActWidget::validateCurrentTransformerReplacement()
     }
 
     // Проверяем устанавливаемые ТТ
-    for (CurrentTransformerActWidget *transformer :
+    for (const CurrentTransformerActWidget *transformer :
         m_installedCurrentTransformerWidgets)
     {
         if (!transformer)
@@ -1461,11 +1461,15 @@ void CreateActWidget::clearMainTab()
     ui->actTypeComboBox->setCurrentIndex(0);
     ui->areaComboBox->setCurrentIndex(0);
 
+    // устанавливаем текущую дату
+    ui->actDateEdit->setDate(QDate::currentDate());
+
     // представитель предприятия
     ui->employeeComboBox->setCurrentIndex(0);
 
     // сторонние представители
     clearExternalRepresentatives();
+
 }
 
 // очищаем вкладку "Оборудование"
@@ -1481,14 +1485,15 @@ void CreateActWidget::clearEquipmentTab()
     // Трансформаторы тока
     clearCurrentTransformers();
 
-    // Векторная диаграмма
-    if (m_vectorDiagramWidget)
-        m_vectorDiagramWidget->clear();
+
 }
 
 // Очищаем вкладку "Измерения"
 void CreateActWidget::clearMeasurementTab()
 {
+    // Векторная диаграмма
+    if (m_vectorDiagramWidget)
+        m_vectorDiagramWidget->clear();
     ui->hasVectorDiagramCheckBox->setChecked(false);
     // длительность замены
     ui->replacementDurationSpinBox->setValue(0);
