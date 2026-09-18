@@ -1,6 +1,9 @@
 
+#include <QDebug>
+
 #include "createactwidget.h"
 #include "ui_CreateActWidget.h"
+#include "actrepository.h"
 
 
 CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
@@ -609,7 +612,7 @@ bool CreateActWidget::saveAct()
         // снятые ТТ
         if (!insertActCurrentTransformers(
             actId,
-            m_installedCurrentTransformerWidgets, InstalledCurrentTransformer))
+            m_installedCurrentTransformerWidgets, RemovedCurrentTransformer))
         {
             m_database.rollback();
             return false;
@@ -649,6 +652,117 @@ bool CreateActWidget::saveAct()
     QMessageBox::information(this, "Акт сохранен", "Данные акта успешно сохранены");
     // очищаем форму
     clearForm();
+
+    //------------------------------------------------
+    // Делаем проверку полученных данных из БД
+    //------------------------------------------------
+    ActRepository repository(m_database);
+    ActData data;
+
+    if (repository.loadAct(actId, data))
+    {
+        qDebug() << "===== CHECK ACT REPOSITORY =====";
+        qDebug() << "ID: " << data.id;
+        qDebug() << "Type ID: " << data.actTypeId;
+        qDebug() << "Type: " << data.actTypeName;
+        qDebug() << "Date: " << data.date;
+
+        qDebug() << "Area: " << data.areaName;
+        qDebug() << "SubSt: " << data.substationName;
+        qDebug() << "Connection: " << data.connectionName;
+        qDebug() << "Voltage: " << data.voltage;
+        qDebug() << "CtRatio: " << data.ctRatio;
+
+        qDebug() << "Employee: " << data.employeeName;
+        qDebug() << "Position: " << data.employeePosition;
+
+        qDebug() << "Seal: " << data.sealNumber;
+        qDebug() << "Reason: " << data.reason;
+        qDebug() << "Result: " << data.result;
+        qDebug() << "Duration: " << data.replacementDurationMinutes;
+
+        qDebug() << "External representatives: " <<
+            data.externalRepresentatives.size();
+
+        for (const ExternalRepresentativeData &representative :
+            data.externalRepresentatives)
+        {
+            qDebug() << "-----------------------------";
+            qDebug() << "Organization: " << representative.organization;
+            qDebug() << "Name: " << representative.shortName;
+            qDebug() << "Position: " << representative.position;
+        }
+
+        qDebug() << "Meters count: " << data.meters.size();
+
+        for (const ActMeterData &meter : data.meters)
+        {
+            qDebug() << "------------------------------";
+            qDebug() << "Meter id: " << meter.meterId;
+            qDebug() << "Role: " << meter.role;
+            qDebug() << "Serial: " << meter.serialNumber;
+            qDebug() << "Accuracy: " << meter.accuracyClass;
+            qDebug() << "Verification year: " << meter.verificationYear;
+
+            qDebug() << "Readings: " << meter.readings.size();
+
+            for (const ActMeterReadingData &reading : meter.readings)
+            {
+                qDebug()
+                    << "  "
+                    << reading.code
+                    << "="
+                    << reading.value
+                    << "(type id: "
+                    << reading.typeId
+                    << ")";
+            }
+        }
+
+        qDebug() << "Current transformers: " << data.currentTransformers.size();
+
+        for (const ActCurrentTransformerData &transformer :
+            data.currentTransformers)
+        {
+            qDebug() << "------------------------------";
+            qDebug() << "CT id: " << transformer.currentTransformerId;
+            qDebug() << "Role: " << transformer.role;
+            qDebug() << "Phase: " << transformer.phase;
+            qDebug() << "Name: " << transformer.name;
+            qDebug() << "Serial: " << transformer.serialNumber;
+            qDebug() << "Ratio: " << transformer.transformationRatio;
+            qDebug() << "Accuracy: " << transformer.accuracyClass;
+        }
+
+        qDebug() << "Vector diagram exists: " << data.vectorDiagram.exists;
+
+        if (data.vectorDiagram.exists)
+        {
+            qDebug() << "Ia: " << data.vectorDiagram.ia;
+            qDebug() << "Angle A: " << data.vectorDiagram.angleA;
+            qDebug() << "Type A: " << data.vectorDiagram.angleAType;
+
+            qDebug() << "Ib: " << data.vectorDiagram.ib;
+            qDebug() << "Angle B: " << data.vectorDiagram.angleB;
+            qDebug() << "Type B: " << data.vectorDiagram.angleBType;
+
+            qDebug() << "Ic: " << data.vectorDiagram.ic;
+            qDebug() << "Angle C: " << data.vectorDiagram.angleC;
+            qDebug() << "Type C: " << data.vectorDiagram.angleCType;
+
+            qDebug() << "Uab: " << data.vectorDiagram.uab;
+            qDebug() << "Ubc: " << data.vectorDiagram.ubc;
+            qDebug() << "Uca: " << data.vectorDiagram.uca;
+        }
+
+        qDebug() << "====================================";
+    } else
+    {
+        qDebug() << "Ошибка загрузки акта: " << repository.lastError();
+    }
+    //-------------------------------------------------
+    //-------------------------------------------------
+
     return true;
 }
 

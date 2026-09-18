@@ -16,13 +16,19 @@ public:
 
 private:
     Database &m_database;
+    // строка ошибок при работе с БД
     QString m_lastError;
-
+    // метод загрузки основных данных
     bool loadMainData(int actId, ActData &data);
+    // метод загрузки сторонних представителей
     bool loadExternalRepresentatives(int actId, ActData &data);
+    // метод загрузки данных измерительных приборов
     bool loadMeters(int actId, ActData &data);
-    bool loadMeterReadings(int actMeterId, ActMeterData &data);
-    bool loadCurrentTransformer(int actId, ActData &data);
+    // метод загрузки показаний прибора учета
+    bool loadMeterReadings(int actMeterId, ActMeterData &meter);
+    // метод загрузки данных ТТ
+    bool loadCurrentTransformers(int actId, ActData &data);
+    // метод загрузки векторной диаграммы
     bool loadVectorDiagram(int actId, ActData &data);
 };
 

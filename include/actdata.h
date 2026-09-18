@@ -7,6 +7,7 @@
 #include <QDate>
 #include <QList>
 
+// структура показаний прибора учета
 struct ActMeterReadingData
 {
     int typeId = -1;
@@ -14,6 +15,7 @@ struct ActMeterReadingData
     double value = 0.0;
 };
 
+// структура приборов учета
 struct ActMeterData
 {
     int meterId =-1;
@@ -28,6 +30,7 @@ struct ActMeterData
     QList<ActMeterReadingData> readings;
 };
 
+// структура трансформаторов тока
 struct ActCurrentTransformerData
 {
     int currentTransformerId = -1;
@@ -40,6 +43,7 @@ struct ActCurrentTransformerData
     QString accuracyClass;
 };
 
+// структура сторонних представителей
 struct ExternalRepresentativeData
 {
     QString organization;
@@ -47,6 +51,7 @@ struct ExternalRepresentativeData
     QString position;
 };
 
+// структура векторной диаграммы
 struct VectorDiagramData
 {
     bool exists = false;
@@ -63,12 +68,13 @@ struct VectorDiagramData
     double angleC = 0.0;
     QString angleCType;
 
-    double uad = 0.0;
+    double uab = 0.0;
     double ubc = 0.0;
     double uca = 0.0;
 
 };
 
+// структура данных акта
 struct ActData
 {
     int id = -1;
@@ -92,7 +98,7 @@ struct ActData
 
     // Оборудование
     QList<ActMeterData> meters;
-    QList<ActMeterReadingData> currentTransformers;
+    QList<ActCurrentTransformerData> currentTransformers;
 
     // Измерения
     VectorDiagramData vectorDiagram;
