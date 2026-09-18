@@ -14,6 +14,7 @@ add_executable(MeteringActs
         currenttransformeractwidget.cpp
         currenttransformerdialog.cpp
         actrepository.cpp
+        docxgenerator.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -26,6 +27,7 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/currenttransformerdialog.h
         ${MY_INCLUDE_DIR}/actrepository.h
         ${MY_INCLUDE_DIR}/actdata.h
+        ${MY_INCLUDE_DIR}/docxgenerator.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui
@@ -53,4 +55,6 @@ target_link_libraries(MeteringActs PRIVATE
         Qt6::Gui
         Qt6::Widgets
         Qt6::Sql
+        Qt6::Xml
+        QuaZip::QuaZip
 )
