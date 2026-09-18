@@ -146,6 +146,9 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         {
             saveAct();
         });
+
+    // кнопка очистки формы
+    connect(ui->clearButton, &QPushButton::clicked, this, &CreateActWidget::clearForm);
 }
 
 CreateActWidget::~CreateActWidget()
@@ -644,6 +647,8 @@ bool CreateActWidget::saveAct()
     }
 
     QMessageBox::information(this, "Акт сохранен", "Данные акта успешно сохранены");
+    // очищаем форму
+    clearForm();
     return true;
 }
 
@@ -1373,6 +1378,89 @@ bool CreateActWidget::insertActCurrentTransformers(
         }
     }
     return true;
+}
+
+void CreateActWidget::clearForm()
+{
+    // спрашиваем подтверждение очистки
+    const auto answer = QMessageBox::question(this, "Очистка формы",
+        "Очистить все введённые данные?",
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+
+    if (answer == QMessageBox::No)
+        return;
+
+    // основные данные
+    ui->actTypeComboBox->setCurrentIndex(0);
+    ui->areaComboBox->setCurrentIndex(0);
+
+    // остальные зависимые ComboBox должны очиститься
+    ui->substationComboBox->clear();
+    ui->connectionComboBox->clear();
+
+    // представители предприятия
+    clearExternalRepresentatives();
+
+    // Приборы учета
+    if (m_primaryMeterWidget)
+        m_primaryMeterWidget->clear();
+
+    if (m_secondaryMeterWidget)
+        m_secondaryMeterWidget->clear();
+
+    // Трансформаторы тока
+    clearCurrentTransformers();
+
+    // обновляем вид графического окна
+    updateActTypeUi();
+    // возвращаемся на первую страницу
+    ui->actTabWidget->setCurrentWidget(ui->mainTab);
+
+}
+
+// очищаем виджеты сторонних представителей
+void CreateActWidget::clearExternalRepresentatives()
+{
+    for (ExternalRepresentativeWidget* representative :
+        m_externalRepresentativeWidgets)
+    {
+        if (!representative)
+            continue;
+        ui->externalRepresentativesContainer->layout()->removeWidget(representative);
+
+        representative->deleteLater();
+    }
+
+    m_externalRepresentativeWidgets.clear();
+}
+
+// очищаем все созданные трансформаторы тока
+void CreateActWidget::clearCurrentTransformers()
+{
+    for (CurrentTransformerActWidget* transformer :
+        m_removedCurrentTransformerWidgets)
+    {
+        if (!transformer)
+            continue;
+
+        ui->removedCtContainerWidget->layout()->removeWidget(transformer);
+        transformer->deleteLater();
+    }
+
+    m_removedCurrentTransformerWidgets.clear();
+
+    for (CurrentTransformerActWidget* transformer :
+        m_installedCurrentTransformerWidgets)
+    {
+        if (!transformer)
+            continue;
+
+        ui->installedCtContainerWidget->layout()->removeWidget(transformer);
+        transformer->deleteLater();
+    }
+
+    m_installedCurrentTransformerWidgets.clear();
 }
 
 

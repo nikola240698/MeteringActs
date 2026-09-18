@@ -136,6 +136,10 @@ private:
     bool insertActCurrentTransformers(
         int actId, const QList<CurrentTransformerActWidget *> &transformers, int role);
 
+    // методы для очистки формы
+    void clearForm();
+    void clearExternalRepresentatives();
+    void clearCurrentTransformers();
 
 };
 

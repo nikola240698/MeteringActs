@@ -17,8 +17,8 @@ CurrentTransformerActWidget::CurrentTransformerActWidget(
 
     // заполняем список фаз
     ui->phaseComboBox->addItem("A", "A");
-    ui->phaseComboBox->addItem("В", "В");
-    ui->phaseComboBox->addItem("С", "С");
+    ui->phaseComboBox->addItem("B", "B");
+    ui->phaseComboBox->addItem("C", "C");
 
     // Подсказка для заводского номера
     ui->serialNumberLineEdit->setPlaceholderText("Введите заводской номер");

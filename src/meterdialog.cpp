@@ -139,7 +139,7 @@ bool MeterDialog::serialNumberExists(const QString &serialNumber)
             "Не удалось проверить заводской номер: "
             + query.lastError().text());
 
-        return true;
+        return false;
     }
 
     return query.next();
