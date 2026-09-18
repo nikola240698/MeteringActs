@@ -1,5 +1,6 @@
 
 #include "currenttransformeractwidget.h"
+#include "currenttransformerdialog.h"
 
 #include <QMessageBox>
 
@@ -157,10 +158,28 @@ void CurrentTransformerActWidget::findCurrentTransformer()
     // проверяем, что что-нибудь нашлось
     if (!query.next())
     {
-        QMessageBox::information(this, "Трансформатор тока не найден",
-            "Трансформатор тока с заводсикм номером " + serialNumber
-            + " не найден.");
-
+        // формируем окно вопроса для создания новго ТТ
+        const auto answer = QMessageBox::question(this, "Трансформатор тока не найден",
+            "Трансформатор тока с заводским номером "
+            + serialNumber + " не найден.\n\nДобавить новый?",
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::Yes);
+        // если пользователь отказался
+        if (answer != QMessageBox::Yes)
+        {
+            return;
+        }
+        // создаем наше диалоговое окно
+        CurrentTransformerDialog dialog(m_database, this);
+        // вставляем туда серийный номер
+        dialog.setSerialNumber(serialNumber);
+        // ждем ответа от диалогового окна
+        if (dialog.exec() != QDialog::Accepted)
+        {
+            return;
+        }
+        // если всё хорошо, то загружаем данные введенного ТТ
+        loadCurrentTransformer(dialog.currentTransformerId());
         return;
     }
     // получаем id найденного ТТ

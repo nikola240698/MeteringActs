@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CurrentTransformerDialog</class>
+ <widget class="QDialog" name="CurrentTransformerDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>400</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>CurrentTransformerDialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="nameLabel">
+       <property name="text">
+        <string>Тип:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="serialLabel">
+       <property name="text">
+        <string>Заводской №:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="tranformationRatioLabel">
+       <property name="text">
+        <string>Ктт:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="accuracyClassLabel">
+       <property name="text">
+        <string>Класс точности:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="manufacturerLabel">
+       <property name="text">
+        <string>Производитель:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="manufactureYeaLabel">
+       <property name="text">
+        <string>Год производства:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="noteLabel">
+       <property name="text">
+        <string>Примечание:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="nameLineEdit"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="serialLineEdit"/>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="tranformationRatioLineEdit"/>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="accuracyClassLineEdit"/>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="manufacturerLineEdit"/>
+     </item>
+     <item row="5" column="1">
+      <widget class="QSpinBox" name="manufactureYearSpinBox">
+       <property name="specialValueText">
+        <string>Не указан</string>
+       </property>
+       <property name="minimum">
+        <number>1990</number>
+       </property>
+       <property name="maximum">
+        <number>2100</number>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QPlainTextEdit" name="notePlainTextEdit"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Save</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

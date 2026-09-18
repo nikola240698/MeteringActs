@@ -506,9 +506,16 @@ bool CreateActWidget::validateForm()
         }
 
         if (!validateCurrentTransformers(
-            m_installedCurrentTransformerWidgets, "Установленные трансформаторы тока"));
+            m_installedCurrentTransformerWidgets, "Установленные трансформаторы тока"))
         {
             ui->actTabWidget->setCurrentWidget(ui->metersTab);
+            return false;
+        }
+        // проверяем на различие снятых и установленных ТТ
+        if (!validateCurrentTransformerReplacement())
+        {
+            ui->actTabWidget->setCurrentWidget(ui->metersTab);
+            return false;
         }
     }
 
@@ -587,7 +594,8 @@ bool CreateActWidget::saveAct()
     if (actTypeId == 6)
     {
         if (!insertActCurrentTransformers(
-            actId, m_installedCurrentTransformerWidgets, InstalledCurrentTransformer))
+            actId,
+            m_installedCurrentTransformerWidgets, InstalledCurrentTransformer))
         {
             m_database.rollback();
             return false;
@@ -597,15 +605,18 @@ bool CreateActWidget::saveAct()
     {
         // снятые ТТ
         if (!insertActCurrentTransformers(
-            actId, m_installedCurrentTransformerWidgets, InstalledCurrentTransformer))
+            actId,
+            m_installedCurrentTransformerWidgets, InstalledCurrentTransformer))
         {
             m_database.rollback();
             return false;
         }
         // установленные ТТ
-        for (CurrentTransformerActWidget* transformer : m_installedCurrentTransformerWidgets)
+        for (CurrentTransformerActWidget* transformer
+            : m_installedCurrentTransformerWidgets)
         {
-            if (!insertActCurrentTransformer(actId, transformer, InstalledCurrentTransformer))
+            if (!insertActCurrentTransformer(
+                actId, transformer, InstalledCurrentTransformer))
             {
                 m_database.rollback();
                 return false;
@@ -1171,7 +1182,7 @@ void CreateActWidget::addRemovedCurrentTransformer()
     connect(transformer, &CurrentTransformerActWidget::removeRequested, this,
         [this, transformer]()
         {
-            removeInstalledCurrentTransformer(transformer);
+            removeRemovedCurrentTransformer(transformer);
         });
 }
 
@@ -1257,7 +1268,46 @@ bool CreateActWidget::validateCurrentTransformers(const QList<CurrentTransformer
     return true;
 }
 
-bool CreateActWidget::insertActCurrentTransformer(int actId, CurrentTransformerActWidget *transformer, int role)
+bool CreateActWidget::validateCurrentTransformerReplacement()
+{
+    QSet<int> removedTransformerIds;
+
+    // собираем id всех снимаемых ТТ
+    for (CurrentTransformerActWidget* transformer :
+        m_removedCurrentTransformerWidgets)
+    {
+        if (!transformer)
+            continue;
+
+        removedTransformerIds.insert(transformer->currentTransformerId());
+    }
+
+    // Проверяем устанавливаемые ТТ
+    for (CurrentTransformerActWidget *transformer :
+        m_installedCurrentTransformerWidgets)
+    {
+        if (!transformer)
+            continue;
+
+        const int transformerId = transformer->currentTransformerId();
+        if (removedTransformerIds.contains(transformerId))
+        {
+            QMessageBox::warning(this, "Ошибка выбора трансформатора тока",
+                "Трансформатор тока с заводским номером "
+                + transformer->serialNumber()
+                + " одновременно указан как снятый и установленный.");
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool CreateActWidget::insertActCurrentTransformer(
+    int actId,
+    CurrentTransformerActWidget *transformer,
+    int role)
 {
     // проверяем что существует поля для ввода
     if (!transformer)
@@ -1309,7 +1359,9 @@ bool CreateActWidget::insertActCurrentTransformer(int actId, CurrentTransformerA
     return true;
 }
 
-bool CreateActWidget::insertActCurrentTransformers(int actId, const QList<CurrentTransformerActWidget *> &transformers,
+bool CreateActWidget::insertActCurrentTransformers(
+    int actId,
+    const QList<CurrentTransformerActWidget *> &transformers,
     int role)
 {
     for (CurrentTransformerActWidget* transformer : transformers)

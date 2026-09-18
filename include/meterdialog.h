@@ -37,6 +37,9 @@ private:
     int m_createdMeterId = -1;
 
     void saveMeter();
+
+    // метод проверки на существующий серийный номер в БД
+    bool serialNumberExists(const QString &serialNumber);
 };
 
 

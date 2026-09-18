@@ -67,8 +67,14 @@
      </item>
      <item>
       <widget class="QSpinBox" name="verificationYearSpinBox">
+       <property name="specialValueText">
+        <string/>
+       </property>
+       <property name="minimum">
+        <number>1900</number>
+       </property>
        <property name="maximum">
-        <number>9999</number>
+        <number>2100</number>
        </property>
       </widget>
      </item>
@@ -91,8 +97,14 @@
      </item>
      <item>
       <widget class="QSpinBox" name="manufactureYearSpinBox">
+       <property name="specialValueText">
+        <string>Не указан</string>
+       </property>
+       <property name="minimum">
+        <number>1900</number>
+       </property>
        <property name="maximum">
-        <number>9999</number>
+        <number>2100</number>
        </property>
       </widget>
      </item>
