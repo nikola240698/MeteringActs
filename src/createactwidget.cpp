@@ -870,6 +870,9 @@ void CreateActWidget::updateActTypeUi()
         ui->secondaryMeterGroupBox->setVisible(false);
         // скрываем поле пломбы пока не выберется тип акта
         ui->sealWidget->setVisible(false);
+        // скрываем блоки ТТ
+        ui->removedCurrentTransformersGroupBox->setVisible(false);
+        ui->installedCurrentTransformersGroupBox->setVisible(false);
         // Обновляем отображение полей векторной диаграммы
         updateVectorDiagramUi();
         return;
@@ -878,8 +881,10 @@ void CreateActWidget::updateActTypeUi()
     int actTypeId = ui->actTypeComboBox->currentData().toInt();
     // Отображаем поле пломбы везде кроме демонтажа
     ui->sealWidget->setVisible(actTypeId != 4);
+    // скрываем блоки ТТ
+    ui->removedCurrentTransformersGroupBox->setVisible(false);
+    ui->installedCurrentTransformersGroupBox->setVisible(false);
     // отображаем окна и подписи согласно выбранному типу акта
-
     switch (actTypeId)
     {
         case 1:     // проверка
@@ -1391,26 +1396,11 @@ void CreateActWidget::clearForm()
     if (answer == QMessageBox::No)
         return;
 
-    // основные данные
-    ui->actTypeComboBox->setCurrentIndex(0);
-    ui->areaComboBox->setCurrentIndex(0);
-
-    // остальные зависимые ComboBox должны очиститься
-    ui->substationComboBox->clear();
-    ui->connectionComboBox->clear();
-
-    // представители предприятия
-    clearExternalRepresentatives();
-
-    // Приборы учета
-    if (m_primaryMeterWidget)
-        m_primaryMeterWidget->clear();
-
-    if (m_secondaryMeterWidget)
-        m_secondaryMeterWidget->clear();
-
-    // Трансформаторы тока
-    clearCurrentTransformers();
+    // Очищаем все вкладки
+    clearMainTab();
+    clearEquipmentTab();
+    clearMeasurementTab();
+    clearConclusionTab();
 
     // обновляем вид графического окна
     updateActTypeUi();
@@ -1461,6 +1451,59 @@ void CreateActWidget::clearCurrentTransformers()
     }
 
     m_installedCurrentTransformerWidgets.clear();
+}
+
+// очищаем вкладку "Основное"
+void CreateActWidget::clearMainTab()
+{
+    // основные данные
+    // они же за счет работы сигналов и сбросят зависимые поля
+    ui->actTypeComboBox->setCurrentIndex(0);
+    ui->areaComboBox->setCurrentIndex(0);
+
+    // представитель предприятия
+    ui->employeeComboBox->setCurrentIndex(0);
+
+    // сторонние представители
+    clearExternalRepresentatives();
+}
+
+// очищаем вкладку "Оборудование"
+void CreateActWidget::clearEquipmentTab()
+{
+    // Приборы учета
+    if (m_primaryMeterWidget)
+        m_primaryMeterWidget->clear();
+
+    if (m_secondaryMeterWidget)
+        m_secondaryMeterWidget->clear();
+
+    // Трансформаторы тока
+    clearCurrentTransformers();
+
+    // Векторная диаграмма
+    if (m_vectorDiagramWidget)
+        m_vectorDiagramWidget->clear();
+}
+
+// Очищаем вкладку "Измерения"
+void CreateActWidget::clearMeasurementTab()
+{
+    ui->hasVectorDiagramCheckBox->setChecked(false);
+    // длительность замены
+    ui->replacementDurationSpinBox->setValue(0);
+}
+
+// Очищаем вкладку "Заключение"
+void CreateActWidget::clearConclusionTab()
+{
+    // Пломба
+    ui->sealLineEdit->clear();
+
+    // Причина и заключение
+    ui->reasonPlainTextEdit->clear();
+    ui->resultPlainTextEdit->clear();
+
 }
 
 

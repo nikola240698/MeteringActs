@@ -6,367 +6,385 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>625</width>
-    <height>644</height>
+    <width>644</width>
+    <height>670</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>CreateActWidget</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" colspan="2">
+   <item row="0" column="2">
     <widget class="QTabWidget" name="actTabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="mainTab">
       <attribute name="title">
        <string>Основное</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_5">
-       <item row="0" column="0">
-        <layout class="QVBoxLayout" name="mainTabLayout">
-         <property name="spacing">
-          <number>10</number>
-         </property>
-         <property name="leftMargin">
-          <number>12</number>
-         </property>
-         <property name="topMargin">
-          <number>12</number>
-         </property>
-         <property name="rightMargin">
-          <number>12</number>
-         </property>
-         <property name="bottomMargin">
-          <number>12</number>
-         </property>
-         <item>
-          <widget class="QWidget" name="mainContentWidget" native="true">
-           <layout class="QGridLayout" name="gridLayout_3">
-            <item row="0" column="0">
-             <layout class="QGridLayout" name="mainContentGridLayout" columnstretch="1,1">
-              <item row="0" column="1">
-               <widget class="QGroupBox" name="employeeGroupBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="title">
-                 <string>Представители</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_4">
+      <layout class="QVBoxLayout" name="mainTabLayout">
+       <property name="spacing">
+        <number>8</number>
+       </property>
+       <property name="leftMargin">
+        <number>12</number>
+       </property>
+       <property name="topMargin">
+        <number>12</number>
+       </property>
+       <property name="rightMargin">
+        <number>12</number>
+       </property>
+       <property name="bottomMargin">
+        <number>12</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="mainContentWidget" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <layout class="QVBoxLayout" name="mainContentColumn1Lyout">
+            <item>
+             <widget class="QGroupBox" name="generalDataGroupBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="title">
+               <string>Общие сведения:</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_8">
+               <item row="0" column="0">
+                <layout class="QGridLayout" name="generalDataGridLayout">
+                 <property name="leftMargin">
+                  <number>12</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>12</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>12</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>12</number>
+                 </property>
+                 <property name="spacing">
+                  <number>8</number>
+                 </property>
+                 <item row="0" column="1">
+                  <widget class="QLabel" name="actTypeLabel">
+                   <property name="text">
+                    <string>Тип акта:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QComboBox" name="actTypeComboBox">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QDateEdit" name="actDateEdit">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="displayFormat">
+                    <string>dd.MM.yyyy</string>
+                   </property>
+                   <property name="calendarPopup">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLabel" name="actDateLabel">
+                   <property name="text">
+                    <string>Дата:</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="locationGroupBox">
+              <property name="title">
+               <string>Место проведения работ</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_2">
+               <item row="3" column="0">
+                <layout class="QGridLayout" name="loactionGridLayout">
+                 <property name="leftMargin">
+                  <number>12</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>12</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>12</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>12</number>
+                 </property>
+                 <property name="spacing">
+                  <number>8</number>
+                 </property>
+                 <item row="3" column="1">
+                  <widget class="QLineEdit" name="voltageLineEdit">
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="areaLabel">
+                   <property name="text">
+                    <string>Участок:</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="1" column="0">
-                  <layout class="QGridLayout" name="employeeGridLayout">
-                   <property name="leftMargin">
-                    <number>10</number>
+                  <widget class="QLabel" name="substationLabel">
+                   <property name="text">
+                    <string>Подстанция:</string>
                    </property>
-                   <property name="topMargin">
-                    <number>10</number>
-                   </property>
-                   <property name="rightMargin">
-                    <number>10</number>
-                   </property>
-                   <property name="bottomMargin">
-                    <number>10</number>
-                   </property>
-                   <property name="spacing">
-                    <number>8</number>
-                   </property>
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="emplyeeLabel">
-                     <property name="text">
-                      <string>Представитель предприятия:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QComboBox" name="employeeComboBox">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
+                  </widget>
                  </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QGroupBox" name="generalDataGroupBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="title">
-                 <string>Общие сведения:</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_8">
-                 <item row="0" column="0">
-                  <layout class="QGridLayout" name="generalDataGridLayout">
-                   <property name="leftMargin">
-                    <number>12</number>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="connectionLabel">
+                   <property name="text">
+                    <string>Присоединение:</string>
                    </property>
-                   <property name="topMargin">
-                    <number>12</number>
-                   </property>
-                   <property name="rightMargin">
-                    <number>12</number>
-                   </property>
-                   <property name="bottomMargin">
-                    <number>12</number>
-                   </property>
-                   <property name="spacing">
-                    <number>8</number>
-                   </property>
-                   <item row="0" column="1">
-                    <widget class="QLabel" name="actTypeLabel">
-                     <property name="text">
-                      <string>Тип акта:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="2">
-                    <widget class="QComboBox" name="actTypeComboBox">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>0</height>
-                      </size>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="2">
-                    <widget class="QDateEdit" name="actDateEdit">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="displayFormat">
-                      <string>dd.MM.yyyy</string>
-                     </property>
-                     <property name="calendarPopup">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QLabel" name="actDateLabel">
-                     <property name="text">
-                      <string>Дата:</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
+                  </widget>
                  </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QGroupBox" name="locationGroupBox">
-                <property name="title">
-                 <string>Место проведения работ</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_2">
                  <item row="3" column="0">
-                  <layout class="QGridLayout" name="loactionGridLayout">
-                   <property name="leftMargin">
-                    <number>12</number>
+                  <widget class="QLabel" name="voltageLabel">
+                   <property name="text">
+                    <string>Напряжение:</string>
                    </property>
-                   <property name="topMargin">
-                    <number>12</number>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QComboBox" name="substationComboBox"/>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QComboBox" name="areaComboBox"/>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QComboBox" name="connectionComboBox"/>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="ctRatioLabel">
+                   <property name="text">
+                    <string>Ктт:</string>
                    </property>
-                   <property name="rightMargin">
-                    <number>12</number>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QLineEdit" name="ctRatioLineEdit">
+                   <property name="readOnly">
+                    <bool>true</bool>
                    </property>
-                   <property name="bottomMargin">
-                    <number>12</number>
-                   </property>
-                   <property name="spacing">
-                    <number>8</number>
-                   </property>
-                   <item row="3" column="1">
-                    <widget class="QLineEdit" name="voltageLineEdit">
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="areaLabel">
-                     <property name="text">
-                      <string>Участок:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="substationLabel">
-                     <property name="text">
-                      <string>Подстанция:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="QLabel" name="connectionLabel">
-                     <property name="text">
-                      <string>Присоединение:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="0">
-                    <widget class="QLabel" name="voltageLabel">
-                     <property name="text">
-                      <string>Напряжение:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QComboBox" name="substationComboBox"/>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QComboBox" name="areaComboBox"/>
-                   </item>
-                   <item row="2" column="1">
-                    <widget class="QComboBox" name="connectionComboBox"/>
-                   </item>
-                   <item row="4" column="0">
-                    <widget class="QLabel" name="ctRatioLabel">
-                     <property name="text">
-                      <string>Ктт:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="4" column="1">
-                    <widget class="QLineEdit" name="ctRatioLineEdit">
-                     <property name="readOnly">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
+                  </widget>
                  </item>
                 </layout>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QGroupBox" name="externalRepresentativesGroupBox">
-                <property name="title">
-                 <string>Сторонние представители</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_10">
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="mainContentColumn2Layout">
+            <item>
+             <widget class="QGroupBox" name="employeeGroupBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="title">
+               <string>Представители</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_4">
+               <item row="1" column="0">
+                <layout class="QGridLayout" name="employeeGridLayout">
+                 <property name="leftMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="spacing">
+                  <number>8</number>
+                 </property>
                  <item row="0" column="0">
-                  <layout class="QVBoxLayout" name="verticalLayout">
-                   <property name="leftMargin">
-                    <number>10</number>
+                  <widget class="QLabel" name="emplyeeLabel">
+                   <property name="text">
+                    <string>Представитель предприятия:</string>
                    </property>
-                   <property name="topMargin">
-                    <number>10</number>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QComboBox" name="employeeComboBox">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
                    </property>
-                   <property name="rightMargin">
-                    <number>10</number>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="externalRepresentativesGroupBox">
+              <property name="title">
+               <string>Сторонние представители</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_10">
+               <item row="0" column="0">
+                <layout class="QVBoxLayout" name="verticalLayout">
+                 <property name="leftMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>10</number>
+                 </property>
+                 <item>
+                  <widget class="QScrollArea" name="scrollArea">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
                    </property>
-                   <property name="bottomMargin">
-                    <number>10</number>
+                   <property name="widgetResizable">
+                    <bool>true</bool>
                    </property>
-                   <item>
-                    <widget class="QScrollArea" name="scrollArea">
-                     <property name="widgetResizable">
-                      <bool>true</bool>
+                   <widget class="QWidget" name="scrollAreaWidgetContents">
+                    <property name="geometry">
+                     <rect>
+                      <x>0</x>
+                      <y>0</y>
+                      <width>253</width>
+                      <height>147</height>
+                     </rect>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout_8">
+                     <property name="spacing">
+                      <number>0</number>
                      </property>
-                     <widget class="QWidget" name="scrollAreaWidgetContents">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>0</y>
-                        <width>253</width>
-                        <height>130</height>
-                       </rect>
-                      </property>
-                      <layout class="QVBoxLayout" name="verticalLayout_8">
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <layout class="QVBoxLayout" name="scrollVerticalLayout">
                        <property name="spacing">
                         <number>0</number>
                        </property>
-                       <property name="leftMargin">
-                        <number>0</number>
-                       </property>
-                       <property name="topMargin">
-                        <number>0</number>
-                       </property>
-                       <property name="rightMargin">
-                        <number>0</number>
-                       </property>
-                       <property name="bottomMargin">
-                        <number>0</number>
-                       </property>
                        <item>
-                        <layout class="QVBoxLayout" name="scrollVerticalLayout">
-                         <property name="spacing">
-                          <number>0</number>
+                        <widget class="QWidget" name="externalRepresentativesContainer" native="true">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>0</height>
+                          </size>
                          </property>
-                         <item>
-                          <widget class="QWidget" name="externalRepresentativesContainer" native="true">
-                           <layout class="QVBoxLayout" name="verticalLayout_2">
-                            <item>
-                             <layout class="QVBoxLayout" name="externalRepresentativesContainerLayout"/>
-                            </item>
-                           </layout>
-                          </widget>
-                         </item>
-                        </layout>
+                         <layout class="QVBoxLayout" name="externalRepresentativesContainerLayout"/>
+                        </widget>
                        </item>
                       </layout>
-                     </widget>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="addExternalRepresentativeButton">
-                     <property name="text">
-                      <string>⊕ Добавить представителя</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="addExternalRepresentativeButton">
+                   <property name="text">
+                    <string>⊕ Добавить представителя</string>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
-               </widget>
-              </item>
-             </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Orientation::Vertical</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Policy::Expanding</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -394,93 +412,127 @@
         <number>12</number>
        </property>
        <item>
-        <widget class="QGroupBox" name="primaryMeterGroupBox">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <widget class="QScrollArea" name="ctScrollArea">
+         <property name="widgetResizable">
+          <bool>true</bool>
          </property>
-         <property name="title">
-          <string>Прибор учета</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_6">
-          <item>
-           <widget class="QWidget" name="meterContainerWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_3"/>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QWidget" name="ctScrollAreaWidgetContents">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>592</width>
+            <height>594</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_16">
+           <property name="spacing">
+            <number>8</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QGroupBox" name="primaryMeterGroupBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="title">
+              <string>Прибор учета</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <item>
+               <widget class="QWidget" name="meterContainerWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_3"/>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="secondaryMeterGroupBox">
+             <property name="title">
+              <string>Устанавливаемый прибор</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QWidget" name="secondMeterContainerWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_5"/>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="removedCurrentTransformersGroupBox">
+             <property name="title">
+              <string>Снятые трансформаторы тока</string>
+             </property>
+             <layout class="QVBoxLayout" name="removedCtLayout">
+              <item>
+               <widget class="QWidget" name="removedCtContainerWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_14"/>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="addRemoveCtButton">
+                <property name="text">
+                 <string>Добавить</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="installedCurrentTransformersGroupBox">
+             <property name="title">
+              <string>Установленные трансформаторы тока</string>
+             </property>
+             <layout class="QVBoxLayout" name="installedCtLayout">
+              <item>
+               <widget class="QWidget" name="installedCtContainerWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_15"/>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="addInstalledCtButton">
+                <property name="text">
+                 <string>Добавить</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
         </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="secondaryMeterGroupBox">
-         <property name="title">
-          <string>Устанавливаемый прибор</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QWidget" name="secondMeterContainerWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_5"/>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="removedCurrentTransformersGroupBox">
-         <property name="title">
-          <string>Снятые трансформаторы тока</string>
-         </property>
-         <layout class="QVBoxLayout" name="removedCtLayout">
-          <item>
-           <widget class="QWidget" name="removedCtContainerWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_14"/>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="addRemoveCtButton">
-            <property name="text">
-             <string>Добавить</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="installedCurrentTransformersGroupBox">
-         <property name="title">
-          <string>Установленные трансформаторы тока</string>
-         </property>
-         <layout class="QVBoxLayout" name="installedCtLayout">
-          <item>
-           <widget class="QWidget" name="installedCtContainerWidget" native="true">
-            <layout class="QVBoxLayout" name="verticalLayout_15"/>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="addInstalledCtButton">
-            <property name="text">
-             <string>Добавить</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>
@@ -759,7 +811,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>actTabWidget</tabstop>
   <tabstop>actTypeComboBox</tabstop>
   <tabstop>actDateEdit</tabstop>
   <tabstop>employeeComboBox</tabstop>

@@ -140,6 +140,11 @@ private:
     void clearForm();
     void clearExternalRepresentatives();
     void clearCurrentTransformers();
+    // методы очистки каждого окна отдельно
+    void clearMainTab();
+    void clearEquipmentTab();
+    void clearMeasurementTab();
+    void clearConclusionTab();
 
 };
 
