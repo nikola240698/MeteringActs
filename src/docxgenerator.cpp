@@ -411,6 +411,12 @@ bool DocxGenerator::generate(const ActData &data, const QString &outputPath)
                 return false;
             }
             break;
+        case 6:
+            if (!generateActType6(data))
+            {
+                return false;
+            }
+            break;
         default:
             m_lastError =
                 "Генерация данного акта пока не реализована.";
@@ -500,6 +506,9 @@ QString DocxGenerator::templatePathForActType(int actTypeId) const
             break;
         case 5:
             fileName = "act_install_meter.docx";
+            break;
+        case 6:
+            fileName = "act_installed_meter_ct.docx";
             break;
         default:
             return {};
@@ -626,6 +635,38 @@ bool DocxGenerator::generateActType5(const ActData &data)
         return false;
     }
 
+    if (!replacePlaceholder("seal_number", data.sealNumber))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool DocxGenerator::generateActType6(const ActData &data)
+{
+    constexpr int InstalledMeterRole = 3;
+    constexpr int InstalledCurrentTransformerRole = 2;
+
+    // Установленный прибор учета
+    if (!replaceMeterData(data, InstalledMeterRole))
+    {
+        return false;
+    }
+
+    // Установленные ТТ
+    if (!replaceCurrentTransformers(data, InstalledCurrentTransformerRole))
+    {
+        return false;
+    }
+
+    // Векторная диаграмма
+    if (!processVectorDiagram(data))
+    {
+        return false;
+    }
+
+    // Пломба
     if (!replacePlaceholder("seal_number", data.sealNumber))
     {
         return false;
@@ -858,6 +899,164 @@ bool DocxGenerator::replaceMeterData(const ActData &data, int meterRole, const Q
     }
     if (!replacePlaceholder(
         prefix + "reading_r_minus", meterReadingValue(*meter, "R-")))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool DocxGenerator::replaceCurrentTransformers(const ActData &data, int role, const QString &blockName)
+{
+    QDomDocument document;
+
+    if (!loadDocument(document))
+    {
+        return false;
+    }
+
+    const QString startMarker = "{{#" + blockName + "}}";
+
+    const QString endMarker = "{{/" + blockName + "}}";
+
+    QDomNodeList rows = document.elementsByTagName("w:tr");
+
+    QDomElement templateRow;
+
+    // 1. Ищем строку с шаблоном
+    for (qsizetype i = 0; i < rows.count(); ++i)
+    {
+        QDomElement row = rows.at(i).toElement();
+
+        QString rowText;
+
+        QDomNodeList textNodes = row.elementsByTagName("w:t");
+
+        for (qsizetype j = 0; j < textNodes.count(); ++j)
+        {
+            rowText += textNodes.at(j).toElement().text();
+        }
+
+        if (rowText.contains(startMarker) && rowText.contains(endMarker))
+        {
+            templateRow = row;
+            break;
+        }
+    }
+
+    if (templateRow.isNull())
+    {
+        m_lastError =
+            "В DOCX не найдена строка блока: " + blockName;
+
+        return false;
+    }
+
+    // 2. Родителем блока будет таблица
+    QDomNode parent = templateRow.parentNode();
+
+    if (parent.isNull())
+    {
+        m_lastError =
+            "Не удалось определить родителя строки блока: " + blockName;
+
+        return false;
+    }
+
+    // 3. Для каждого ТТ нужной роли создаем копию строки
+    for (const ActCurrentTransformerData &transformer :
+        data.currentTransformers)
+    {
+        if (transformer.role != role)
+        {
+            continue;
+        }
+
+        QDomNode clonedNode = templateRow.cloneNode(true);
+
+        QDomElement clonedRow = clonedNode.toElement();
+
+        if (!replaceCurrentTransformerRow(
+            document, clonedRow, transformer, blockName))
+        {
+            return false;
+        }
+
+        parent.insertBefore(clonedNode, templateRow);
+    }
+
+    // 4. Удаляем исходную строку с плейсхолдерами
+    parent.removeChild(templateRow);
+
+    // 5. Сохраняем XML
+    return saveXmlDocument(document);
+}
+
+bool DocxGenerator::replaceCurrentTransformerRow(QDomDocument &document, QDomElement &row,
+                                                 const ActCurrentTransformerData &transformer, const QString &blockName)
+{
+
+    QDomNodeList paragraphs = row.elementsByTagName("w:p");
+
+    auto replaceInRow =
+        [&](const QString name,
+            const QString &value) -> bool
+        {
+            bool replaced = false;
+
+            for (qsizetype i = 0; i < paragraphs.count(); ++i)
+            {
+                QDomElement paragraph = paragraphs.at(i).toElement();
+
+                if (replacePlaceholderInParagraphAll(
+                    document,
+                    paragraph,
+                    name,
+                    value))
+                {
+                    replaced = true;
+                }
+            }
+
+            if (!replaced)
+            {
+                m_lastError =
+                    "Не найден плейсхолдер {{" + name + "}}.";
+
+                return false;
+            }
+
+            return true;
+        };
+
+    if (!replaceInRow("#" + blockName, ""))
+    {
+        return false;
+    }
+
+    if (!replaceInRow("/" + blockName, ""))
+    {
+        return false;
+    }
+
+    // Заполняем данные ТТ
+    if (!replaceInRow("ct_phase", transformer.phase))
+    {
+       return false;
+    }
+    if (!replaceInRow("ct_transformation_ratio", transformer.transformationRatio))
+    {
+        return false;
+    }
+    if (!replaceInRow("ct_name", transformer.name))
+    {
+        return false;
+    }
+    if (!replaceInRow("ct_serial", transformer.serialNumber))
+    {
+        return false;
+    }
+    if (!replaceInRow("ct_accuracy", transformer.accuracyClass))
     {
         return false;
     }

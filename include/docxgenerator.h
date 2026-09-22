@@ -45,6 +45,7 @@ private:
     bool generateActType3(const ActData &data);
     bool generateActType4(const ActData &data);
     bool generateActType5(const ActData &data);
+    bool generateActType6(const ActData &data);
 
     bool replacePlaceholderInParagraph(
         QDomDocument &document,
@@ -61,6 +62,18 @@ private:
         const ActData &data,
         int meterRole,
         const QString &prefix = QString());
+
+    // Методы замены особых полей связанных с ТТ
+    bool replaceCurrentTransformers(
+        const ActData &data,
+        int role,
+        const QString &blockName = "current_transformers");
+
+    bool replaceCurrentTransformerRow(
+        QDomDocument &document,
+        QDomElement &row,
+        const ActCurrentTransformerData &transformer,
+        const QString &blockName);
 
     QString meterReadingValue(
         const ActMeterData &meter,
