@@ -417,6 +417,12 @@ bool DocxGenerator::generate(const ActData &data, const QString &outputPath)
                 return false;
             }
             break;
+        case 7:
+            if (!generateActType7(data))
+            {
+                return false;
+            }
+            break;
         default:
             m_lastError =
                 "Генерация данного акта пока не реализована.";
@@ -509,6 +515,9 @@ QString DocxGenerator::templatePathForActType(int actTypeId) const
             break;
         case 6:
             fileName = "act_installed_meter_ct.docx";
+            break;
+        case 7:
+            fileName = "act_replace_ct.docx";
             break;
         default:
             return {};
@@ -673,6 +682,55 @@ bool DocxGenerator::generateActType6(const ActData &data)
     }
 
     return true;
+}
+
+bool DocxGenerator::generateActType7(const ActData &data)
+{
+    constexpr int ExistingMeterRole = 5;
+    constexpr int RemovedCurrentTransformerRole = 1;
+    constexpr int InstalledCurrentTransformerRole = 2;
+
+    // Характер работы
+    if (!replacePlaceholder(
+        "work_schedule_type", workScheduleTypeToString(data.workScheduleType)))
+    {
+        return false;
+    }
+
+    // Существующий прибор учета
+    if (!replaceMeterData(data, ExistingMeterRole))
+    {
+        return false;
+    }
+
+    // Снятые ТТ
+    if (!replaceCurrentTransformers(
+        data, RemovedCurrentTransformerRole, "removed_current_transformers"))
+    {
+        return false;
+    }
+
+    // Установленные ТТ
+    if (!replaceCurrentTransformers(
+        data, InstalledCurrentTransformerRole, "installed_current_transformers"))
+    {
+        return false;
+    }
+
+    // Векторная диаграмма
+    if (!processVectorDiagram(data))
+    {
+        return false;
+    }
+
+    // Пломба
+    if (!replacePlaceholder(
+        "seal_number", data.sealNumber))
+    {
+        return false;
+    }
+
+    return  true;
 }
 
 bool DocxGenerator::replacePlaceholderInParagraph(QDomDocument &document, QDomElement &paragraph,
@@ -964,6 +1022,7 @@ bool DocxGenerator::replaceCurrentTransformers(const ActData &data, int role, co
     }
 
     // 3. Для каждого ТТ нужной роли создаем копию строки
+    int matchingTransformerCount = 0;
     for (const ActCurrentTransformerData &transformer :
         data.currentTransformers)
     {
@@ -971,6 +1030,8 @@ bool DocxGenerator::replaceCurrentTransformers(const ActData &data, int role, co
         {
             continue;
         }
+
+        ++matchingTransformerCount;
 
         QDomNode clonedNode = templateRow.cloneNode(true);
 
@@ -983,6 +1044,15 @@ bool DocxGenerator::replaceCurrentTransformers(const ActData &data, int role, co
         }
 
         parent.insertBefore(clonedNode, templateRow);
+    }
+
+    if (matchingTransformerCount == 0)
+    {
+        m_lastError =
+            QString("В данных акта не найдены трансформаторы тока с ролью %1.")
+            .arg(role);
+
+        return false;
     }
 
     // 4. Удаляем исходную строку с плейсхолдерами
