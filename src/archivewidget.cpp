@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QItemSelectionModel>
+#include <QSignalBlocker>
 
 #include "archivewidget.h"
 
@@ -52,6 +53,7 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
         {
             ui->dateFromEdit->setEnabled(checked);
             ui->dateToEdit->setEnabled(checked);
+            applyFilters();
         });
 
     // Подключаем сами даты
@@ -65,6 +67,34 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
         [this](const QDate &date)
         {
             ui->dateFromEdit->setMaximumDate(date);
+            applyFilters();
+        });
+
+    // Подключаем кнопку сброса
+    connect(ui->resetFiltersButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            // создаем блокировку сигналов для всех элементов
+            // чтобы не выполнлся их connect и изменении данных
+            const QSignalBlocker searchBlocker(
+                ui->searchLineEdit);
+            const QSignalBlocker typeBlocker(
+                ui->actTypeComboBox);
+            const QSignalBlocker checkBoxBlocker(
+                ui->dateFilterCheckBox);
+            const QSignalBlocker dateFromBlocker(
+                ui->dateFromEdit);
+            const QSignalBlocker dateToBlocker(
+                ui->dateToEdit);
+
+            // сбрасываем всё
+            ui->searchLineEdit->clear();
+            ui->actTypeComboBox->setCurrentIndex(0);
+            ui->dateFilterCheckBox->setChecked(false);
+            const QDate today = QDate::currentDate();
+            ui->dateFromEdit->setDate(
+                QDate(today.year(), today.month(), 1));
+            ui->dateToEdit->setDate(today);
             applyFilters();
         });
 
@@ -131,11 +161,11 @@ void ArchiveWidget::loadActs(
     query.bindValue(":actTypeId", actTypeId);
 
     query.bindValue(
-        ":useDateFilter", useDateFilter ? 1 : 0);
+        ":userDateFilter", useDateFilter ? 1 : 0);
     query.bindValue(
         ":dateFrom", dateFrom.toString("yyyy-MM-dd"));
     query.bindValue(
-        ":dateTo", dateFrom.toString("yyyy-MM-dd"));
+        ":dateTo", dateTo.toString("yyyy-MM-dd"));
 
     if (!query.exec())
     {
