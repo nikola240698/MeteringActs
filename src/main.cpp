@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     ActData actData;
 
     // Временно указываем id существующего акта
-    const int testActId = 32;
+    const int testActId = 33;
 
     if (!repository.loadAct(testActId, actData))
     {

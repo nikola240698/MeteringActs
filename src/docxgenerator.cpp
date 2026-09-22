@@ -405,6 +405,12 @@ bool DocxGenerator::generate(const ActData &data, const QString &outputPath)
                 return false;
             }
             break;
+        case 5:
+            if (!generateActType5(data))
+            {
+                return false;
+            }
+            break;
         default:
             m_lastError =
                 "Генерация данного акта пока не реализована.";
@@ -491,6 +497,9 @@ QString DocxGenerator::templatePathForActType(int actTypeId) const
             break;
         case 4:
             fileName = "act_remove_meter.docx";
+            break;
+        case 5:
+            fileName = "act_install_meter.docx";
             break;
         default:
             return {};
@@ -592,9 +601,32 @@ bool DocxGenerator::generateActType3(const ActData &data)
 
 bool DocxGenerator::generateActType4(const ActData &data)
 {
-    constexpr int RemoveMeterRole = 2;
+    constexpr int RemovedMeterRole = 2;
 
-    if (!replaceMeterData(data, RemoveMeterRole))
+    if (!replaceMeterData(data, RemovedMeterRole))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool DocxGenerator::generateActType5(const ActData &data)
+{
+    constexpr int InstallMeterRole = 3;
+
+    if (!replaceMeterData(data, InstallMeterRole))
+    {
+        return false;
+    }
+
+    // Векторная диаграмма
+    if (!processVectorDiagram(data))
+    {
+        return false;
+    }
+
+    if (!replacePlaceholder("seal_number", data.sealNumber))
     {
         return false;
     }

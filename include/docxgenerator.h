@@ -44,6 +44,7 @@ private:
     bool generateActType2(const ActData &data);
     bool generateActType3(const ActData &data);
     bool generateActType4(const ActData &data);
+    bool generateActType5(const ActData &data);
 
     bool replacePlaceholderInParagraph(
         QDomDocument &document,
