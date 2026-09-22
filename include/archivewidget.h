@@ -4,6 +4,7 @@
 #define METERINGACTS_ARCHIVEWIDGET_H
 
 #include <QWidget>
+#include <QDate>
 
 #include "database.h"
 
@@ -34,12 +35,20 @@ private:
 
     void loadActs(
         const QString &searchText = QString(),
-        int actTypeId = -1);
+        int actTypeId = -1,
+        bool useDateFilter = false,
+        const QDate &dateFrom = QDate(),
+        const QDate &dateTo = QDate());
 
     void loadActTypes();
 
     // метод генерации DOCX файла
     void generateSelectedAct();
+
+    //  метод для сокращения всех connect
+    void applyFilters();
+
+
 };
 
 

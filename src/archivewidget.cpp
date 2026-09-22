@@ -20,6 +20,14 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Выставляем дату по умолчанию в QDateEdit
+    const QDate today = QDate::currentDate();
+
+    ui->dateToEdit->setDate(today);
+
+    ui->dateFromEdit->setDate(
+        QDate(today.year(), today.month(), 1));
+
     loadActTypes();
     loadActs();
 
@@ -27,19 +35,39 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
         &ArchiveWidget::generateSelectedAct);
 
     connect(ui->searchLineEdit, &QLineEdit::textChanged, this,
-        [this](const QString &text)
+        [this]()
         {
-            const int actTypeId = ui->actTypeComboBox->currentData().toInt();
-            loadActs(text, actTypeId);
+            applyFilters();
         });
 
     connect(ui->actTypeComboBox, &QComboBox::currentIndexChanged, this,
-        [this](int)
+        [this]()
         {
-            const int actTypeId = ui->actTypeComboBox->currentData().toInt();
-
-            loadActs(ui->searchLineEdit->text(), actTypeId);
+            applyFilters();
         });
+
+    // Подключаем чекбокс выбора фильтра по датам
+    connect(ui->dateFilterCheckBox, &QCheckBox::toggled, this,
+        [this](bool checked)
+        {
+            ui->dateFromEdit->setEnabled(checked);
+            ui->dateToEdit->setEnabled(checked);
+        });
+
+    // Подключаем сами даты
+    connect(ui->dateFromEdit, &QDateEdit::dateChanged, this,
+        [this](const QDate &date)
+        {
+            ui->dateToEdit->setMinimumDate(date);
+            applyFilters();
+        });
+    connect(ui->dateToEdit, &QDateEdit::dateChanged, this,
+        [this](const QDate &date)
+        {
+            ui->dateFromEdit->setMaximumDate(date);
+            applyFilters();
+        });
+
 }
 
 ArchiveWidget::~ArchiveWidget()
@@ -47,7 +75,12 @@ ArchiveWidget::~ArchiveWidget()
     delete ui;
 }
 
-void ArchiveWidget::loadActs(const QString &searchText, int actTypeId)
+void ArchiveWidget::loadActs(
+    const QString &searchText,
+    int actTypeId,
+    bool useDateFilter,
+    const QDate &dateFrom,
+    const QDate &dateTo)
 {
     auto* model = new QSqlQueryModel(this);
 
@@ -85,12 +118,24 @@ void ArchiveWidget::loadActs(const QString &searchText, int actTypeId)
             "OR a.act_type_id = :actTypeId"
         ") "
 
+        "AND ("
+            ":userDateFilter = 0 "
+            "OR a.act_date BETWEEN :dateFrom AND :dateTo"
+        ") "
+
         "ORDER BY a.act_date DESC, a.id DESC;"
     );
 
     query.bindValue(":search", "%" + searchText.trimmed() + "%");
 
     query.bindValue(":actTypeId", actTypeId);
+
+    query.bindValue(
+        ":useDateFilter", useDateFilter ? 1 : 0);
+    query.bindValue(
+        ":dateFrom", dateFrom.toString("yyyy-MM-dd"));
+    query.bindValue(
+        ":dateTo", dateFrom.toString("yyyy-MM-dd"));
 
     if (!query.exec())
     {
@@ -229,6 +274,34 @@ void ArchiveWidget::generateSelectedAct()
 
     QMessageBox::information(this, "Готово",
         "Документ успешно сформирован: " + outputPath);
+}
+
+void ArchiveWidget::applyFilters()
+{
+    const QString searchText =
+        ui->searchLineEdit->text();
+
+    const int actTypeId =
+        ui->actTypeComboBox->currentData().toInt();
+
+    const bool useDateFilter =
+        ui->dateFilterCheckBox->isChecked();
+
+    const QDate dateFrom =
+        ui->dateFromEdit->date();
+
+    const QDate dateTo =
+        ui->dateToEdit->date();
+
+    loadActs(
+        searchText,
+        actTypeId,
+        useDateFilter,
+        dateFrom,
+        dateTo);
+
+
+
 }
 
 
