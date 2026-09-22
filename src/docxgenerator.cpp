@@ -360,11 +360,7 @@ bool DocxGenerator::generate(const ActData &data, const QString &outputPath)
     {
         return false;
     }
-    if (!replacePlaceholder(
-        "seal_number", data.sealNumber))
-    {
-        return false;
-    }
+
     if (!replacePlaceholder(
         "reason", data.reason))
     {
@@ -372,13 +368,6 @@ bool DocxGenerator::generate(const ActData &data, const QString &outputPath)
     }
     if (!replacePlaceholder(
         "result", data.result))
-    {
-        return false;
-    }
-
-
-    if (!replacePlaceholder(
-        "work_schedule_type", workScheduleTypeToString(data.workScheduleType)))
     {
         return false;
     }
@@ -400,6 +389,18 @@ bool DocxGenerator::generate(const ActData &data, const QString &outputPath)
             break;
         case 2:
             if (!generateActType2(data))
+            {
+                return false;
+            }
+            break;
+        case 3:
+            if (!generateActType3(data))
+            {
+                return false;
+            }
+            break;
+        case 4:
+            if (!generateActType4(data))
             {
                 return false;
             }
@@ -485,6 +486,12 @@ QString DocxGenerator::templatePathForActType(int actTypeId) const
         case 2:
             fileName = "act_replace_meter.docx";
             break;
+        case 3:
+            fileName = "act_meter_reading.docx";
+            break;
+        case 4:
+            fileName = "act_remove_meter.docx";
+            break;
         default:
             return {};
     }
@@ -496,6 +503,18 @@ QString DocxGenerator::templatePathForActType(int actTypeId) const
 bool DocxGenerator::generateActType1(const ActData &data)
 {
     constexpr int CheckedMeterRole = 1;
+
+    if (!replacePlaceholder(
+        "work_schedule_type", workScheduleTypeToString(data.workScheduleType)))
+    {
+        return false;
+    }
+
+    if (!replacePlaceholder(
+        "seal_number", data.sealNumber))
+    {
+        return false;
+    }
 
     if (!replaceMeterData(data, CheckedMeterRole))
     {
@@ -514,6 +533,18 @@ bool DocxGenerator::generateActType2(const ActData &data)
 {
     constexpr int RemovedMeterRole = 2;
     constexpr int InstalledMeterRole = 3;
+
+    if (!replacePlaceholder(
+        "work_schedule_type", workScheduleTypeToString(data.workScheduleType)))
+    {
+        return false;
+    }
+
+    if (!replacePlaceholder(
+        "seal_number", data.sealNumber))
+    {
+        return false;
+    }
 
     // Снятый прибор
     if (!replaceMeterData(data, RemovedMeterRole, "removed_"))
@@ -534,6 +565,36 @@ bool DocxGenerator::generateActType2(const ActData &data)
     }
 
     if (!processReplacementDuration(data))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool DocxGenerator::generateActType3(const ActData &data)
+{
+    constexpr int ReadingMeterRole = 4;
+
+    if (!replaceMeterData(data, ReadingMeterRole))
+    {
+        return false;
+    }
+
+    if (!replacePlaceholder(
+        "seal_number", data.sealNumber))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool DocxGenerator::generateActType4(const ActData &data)
+{
+    constexpr int RemoveMeterRole = 2;
+
+    if (!replaceMeterData(data, RemoveMeterRole))
     {
         return false;
     }

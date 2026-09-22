@@ -636,7 +636,7 @@ bool CreateActWidget::saveAct()
         // снятые ТТ
         if (!insertActCurrentTransformers(
             actId,
-            m_installedCurrentTransformerWidgets, RemovedCurrentTransformer))
+            m_removedCurrentTransformerWidgets, RemovedCurrentTransformer))
         {
             m_database.rollback();
             return false;

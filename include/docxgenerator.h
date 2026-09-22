@@ -42,6 +42,8 @@ private:
     // метод генерации особых полей в акта согласно его типу
     bool generateActType1(const ActData &data);
     bool generateActType2(const ActData &data);
+    bool generateActType3(const ActData &data);
+    bool generateActType4(const ActData &data);
 
     bool replacePlaceholderInParagraph(
         QDomDocument &document,
@@ -109,6 +111,8 @@ private:
 
     // Метод расчета недоучтенной электроэнергии
     bool processReplacementDuration(const ActData &data);
+
+
 
 };
 
