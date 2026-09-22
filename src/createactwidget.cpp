@@ -2,7 +2,7 @@
 #include <QDebug>
 
 #include "createactwidget.h"
-#include "ui_CreateActWidget.h"
+#include "ui_createactwidget.h"
 #include "actrepository.h"
 
 

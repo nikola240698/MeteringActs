@@ -6,7 +6,7 @@
 #include <QLocale>
 
 #include "vectordiagramwidget.h"
-#include "ui_VectorDiagramWidget.h"
+#include "ui_vectordiagramwidget.h"
 
 namespace
 {

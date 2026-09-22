@@ -1,6 +1,6 @@
 
 #include "meteractwidget.h"
-#include "ui_MeterActWidget.h"
+#include "ui_meteractwidget.h"
 
 
 MeterActWidget::MeterActWidget(Database &database, QWidget *parent)

@@ -1,7 +1,7 @@
 
 
 #include "mainwindow.h"
-#include "ui_MainWindow.h"
+#include "ui_mainwindow.h"
 
 #include "createactwidget.h"
 #include "archivewidget.h"

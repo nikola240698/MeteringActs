@@ -12,7 +12,7 @@
 
 #include "actrepository.h"
 #include "docxgenerator.h"
-#include "ui_ArchiveWidget.h"
+#include "ui_archivewidget.h"
 
 
 ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :

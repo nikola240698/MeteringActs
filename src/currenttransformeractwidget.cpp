@@ -4,7 +4,7 @@
 
 #include <QMessageBox>
 
-#include "ui_CurrentTransformerActWidget.h"
+#include "ui_currenttransformeractwidget.h"
 
 
 CurrentTransformerActWidget::CurrentTransformerActWidget(

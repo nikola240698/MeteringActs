@@ -3,7 +3,7 @@
 
 #include <QMessageBox>
 
-#include "ui_ExternalRepresentativeWidget.h"
+#include "ui_externalrepresentativewidget.h"
 
 
 ExternalRepresentativeWidget::ExternalRepresentativeWidget(QWidget *parent) : QWidget(parent),

@@ -2,7 +2,7 @@
 #include <QMessageBox>
 
 #include "../include/currenttransformerdialog.h"
-#include "ui_CurrentTransformerDialog.h"
+#include "ui_currenttransformerdialog.h"
 
 
 CurrentTransformerDialog::CurrentTransformerDialog(

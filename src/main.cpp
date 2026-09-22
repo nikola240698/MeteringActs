@@ -1,6 +1,6 @@
 #include <QApplication>
 #include <QMessageBox>
-#include <ui_MainWindow.h>
+#include <ui_mainwindow.h>
 #include <QString>
 
 #include "database.h"

@@ -1,6 +1,6 @@
 
 #include "meterdialog.h"
-#include "ui_MeterDialog.h"
+#include "ui_meterdialog.h"
 
 
 MeterDialog::MeterDialog(Database &database, const QString &serial, QWidget *parent)
