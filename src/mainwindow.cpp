@@ -4,6 +4,7 @@
 #include "ui_MainWindow.h"
 
 #include "createactwidget.h"
+#include "archivewidget.h"
 
 
 MainWindow::MainWindow(Database &database, QWidget *parent)
@@ -16,6 +17,10 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
     // создаем виджет первого окна и добавляем его в stackWidget
     auto* createActWidget = new CreateActWidget(m_database, this);
     ui->stackedWidget->insertWidget(0, createActWidget);
+
+    // Создаем виджет третьего окна и добавляем в stackWidget
+    auto* archiveWidget = new ArchiveWidget(m_database, this);
+    ui->stackedWidget->insertWidget(2, archiveWidget);
 
 
     // создаем группу кнопок для возможности уникального выбора
