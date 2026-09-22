@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(MeteringActs VERSION 1.0 LANGUAGES CXX)
-
-message(STATUS "C compiler: ${CMAKE_C_COMPILER}")
-message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER}")
+project(MeteringActs VERSION 1.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,9 +18,6 @@ find_package(Qt6 COMPONENTS
         Xml
         REQUIRED
 )
-message(STATUS "Qt6_DIR: ${Qt6_DIR}")
-message(STATUS "Qt6Core_DIR: ${Qt6Core_DIR}")
-
 
 include(FetchContent)
 

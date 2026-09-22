@@ -35,6 +35,13 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     ui->removedCurrentTransformersGroupBox->setVisible(false);
     ui->installedCurrentTransformersGroupBox->setVisible(false);
 
+    // Заполняем ComboBox характера работ
+    ui->workScheduleComboBox->addItem("Выберите характер работ...", 0);
+    ui->workScheduleComboBox->addItem("Плановая", PlannedWork);
+    ui->workScheduleComboBox->addItem("Внеплановая", UnplannedWork);
+    // скрываем по умолчанию данный виджет
+    ui->workScheduleWidget->setVisible(false);
+
     // вызываем загрузку типов актов
     loadActTypes();
     // сигнал изменения типа акта для показа полей для второго прибора
@@ -410,6 +417,7 @@ bool CreateActWidget::validateForm()
         ui->actTabWidget->setCurrentWidget(ui->metersTab);
         return false;
     }
+
     // добавляем проверку введенных полей второго прибора учета, если он видим
     // в данном типе акта
     const int actTypeId = ui->actTypeComboBox->currentData().toInt();
@@ -523,6 +531,22 @@ bool CreateActWidget::validateForm()
             ui->actTabWidget->setCurrentWidget(ui->metersTab);
             return false;
         }
+    }
+
+    // 17. Проверяем правильно выбранный характер работ
+    const bool requiresWorkSchedule =
+        actTypeId == 1 ||
+        actTypeId == 2 ||
+        actTypeId == 7;
+
+    if (requiresWorkSchedule &&
+        ui->workScheduleComboBox->currentData().toInt() == 0)
+    {
+        QMessageBox::warning(this, "Ошибка",
+            "Выберите характер работ.");
+        ui->actTabWidget->setCurrentWidget(ui->mainTab);
+        ui->workScheduleComboBox->setFocus();
+        return false;
     }
 
     return true;
@@ -771,6 +795,11 @@ int CreateActWidget::insertAct()
 {
     // получаем необходимые данные с формы ввода
     const int actTypeId = ui->actTypeComboBox->currentData().toInt();
+    QVariant workScheduleType;
+    if (actTypeId == 1 || actTypeId == 2 || actTypeId == 7)
+    {
+        workScheduleType = ui->workScheduleComboBox->currentData().toInt();
+    }
     const int connectionId = ui->connectionComboBox->currentData().toInt();
     const int employeeId = ui->employeeComboBox->currentData().toInt();
     const QString actDate = ui->actDateEdit->date().toString(Qt::ISODate);
@@ -824,7 +853,8 @@ int CreateActWidget::insertAct()
         "reason, "
         "result, "
         "seal_number, "
-        "replacement_duration_minutes"
+        "replacement_duration_minutes, "
+        "work_schedule_type"
         ") "
         "VALUES ("
         ":actTypeId, "
@@ -836,7 +866,8 @@ int CreateActWidget::insertAct()
         ":reason, "
         ":result, "
         ":sealNumber,"
-        ":replacementDuration"
+        ":replacementDuration, "
+        ":workScheduleType"
         ");");
 
     query.bindValue(":actTypeId", actTypeId);
@@ -849,6 +880,7 @@ int CreateActWidget::insertAct()
     query.bindValue(":result", result);
     query.bindValue(":sealNumber", sealNumber);
     query.bindValue(":replacementDuration", replacementDuration);
+    query.bindValue(":workScheduleType", workScheduleType);
 
     if (!query.exec())
     {
@@ -999,6 +1031,21 @@ void CreateActWidget::updateActTypeUi()
     // скрываем блоки ТТ
     ui->removedCurrentTransformersGroupBox->setVisible(false);
     ui->installedCurrentTransformersGroupBox->setVisible(false);
+
+    // Настраиваем отображение поля характера работ
+    // переменная выбора типов актов в котором нужен характер работ
+    const bool showWorkSchedule =
+        actTypeId == 1 ||
+        actTypeId == 2 ||
+        actTypeId == 7;
+    // устанавливаем видимость в зависимости от типа акта
+    ui->workScheduleWidget->setVisible(showWorkSchedule);
+    // в случае выбора акта с не нужным характером работ сбрасываем на 0
+    if (!showWorkSchedule)
+    {
+        ui->workScheduleComboBox->setCurrentIndex(0);
+    }
+
     // отображаем окна и подписи согласно выбранному типу акта
     switch (actTypeId)
     {
@@ -1516,6 +1563,8 @@ void CreateActWidget::clearForm()
     clearMeasurementTab();
     clearConclusionTab();
 
+
+
     // обновляем вид графического окна
     updateActTypeUi();
     // возвращаемся на первую страницу
@@ -1574,6 +1623,10 @@ void CreateActWidget::clearMainTab()
     // они же за счет работы сигналов и сбросят зависимые поля
     ui->actTypeComboBox->setCurrentIndex(0);
     ui->areaComboBox->setCurrentIndex(0);
+
+    // характер работ
+    ui->workScheduleComboBox->setCurrentIndex(0);
+    ui->workScheduleWidget->setVisible(false);
 
     // устанавливаем текущую дату
     ui->actDateEdit->setDate(QDate::currentDate());

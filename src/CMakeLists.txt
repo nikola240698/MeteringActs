@@ -15,6 +15,7 @@ add_executable(MeteringActs
         currenttransformerdialog.cpp
         actrepository.cpp
         docxgenerator.cpp
+        actcalculator.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -28,6 +29,7 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/actrepository.h
         ${MY_INCLUDE_DIR}/actdata.h
         ${MY_INCLUDE_DIR}/docxgenerator.h
+        ${MY_INCLUDE_DIR}/actcalculator.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui

@@ -74,6 +74,13 @@ struct VectorDiagramData
 
 };
 
+// Выбор плановой/внеплановой работы
+enum WorkScheduleType
+{
+    PlannedWork = 1,
+    UnplannedWork = 2
+};
+
 // структура данных акта
 struct ActData
 {
@@ -82,6 +89,8 @@ struct ActData
 
     QString actTypeName;
     QDate date;
+
+    int workScheduleType = 0;
 
     // Место проведения работ
     QString areaName;

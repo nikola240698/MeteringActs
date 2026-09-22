@@ -53,7 +53,7 @@ QString ActRepository::lastError() const
 // метод загрузки основных данных
 bool ActRepository::loadMainData(int actId, ActData &data)
 {
-    // сооздаем запрос и пробуем подготовить его
+    // создаем запрос и пробуем подготовить его
     QSqlQuery query(m_database.getDatabase());
     if (!query.prepare(
         "SELECT "
@@ -74,7 +74,8 @@ bool ActRepository::loadMainData(int actId, ActData &data)
         "a.reason,"
         "a.result, "
         "a.seal_number, "
-        "a.replacement_duration_minutes "
+        "a.replacement_duration_minutes,"
+        "a.work_schedule_type "
 
         "FROM acts a "
 
@@ -143,6 +144,12 @@ bool ActRepository::loadMainData(int actId, ActData &data)
     {
         data.replacementDurationMinutes =
             query.value("replacement_duration_minutes").toInt();
+    }
+    // проверяем, указан ли характер работ
+    if (!query.value("work_schedule_type").isNull())
+    {
+        data.workScheduleType =
+            query.value("work_schedule_type").toInt();
     }
 
     return true;
