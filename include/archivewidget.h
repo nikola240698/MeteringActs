@@ -30,9 +30,16 @@ public:
 private:
     Ui::ArchiveWidget *ui;
 
-    Database m_database;
+    Database &m_database;
 
-    void loadActs();
+    void loadActs(
+        const QString &searchText = QString(),
+        int actTypeId = -1);
+
+    void loadActTypes();
+
+    // метод генерации DOCX файла
+    void generateSelectedAct();
 };
 
 
