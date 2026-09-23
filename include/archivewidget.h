@@ -48,6 +48,9 @@ private:
     //  метод для сокращения всех connect
     void applyFilters();
 
+    // метод открытия окна показа акта
+    void openSelectedAct();
+
 
 };
 

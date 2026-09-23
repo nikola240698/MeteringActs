@@ -10,7 +10,7 @@
 #include <QSignalBlocker>
 
 #include "archivewidget.h"
-
+#include "actviewdialog.h"
 #include "actrepository.h"
 #include "docxgenerator.h"
 #include "ui_archivewidget.h"
@@ -75,7 +75,7 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
         [this]()
         {
             // создаем блокировку сигналов для всех элементов
-            // чтобы не выполнлся их connect и изменении данных
+            // чтобы не выполнялся их connect и изменении данных
             const QSignalBlocker searchBlocker(
                 ui->searchLineEdit);
             const QSignalBlocker typeBlocker(
@@ -96,6 +96,17 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
                 QDate(today.year(), today.month(), 1));
             ui->dateToEdit->setDate(today);
             applyFilters();
+        });
+
+    // Подключаем слот кнопки "Открыть акт"
+    connect(ui->openActButton, &QPushButton::clicked, this,
+        &ArchiveWidget::openSelectedAct);
+
+    // Подключаем слот двойного нажатия на строку акта
+    connect(ui->actsTableView, &QTableView::doubleClicked, this,
+        [this](const QModelIndex &)
+        {
+            openSelectedAct();
         });
 
 }
@@ -331,6 +342,30 @@ void ArchiveWidget::applyFilters()
         dateTo);
 
 
+
+}
+
+void ArchiveWidget::openSelectedAct()
+{
+    const QModelIndexList selectedRows =
+        ui->actsTableView->selectionModel()->selectedRows();
+
+    if (selectedRows.isEmpty())
+    {
+        QMessageBox::warning(this, "Акт не выбран", "Выберите акт для просмотра.");
+
+        return;
+    }
+
+    const int row = selectedRows.first().row();
+
+    const QAbstractItemModel* model = ui->actsTableView->model();
+
+    const int actId = model->index(row, 0).data().toInt();
+
+    ActViewDialog dialog(m_database, actId, this);
+
+    dialog.exec();
 
 }
 

@@ -17,6 +17,7 @@ add_executable(MeteringActs
         docxgenerator.cpp
         actcalculator.cpp
         archivewidget.cpp
+        actviewdialog.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -32,6 +33,7 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/docxgenerator.h
         ${MY_INCLUDE_DIR}/actcalculator.h
         ${MY_INCLUDE_DIR}/archivewidget.h
+        ${MY_INCLUDE_DIR}/actviewdialog.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui
@@ -42,6 +44,7 @@ add_executable(MeteringActs
         ${MY_UI_DIR}/currenttransformeractwidget.ui
         ${MY_UI_DIR}/currenttransformerdialog.ui
         ${MY_UI_DIR}/archivewidget.ui
+        ${MY_UI_DIR}/actviewdialog.ui
 )
 
 target_include_directories(MeteringActs PRIVATE

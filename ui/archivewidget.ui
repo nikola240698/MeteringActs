@@ -138,6 +138,13 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="openActButton">
+       <property name="text">
+        <string>Открыть акт</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="generateDocxButton">
        <property name="text">
         <string>Сформировать DOCX</string>
