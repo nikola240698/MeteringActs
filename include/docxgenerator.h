@@ -112,6 +112,11 @@ private:
     bool loadDocument(QDomDocument &document);
     bool saveXmlDocument(const QDomDocument &document);
 
+    // Упаковка DOCX
+    bool compressDocx(
+        const QString &sourceDirectory,
+        const QString &outputPath);
+
     // метод удаления при необходимости векторной диаграммы
     bool processConditionalBlock(
         QDomDocument &document,

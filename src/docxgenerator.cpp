@@ -7,6 +7,9 @@
 #include <QXmlStreamReader>
 #include <QDomDocument>
 #include <QSaveFile>
+#include <quazip.h>
+#include <quazipfile.h>
+#include <QDirIterator>
 
 #include "docxgenerator.h"
 #include "actcalculator.h"
@@ -275,12 +278,22 @@ bool DocxGenerator::saveDocument(const QString &outputPath)
     }
 
     // 4. Упаковываем содержимое рабочей директории
+    /*
     if (!JlCompress::compressDir(outputPath, m_workDirectory))
     {
         m_lastError = "Не удалось создать DOCX: "
             + outputPath;
         return false;
     }
+    */
+
+    if (!compressDocx(m_workDirectory, outputPath))
+    {
+        return false;
+    }
+
+
+
 
     // 5. Проверяем, что файл действительно появился
     QFileInfo resultInfo(outputPath);
@@ -295,6 +308,9 @@ bool DocxGenerator::saveDocument(const QString &outputPath)
     }
 
     return true;
+
+
+
 }
 
 bool DocxGenerator::generate(const ActData &data, const QString &outputPath)
@@ -1661,8 +1677,131 @@ bool DocxGenerator::saveXmlDocument(const QDomDocument &document)
     return true;
 }
 
+bool DocxGenerator::compressDocx(const QString &sourceDirectory, const QString &outputPath)
+{
+
+    QDir sourceDir(sourceDirectory);
+
+    if (!sourceDir.exists())
+    {
+        m_lastError =
+            "Каталог для упаковки DOCX не существует: "
+            + sourceDirectory;
+
+        return false;
+    }
+
+    QuaZip zip(outputPath);
+
+    if (!zip.open(QuaZip::mdCreate))
+    {
+        m_lastError =
+            "Не удалось создать ZIP-контейнер DOCX: "
+            + outputPath;
+
+        return false;
+    }
+
+    QDirIterator iterator(
+        sourceDirectory,
+        QDir::Files | QDir::Hidden,
+        QDirIterator::Subdirectories);
+
+    while (iterator.hasNext())
+    {
+        const QString absoluteFilePath = iterator.next();
+
+        // Получаем путь относительно корня DOCX.
+        //
+        // Например:
+        //
+        // /.../docx_test/word/document.xml
+        //
+        // превращается в:
+        //
+        // word/document.xml
+        //
+        const QString relativeFilePath =
+            sourceDir.relativeFilePath(absoluteFilePath);
+
+        QFile inputFile(absoluteFilePath);
+
+        if (!inputFile.open(QIODevice::ReadOnly))
+        {
+            m_lastError =
+                "Не удалось открыть файл для упаковки DOCX: "
+                + absoluteFilePath;
+
+            zip.close();
+            return false;
+        }
+
+        QuaZipFile outputFile(&zip);
+
+        QuaZipNewInfo fileInfo(
+            relativeFilePath,
+            absoluteFilePath);
+
+        if (!outputFile.open(
+                QIODevice::WriteOnly,
+                fileInfo))
+        {
+            m_lastError =
+                "Не удалось добавить файл в DOCX: "
+                + relativeFilePath;
+
+            inputFile.close();
+            zip.close();
+
+            return false;
+        }
+
+        const QByteArray data = inputFile.readAll();
+
+        if (outputFile.write(data) != data.size())
+        {
+            m_lastError =
+                "Ошибка записи файла в DOCX: "
+                + relativeFilePath;
+
+            outputFile.close();
+            inputFile.close();
+            zip.close();
+
+            return false;
+        }
+
+        outputFile.close();
+        inputFile.close();
+
+        if (outputFile.getZipError() != UNZ_OK)
+        {
+            m_lastError =
+                "Ошибка QuaZip при упаковке файла: "
+                + relativeFilePath;
+
+            zip.close();
+            return false;
+        }
+    }
+
+    zip.close();
+
+    if (zip.getZipError() != UNZ_OK)
+    {
+        m_lastError =
+            "Ошибка завершения ZIP-контейнера DOCX.";
+
+        return false;
+    }
+
+    return true;
+}
+
+
+
 bool DocxGenerator::processConditionalBlock(QDomDocument &document, const QString &blockName, bool keep,
-    const QString &replacementText)
+                                            const QString &replacementText)
 {
     const QString startMarker =
         "{{#" + blockName + "}}";
