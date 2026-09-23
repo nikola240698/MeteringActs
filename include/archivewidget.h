@@ -6,8 +6,9 @@
 #include <QWidget>
 #include <QDate>
 
-#include "database.h"
 
+class Database;
+class QSqlQueryModel;
 
 QT_BEGIN_NAMESPACE
 
@@ -32,6 +33,8 @@ private:
     Ui::ArchiveWidget *ui;
 
     Database &m_database;
+
+    QSqlQueryModel* m_model = nullptr;
 
     void loadActs(
         const QString &searchText = QString(),

@@ -21,6 +21,23 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Создем модель отображения данных
+    m_model = new QSqlQueryModel(this);
+    ui->actsTableView->setModel(m_model);
+    // Скрываем столбец ID
+    ui->actsTableView->hideColumn(0);
+    // Выбираем сразу всю строку
+    ui->actsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    // Активный выбор только на одной строке
+    ui->actsTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+    // Запрещаем редактирование
+    ui->actsTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    // Убираем вертикальные номера строк
+    ui->actsTableView->verticalHeader()->setVisible(false);
+    // Последний столбец занимает свободное место
+    ui->actsTableView->horizontalHeader()->setStretchLastSection(true);
+
+
     // Выставляем дату по умолчанию в QDateEdit
     const QDate today = QDate::currentDate();
 
@@ -90,11 +107,27 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
             // сбрасываем всё
             ui->searchLineEdit->clear();
             ui->actTypeComboBox->setCurrentIndex(0);
+            // снимаем галочку
             ui->dateFilterCheckBox->setChecked(false);
+            // отключаем формы даты
+            ui->dateFromEdit->setEnabled(false);
+            ui->dateToEdit->setEnabled(false);
             const QDate today = QDate::currentDate();
+
+            // Возвращаем стандартные диапазоны
+            ui->dateFromEdit->setMinimumDate(
+                QDate(2000, 1, 1));
+            ui->dateFromEdit->setMaximumDate(
+                QDate(2100, 12, 31));
+            ui->dateToEdit->setMinimumDate(
+                QDate(2000, 1, 1));
+            ui->dateToEdit->setMaximumDate(
+                QDate(2100, 12, 31));
+
             ui->dateFromEdit->setDate(
                 QDate(today.year(), today.month(), 1));
             ui->dateToEdit->setDate(today);
+
             applyFilters();
         });
 
@@ -123,7 +156,7 @@ void ArchiveWidget::loadActs(
     const QDate &dateFrom,
     const QDate &dateTo)
 {
-    auto* model = new QSqlQueryModel(this);
+
 
     QSqlQuery query(m_database.getDatabase());
 
@@ -183,43 +216,22 @@ void ArchiveWidget::loadActs(
         qWarning() << "Не удалось загрузить архив актов: "
             << query.lastError().text();
 
-        delete model;
+
         return;
     }
 
-    model->setQuery(std::move(query));
+    m_model->setQuery(std::move(query));
 
-    model->setHeaderData(0, Qt::Horizontal, "ID");
-    model->setHeaderData(1, Qt::Horizontal, "Дата");
-    model->setHeaderData(2, Qt::Horizontal, "Тип акта");
-    model->setHeaderData(3, Qt::Horizontal, "Подстанция");
-    model->setHeaderData(4, Qt::Horizontal, "Присоединение");
-    model->setHeaderData(5, Qt::Horizontal, "Напряжение, кВ");
-    model->setHeaderData(6, Qt::Horizontal, "Представитель");
-
-    ui->actsTableView->setModel(model);
-
-    // Скрываем столбец ID
-    ui->actsTableView->hideColumn(0);
-
-    // Выбираем сразу всю строку
-    ui->actsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-
-    // Активный выбор только на одной строке
-    ui->actsTableView->setSelectionMode(QAbstractItemView::SingleSelection);
-
-    // Запрещаем редактирование
-    ui->actsTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-    // Убираем вертикальные номера строк
-    ui->actsTableView->verticalHeader()->setVisible(false);
-
-    // Последний столбец занимает свободное место
-    ui->actsTableView->horizontalHeader()->setStretchLastSection(true);
+    m_model->setHeaderData(0, Qt::Horizontal, "ID");
+    m_model->setHeaderData(1, Qt::Horizontal, "Дата");
+    m_model->setHeaderData(2, Qt::Horizontal, "Тип акта");
+    m_model->setHeaderData(3, Qt::Horizontal, "Подстанция");
+    m_model->setHeaderData(4, Qt::Horizontal, "Присоединение");
+    m_model->setHeaderData(5, Qt::Horizontal, "Напряжение, кВ");
+    m_model->setHeaderData(6, Qt::Horizontal, "Представитель");
 
     // Подгоняем остальные столбцы
     ui->actsTableView->resizeColumnsToContents();
-
 }
 
 void ArchiveWidget::loadActTypes()
