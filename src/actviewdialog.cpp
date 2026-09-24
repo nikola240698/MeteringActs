@@ -57,7 +57,7 @@ void ActViewDialog::fillActData()
         QString("Запись в БД: №%1").arg(m_actId));
 
     ui->substationLabel->setText(
-        "ПС" + m_data.substationName);
+        "ПС " + m_data.substationName);
 
     ui->areaLabel->setText(
         m_data.areaName);
@@ -270,7 +270,7 @@ void ActViewDialog::fillMeters()
             if (meter)
             {
                 ui->equipmentLayout->addWidget(
-                    createMeterTable(*meter, "Пибор учета: "));
+                    createMeterTable(*meter, "Пирбор учета: "));
             }
             break;
         }
@@ -396,7 +396,7 @@ QString ActViewDialog::workDescription() const
 
     if (!schedule.isEmpty())
     {
-        return QString("Произведена %1 работа по %2 на стороне %2кВ.")
+        return QString("Произведена %1 работа по %2 на стороне %3кВ.")
             .arg(schedule)
             .arg(work)
             .arg(m_data.voltage);
@@ -475,7 +475,7 @@ void ActViewDialog::fillCurrentTransformers()
             {
                 ui->equipmentLayout->addWidget(
                     createCurrentTransformerTable(
-                        installedTransformers, "Установленные трансфомраотры тока: "));
+                        installedTransformers, "Установленные трансформаторы тока: "));
             }
             break;
         }

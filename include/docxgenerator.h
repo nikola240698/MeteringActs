@@ -6,6 +6,8 @@
 #include <QString>
 #include <QStringList>
 #include <QDomDocument>
+#include <QTemporaryDir>
+#include <memory>
 
 #include "actdata.h"
 
@@ -33,6 +35,8 @@ private:
     QString m_lastError;
     QString m_workDirectory;
     QString m_documentXmlPath;
+    // Временная папка хранения временных фалов перед сборкой
+    std::unique_ptr<QTemporaryDir> m_tempDir;
 
     QString readDocumentText();
 

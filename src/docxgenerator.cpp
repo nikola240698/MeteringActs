@@ -41,33 +41,18 @@ bool DocxGenerator::unpackTemplate(const QString &templatePath)
         return false;
     }
 
-    // Пока используем обычную тестовую папку
-    m_workDirectory =
-        QDir(QStringLiteral(PROJECT_ROOT)).filePath("docx_test");
-    // создаем рабочую директорию
-    QDir workDir(m_workDirectory);
+    // Для каждой генерации создаем отдельную временную директорию
+    m_tempDir = std::make_unique<QTemporaryDir>();
 
-    // Удаляем содержимое предыдущего текста
-    if (workDir.exists())
+    if (!m_tempDir->isValid())
     {
-        // пробуем удалить старый каталог
-        if (!workDir.removeRecursively())
-        {
-            // формируем ошибку
-            m_lastError =
-                "Не удается удалить предыдущий временный каталог: "
-                    + m_workDirectory;
-            return false;
-        }
-    }
-    // пробуем создать временную папку
-    if (!QDir().mkpath(m_workDirectory))
-    {
-        // формируем ошибку
         m_lastError =
-            "Не удается создать временный каталог: " + m_workDirectory;
+            "Не удалось создать временный каталог для DOCX.";
+
         return false;
     }
+
+    m_workDirectory = m_tempDir->path();
 
     // DOCX является ZIP архивом
     const QStringList extractedFiles =
@@ -1841,10 +1826,20 @@ bool DocxGenerator::processConditionalBlock(QDomDocument &document, const QStrin
     }
 
     // 2. Проверяем наличие обоих маркеров
-    if (startParagraph.isNull() ||
-        endParagraph.isNull())
+    if (startMarker.isNull())
     {
-        m_lastError = "В DOCX найден условный блок: " + blockName;
+        m_lastError =
+            "В DOCX не найден начальный маркер условного блока: "
+            + startMarker;
+
+        return false;
+    }
+
+    if (endMarker.isNull())
+    {
+        m_lastError =
+            "В DOCX не найден конечный маркер условного блока: "
+            + endMarker;
 
         return false;
     }
