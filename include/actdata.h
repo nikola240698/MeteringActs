@@ -93,6 +93,10 @@ struct ActData
     int workScheduleType = 0;
 
     // Место проведения работ
+    int areaId = -1;
+    int substationId = -1;
+    int connectionId = -1;
+
     QString areaName;
     QString substationName;
     QString connectionName;
@@ -100,6 +104,7 @@ struct ActData
     QString ctRatio;
 
     // Представитель предприятия
+    int employeeId = -1;
     QString employeeName;
     QString employeePosition;
 

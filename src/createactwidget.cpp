@@ -161,6 +161,15 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     connect(ui->clearButton, &QPushButton::clicked, this, &CreateActWidget::clearForm);
 }
 
+CreateActWidget::CreateActWidget(Database &database, int actId, QWidget *parent) :
+    CreateActWidget(database, parent)
+{
+    m_mode = Mode::Edit;
+    m_editActId = actId;
+
+    loadActForEditing(actId);
+}
+
 CreateActWidget::~CreateActWidget()
 {
     delete ui;
@@ -1675,6 +1684,88 @@ void CreateActWidget::clearConclusionTab()
     // Причина и заключение
     ui->reasonPlainTextEdit->clear();
     ui->resultPlainTextEdit->clear();
+
+}
+
+void CreateActWidget::loadActForEditing(int actId)
+{
+    ActRepository repository(m_database);
+
+    ActData data;
+
+    if (!repository.loadAct(actId, data))
+    {
+        QMessageBox::critical(this, "Ошибка",
+            "Не удалось загрузить акт для редактирования: "
+            + repository.lastError());
+
+        return;
+    }
+
+    qDebug() << "Editing act: " << data.id;
+
+    // Загружаем тип акта
+    const int actTypeIndex =
+        ui->actTypeComboBox->findData(data.actTypeId);
+
+    if (actTypeIndex >= 0)
+    {
+        ui->actTypeComboBox->setCurrentIndex(actTypeIndex);
+    }
+
+    // Загружаем дату
+    ui->actDateEdit->setDate(data.date);
+
+    // Загружаем участок
+    const int areaIndex =
+        ui->areaComboBox->findData(data.areaId);
+
+    if (areaIndex >= 0)
+    {
+        ui->areaComboBox->setCurrentIndex(areaIndex);
+    }
+
+    // Загружаем подстанцию
+    const int substationIndex =
+        ui->substationComboBox->findData(data.substationId);
+
+    if (substationIndex >= 0)
+    {
+        ui->substationComboBox->setCurrentIndex(substationIndex);
+    }
+
+    // Загружаем присоединение
+    const int connectionIndex =
+        ui->connectionComboBox->findData(data.connectionId);
+
+    if (connectionIndex >= 0)
+    {
+        ui->connectionComboBox->setCurrentIndex(connectionIndex);
+    }
+
+    // Загружаем представителя
+    const int employeeIndex =
+        ui->employeeComboBox->findData(data.employeeId);
+
+    if (employeeIndex >= 0)
+    {
+        ui->employeeComboBox->setCurrentIndex(employeeIndex);
+    }
+
+    // Загружаем характер работ для актов, где они используются
+    if (data.workScheduleType > 0)
+    {
+        const int scheduleIndex =
+            ui->workScheduleComboBox->findData(data.workScheduleType);
+
+        if (scheduleIndex >= 0)
+        {
+            ui->workScheduleComboBox->setCurrentIndex(scheduleIndex);
+        }
+    }
+
+
+
 
 }
 

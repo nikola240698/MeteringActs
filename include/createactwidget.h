@@ -49,9 +49,19 @@ public:
         InstalledCurrentTransformer = 2
     };
 
+    // Роль работы окна ввода акта
+    enum class Mode
+    {
+        Create,
+        Edit
+    };
+
 
 
     explicit CreateActWidget(Database &database, QWidget *parent = nullptr);
+
+    explicit CreateActWidget(
+        Database &database, int actId, QWidget* parent = nullptr);
 
     ~CreateActWidget() override;
 
@@ -66,6 +76,10 @@ private:
     MeterActWidget* m_secondaryMeterWidget = nullptr;
 
     VectorDiagramWidget* m_vectorDiagramWidget = nullptr;
+
+    // Поля для работы акта в режиме создания
+    Mode m_mode = Mode::Create;
+    int m_editActId = -1;
 
     // Коллекция для сторонних представителей
     QList<ExternalRepresentativeWidget *> m_externalRepresentativeWidgets;
@@ -145,6 +159,9 @@ private:
     void clearEquipmentTab();
     void clearMeasurementTab();
     void clearConclusionTab();
+
+    // метод загрузки акта для редактирования
+    void loadActForEditing(int actId);
 
 };
 

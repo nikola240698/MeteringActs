@@ -62,12 +62,18 @@ bool ActRepository::loadMainData(int actId, ActData &data)
         "at.name AS act_type_name, "
         "a.act_date, "
 
+        "ar.id AS area_id, "
         "ar.name AS area_name, "
+
+        "s.id AS substation_id, "
         "s.name AS substation_name,"
+
+        "c.id AS connection_id, "
         "c.name AS connection_name, "
         "c.voltage_kv, "
         "c.ct_ratio, "
 
+        "a.employee_id, "
         "a.employee_name, "
         "a.employee_position, "
 
@@ -126,13 +132,19 @@ bool ActRepository::loadMainData(int actId, ActData &data)
 
     data.date = QDate::fromString(query.value("act_date").toString(), Qt::ISODate);
 
+    data.areaId = query.value("area_id").toInt();
     data.areaName = query.value("area_name").toString();
+
+    data.substationId = query.value("substation_id").toInt();
     data.substationName = query.value("substation_name").toString();
+
+    data.connectionId = query.value("connection_id").toInt();
     data.connectionName = query.value("connection_name").toString();
 
     data.voltage = query.value("voltage_kv").toString();
     data.ctRatio = query.value("ct_ratio").toString();
 
+    data.employeeId = query.value("employee_id").toInt();
     data.employeeName = query.value("employee_name").toString();
     data.employeePosition = query.value("employee_position").toString();
 
