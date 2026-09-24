@@ -304,7 +304,7 @@ void ArchiveWidget::generateSelectedAct()
             .arg(data.date.toString("dd-MM-yyyy"));
 
     // Выбираем путь сохранения
-    const QString outputPath =
+    QString outputPath =
         QFileDialog::getSaveFileName(
             this, "Сохранить акт", suggestedFileName, "Документ Word (*.docx)");
 
@@ -312,6 +312,12 @@ void ArchiveWidget::generateSelectedAct()
     if (outputPath.isEmpty())
     {
         return;
+    }
+
+    // Проверяем, что в конце файла указано расширение
+    if (!outputPath.endsWith(".docx", Qt::CaseInsensitive))
+    {
+        outputPath += ".docx";
     }
 
     // Формируем DOCX

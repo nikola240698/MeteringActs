@@ -63,6 +63,8 @@ private:
     QString actTitle() const;
     QString workDescription() const;
     QString formatActDate() const;
+    // получение характера работ из целочисленного
+    QString workScheduleText() const;
 
     // Методы для создания таблиц ТТ
     void fillCurrentTransformers();
@@ -94,6 +96,9 @@ private:
 
     // Метод нажатия на кнопку формирования DOCX
     void generateDocx();
+
+
+
 
 
 

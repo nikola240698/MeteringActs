@@ -361,33 +361,50 @@ QString ActViewDialog::workDescription() const
     switch (m_data.actTypeId)
     {
         case 1:
-            work = "а проверка прибора учета";
+            work = "проверке прибора учета";
             break;
         case 2:
-            work = "а замена прибора учета";
+            work = "замене прибора учета";
             break;
         case 3:
-            work = "о снятие показаний прибора учета";
+            work = "снятию показаний прибора учета";
             break;
         case 4:
-            work = "о снятие прибора учета";
+            work = "снятию прибора учета";
             break;
         case 5:
-            work = "а установка прибора учета";
+            work = "установке прибора учета";
             break;
         case 6:
-            work = "а установка трансформаторов тока и прибора учета";
+            work = "установке трансформаторов тока и прибора учета";
             break;
         case 7:
-            work = "а замена трансформаторов тока";
+            work = "замене трансформаторов тока";
             break;
         default:
             return {};
     }
 
-    return QString("Произведен%1 на стороне %2кВ.")
-        .arg(work)
-        .arg(m_data.voltage);
+    QString schedule;
+
+    if (m_data.actTypeId == 1 ||
+        m_data.actTypeId == 2 ||
+        m_data.actTypeId == 7)
+    {
+        schedule = workScheduleText();
+    }
+
+    if (!schedule.isEmpty())
+    {
+        return QString("Произведена %1 работа по %2 на стороне %2кВ.")
+            .arg(schedule)
+            .arg(work)
+            .arg(m_data.voltage);
+    }
+
+    return QString("Произведена работа по %1 на стороне %2кВ.")
+            .arg(work)
+            .arg(m_data.voltage);
 }
 
 QString ActViewDialog::formatActDate() const
@@ -900,6 +917,19 @@ void ActViewDialog::generateDocx()
 
     QMessageBox::information(this, "Готово",
         "Документ успешно сформирован: " + outputPath);
+}
+
+QString ActViewDialog::workScheduleText() const
+{
+    switch (m_data.workScheduleType)
+    {
+        case 1:
+            return "плановая";
+        case 2:
+            return "внеплановая";
+        default:
+            return {};
+    }
 }
 
 

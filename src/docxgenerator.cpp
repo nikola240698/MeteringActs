@@ -1680,7 +1680,7 @@ bool DocxGenerator::saveXmlDocument(const QDomDocument &document)
 bool DocxGenerator::compressDocx(const QString &sourceDirectory, const QString &outputPath)
 {
 
-    QDir sourceDir(sourceDirectory);
+    const QDir sourceDir(sourceDirectory);
 
     if (!sourceDir.exists())
     {
