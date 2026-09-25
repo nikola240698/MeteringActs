@@ -5,6 +5,8 @@
 
 #include <QWidget>
 
+#include "actdata.h"
+
 
 QT_BEGIN_NAMESPACE
 
@@ -42,6 +44,9 @@ public:
 
     bool validate();
     void clear();
+
+    // Метод загрузки данных для редактирования
+    void setData(const VectorDiagramData &data);
 
 private:
     Ui::VectorDiagramWidget *ui;

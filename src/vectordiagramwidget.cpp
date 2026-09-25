@@ -168,6 +168,35 @@ void VectorDiagramWidget::clear()
     ui->angleCTypeComboBox->setCurrentText("C");
 }
 
+void VectorDiagramWidget::setData(const VectorDiagramData &data)
+{
+    clear();
+
+    if (!data.exists)
+    {
+        return;
+    }
+
+    QLocale locale(QLocale::Russian);
+
+    ui->currentALineEdit->setText(locale.toString(data.ia, 'f', 0));
+    ui->angleALineEdit->setText(locale.toString(data.angleA, 'f', 0));
+    ui->angleATypeComboBox->setCurrentText(data.angleAType);
+
+
+    ui->currentBLineEdit->setText(locale.toString(data.ib, 'f', 0));
+    ui->angleBLineEdit->setText(locale.toString(data.angleB, 'f', 0));
+    ui->angleBTypeComboBox->setCurrentText(data.angleBType);
+
+    ui->currentCLineEdit->setText(locale.toString(data.ic, 'f', 0));
+    ui->angleCLineEdit->setText(locale.toString(data.angleC, 'f', 0));
+    ui->angleCTypeComboBox->setCurrentText(data.angleCType);
+
+    ui->uabLineEdit->setText(locale.toString(data.uab, 'f', 2));
+    ui->ubcLineEdit->setText(locale.toString(data.ubc, 'f', 2));
+    ui->ucaLineEdit->setText(locale.toString(data.uca, 'f', 2));
+}
+
 void VectorDiagramWidget::setupValidators()
 {
     QLocale locale(QLocale::Russian);

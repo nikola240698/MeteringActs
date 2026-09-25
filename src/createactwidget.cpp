@@ -1807,6 +1807,14 @@ void CreateActWidget::loadActForEditing(int actId)
         representative->setData(representativeData);
     }
 
+    // Загружаем векторную диаграмму
+    ui->hasVectorDiagramCheckBox->setChecked(data.vectorDiagram.exists);
+
+    if (data.vectorDiagram.exists);
+    {
+        m_vectorDiagramWidget->setData(data.vectorDiagram);
+    }
+
 
 }
 
