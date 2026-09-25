@@ -411,10 +411,11 @@ void ArchiveWidget::editSelectedAct()
 
     EditActDialog dialog(m_database, actId, this);
 
-    dialog.exec();
-
-    // Обновляем архив
-    applyFilters();
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        // Обновляем архив
+        applyFilters();
+    }
 }
 
 

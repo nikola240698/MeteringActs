@@ -1061,6 +1061,8 @@ bool CreateActWidget::updateActMainData()
         return false;
     }
 
+    emit actUpdated();
+
     return true;
 }
 

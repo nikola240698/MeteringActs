@@ -66,6 +66,8 @@ public:
     ~CreateActWidget() override;
 
 
+signals:
+    void actUpdated();
 
 private:
     Ui::CreateActWidget *ui;

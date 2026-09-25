@@ -14,6 +14,8 @@ EditActDialog::EditActDialog(Database &database, int actId, QWidget *parent)
     auto *editor = new CreateActWidget(database, actId, ui->editorContainerWidget);
 
     ui->editorContainerWidget->layout()->addWidget(editor);
+
+    connect(editor, &CreateActWidget::actUpdated, this, &QDialog::accept);
 }
 
 EditActDialog::~EditActDialog()
