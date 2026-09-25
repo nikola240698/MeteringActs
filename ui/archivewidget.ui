@@ -145,6 +145,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="editActButton">
+       <property name="text">
+        <string>Редактировать акт</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="generateDocxButton">
        <property name="text">
         <string>Сформировать DOCX</string>
@@ -155,6 +162,18 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>searchLineEdit</tabstop>
+  <tabstop>actTypeComboBox</tabstop>
+  <tabstop>dateFilterCheckBox</tabstop>
+  <tabstop>dateFromEdit</tabstop>
+  <tabstop>dateToEdit</tabstop>
+  <tabstop>resetFiltersButton</tabstop>
+  <tabstop>actsTableView</tabstop>
+  <tabstop>openActButton</tabstop>
+  <tabstop>editActButton</tabstop>
+  <tabstop>generateDocxButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

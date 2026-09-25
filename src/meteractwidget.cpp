@@ -193,6 +193,61 @@ void MeterActWidget::clear()
     ui->reactiveExportLineEdit->clear();
 }
 
+void MeterActWidget::setData(const ActMeterData &data)
+{
+    // Полностью очищаем прежнее состояние
+    clear();
+
+    // Восстанавливаем сохраненные данные из акта
+    m_meterId = data.meterId;
+
+    ui->serialNumberLineEdit->setText(data.serialNumber);
+    ui->meterNameLineEdit->setText(data.name);
+    ui->accuracyClassLineEdit->setText(data.accuracyClass);
+
+    if (data.verificationYear > 0)
+    {
+        ui->verificationYearLineEdit->setText(
+            QString::number(data.verificationYear));
+    }
+
+    // Снимаем все флажки
+    ui->activeImportCheckBox->setChecked(false);
+    ui->activeExportCheckBox->setChecked(false);
+    ui->reactiveImportCheckBox->setChecked(false);
+    ui->reactiveExportCheckBox->setChecked(false);
+
+    QLocale locale(QLocale::Russian);
+
+    for (const ActMeterReadingData &reading : data.readings)
+    {
+        const QString value =
+            locale.toString(reading.value, 'f', 3);
+
+        switch (reading.typeId)
+        {
+            case 1:
+                ui->activeImportCheckBox->setChecked(true);
+                ui->activeImportLineEdit->setText(value);
+                break;
+            case 2:
+                ui->activeExportCheckBox->setChecked(true);
+                ui->activeExportCheckBox->setText(value);
+                break;
+            case 3:
+                ui->reactiveImportCheckBox->setChecked(true);
+                ui->reactiveImportLineEdit->setText(value);
+                break;
+            case 4:
+                ui->reactiveExportCheckBox->setChecked(true);
+                ui->reactiveExportLineEdit->setText(value);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 // очистка параметров прибора
 void MeterActWidget::resetMeter()
 {

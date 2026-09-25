@@ -54,6 +54,9 @@ private:
     // метод открытия окна показа акта
     void openSelectedAct();
 
+    // Метод открытия редактирования выбранного акта
+    void editSelectedAct();
+
 
 };
 

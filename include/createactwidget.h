@@ -162,6 +162,8 @@ private:
 
     // метод загрузки акта для редактирования
     void loadActForEditing(int actId);
+    // Загружаем данные прибора учета по роли
+    const ActMeterData* meterByRole(const ActData &data, int role) const;
 
 };
 

@@ -1764,9 +1764,36 @@ void CreateActWidget::loadActForEditing(int actId)
         }
     }
 
+    // Загружаем основной прибор учета
+    const int primaryRole = primaryMeterRole();
 
+    if (const ActMeterData* meter = meterByRole(data, primaryRole))
+    {
+        m_primaryMeterWidget->setData(*meter);
+    }
 
+    // Загружаем дополнительный прибор учета если имеется
+    if (data.actTypeId == 2)
+    {
+        if (const ActMeterData* meter = meterByRole(data, InstalledMeter))
+        {
+            m_secondaryMeterWidget->setData(*meter);
+        }
+    }
 
+}
+
+const ActMeterData * CreateActWidget::meterByRole(const ActData &data, int role) const
+{
+    for (const ActMeterData &meter : data.meters)
+    {
+        if (meter.role == role)
+        {
+            return &meter;
+        }
+    }
+
+    return nullptr;
 }
 
 

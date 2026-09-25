@@ -14,6 +14,7 @@
 
 #include "database.h"
 #include "meterdialog.h"
+#include "actdata.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -57,6 +58,9 @@ public:
     bool validate();
     // полная очистка формы
     void clear();
+
+    // Метод загрузки данных
+    void setData(const ActMeterData &data);
 
 private:
     Ui::MeterActWidget *ui;

@@ -14,6 +14,7 @@
 #include "actrepository.h"
 #include "docxgenerator.h"
 #include "ui_archivewidget.h"
+#include "editactdialog.h"
 
 
 ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
@@ -141,6 +142,10 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
         {
             openSelectedAct();
         });
+
+    // Подключаем кнопку редактирования акта
+    connect(ui->editActButton, &QPushButton::clicked, this,
+        &ArchiveWidget::editSelectedAct);
 
 }
 
@@ -385,6 +390,31 @@ void ArchiveWidget::openSelectedAct()
 
     dialog.exec();
 
+}
+
+void ArchiveWidget::editSelectedAct()
+{
+    const QModelIndexList selectedRows =
+        ui->actsTableView->selectionModel()->selectedRows();
+
+    if (selectedRows.isEmpty())
+    {
+        QMessageBox::warning(this, "Акт не выбран",
+            "Выберите акт для редактирования.");
+
+        return;
+    }
+
+    const int row = selectedRows.first().row();
+
+    const int actId = m_model->index(row, 0).data().toInt();
+
+    EditActDialog dialog(m_database, actId, this);
+
+    dialog.exec();
+
+    // Обновляем архив
+    applyFilters();
 }
 
 
