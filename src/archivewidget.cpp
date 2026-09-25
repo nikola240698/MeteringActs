@@ -147,6 +147,10 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
     connect(ui->editActButton, &QPushButton::clicked, this,
         &ArchiveWidget::editSelectedAct);
 
+    // Подключаем кнопку удаления
+    connect(ui->deleteActButton, &QPushButton::clicked, this,
+        &ArchiveWidget::deleteSelectedAct);
+
 }
 
 ArchiveWidget::~ArchiveWidget()
@@ -416,6 +420,72 @@ void ArchiveWidget::editSelectedAct()
         // Обновляем архив
         applyFilters();
     }
+}
+
+void ArchiveWidget::deleteSelectedAct()
+{
+    const QModelIndexList selectedRows =
+        ui->actsTableView->selectionModel()->selectedRows();
+
+    if (selectedRows.isEmpty())
+    {
+        QMessageBox::warning(this, "Акт не выбран",
+            "Выберите акт для удаления.");
+
+        return;
+    }
+
+    const int row = selectedRows.first().row();
+
+    const int actId = m_model->index(row, 0).data().toInt();
+
+    const QString actDate = m_model->index(row, 1).data().toString();
+
+    const QString actType = m_model->index(row, 2).data().toString();
+
+    const QString substation = m_model->index(row, 3).data().toString();
+
+    const QString connection = m_model->index(row, 4).data().toString();
+
+    const QMessageBox::StandardButton answer =
+        QMessageBox::question(this, "Удаление акта",
+            QString(
+                "Вы действительно хотите удалить этот акт?\n\n"
+                "Дата: %1\n"
+                "Тип: %2\n"
+                "Подстанция: %3\n"
+                "Присоединение: %4\n\n"
+                "Это действие нельзя отменить.")
+                    .arg(actDate)
+                    .arg(actType)
+                    .arg(substation)
+                    .arg(connection),
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::No);
+
+    if (answer != QMessageBox::Yes)
+        return;
+
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "DELETE FROM acts "
+        "WHERE id = :actId;");
+
+    query.bindValue(":actId", actId);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка удаления",
+            "Не удалось удалить акт: " + query.lastError().text());
+
+        return;
+    }
+
+    applyFilters();
+
+    QMessageBox::information(this, "Акт удалён",
+        "Акт успешно удалён.");
 }
 
 

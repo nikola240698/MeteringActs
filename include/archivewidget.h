@@ -57,6 +57,9 @@ private:
     // Метод открытия редактирования выбранного акта
     void editSelectedAct();
 
+    // Метод удаления акта
+    void deleteSelectedAct();
+
 
 };
 

@@ -1,3 +1,6 @@
+
+#include <QSqlQuery>
+
 #include "database.h"
 
 // конструктор класса
@@ -28,6 +31,17 @@ bool Database::open()
         // выводим сообщение, указав ошибку
         qDebug() << "Error opening database: ";
         qDebug() << db.lastError().text();
+        return false;
+    }
+
+    QSqlQuery query(db);
+
+    if (!query.exec("PRAGMA foreign_keys = ON;"))
+    {
+        qDebug() << "Failed to enable foreign keys:";
+        qDebug() << query.lastError().text();
+
+        db.close();
         return false;
     }
 
