@@ -154,7 +154,14 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     connect(ui->createButton, &QPushButton::clicked, this,
         [this]()
         {
-            saveAct();
+            if (m_mode == Mode::Create)
+            {
+                saveAct();
+            }
+            else
+            {
+                updateAct();
+            }
         });
 
     // кнопка очистки формы
@@ -166,6 +173,8 @@ CreateActWidget::CreateActWidget(Database &database, int actId, QWidget *parent)
 {
     m_mode = Mode::Edit;
     m_editActId = actId;
+
+    ui->createButton->setText("Сохранить изменения");
 
     loadActForEditing(actId);
 }
@@ -795,6 +804,351 @@ bool CreateActWidget::saveAct()
     }
     //-------------------------------------------------
     //-------------------------------------------------
+
+    return true;
+}
+
+bool CreateActWidget::updateAct()
+{
+    if (m_editActId < 0)
+    {
+        QMessageBox::critical(this, "Ошибка",
+            "Не указан акт для редактирования. ");
+
+        return false;
+    }
+
+    if (!validateForm())
+        return false;
+
+    if (!m_database.transaction())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось начать транзакцию: " + m_database.lastError());
+
+        return false;
+    }
+
+    // Обновляем основную запись акта
+    if (!updateActMainData())
+    {
+        m_database.rollback();
+        return false;
+    }
+
+    // Удаляем старые дочерние данные
+    if (!deleteActDetails())
+    {
+        m_database.rollback();
+        return false;
+    }
+
+    // Сторонние представители
+    if (!insertExternalRepresentatives(m_editActId))
+    {
+        m_database.rollback();
+        return false;
+    }
+
+    // Основной прибор
+    const int primaryActMeterId =
+        insertActMeter(m_editActId, m_primaryMeterWidget, primaryMeterRole());
+
+    if (primaryActMeterId < 0)
+    {
+        m_database.rollback();
+        return false;
+    }
+
+    if (!insertReadings(primaryActMeterId, m_primaryMeterWidget))
+    {
+        m_database.rollback();
+        return false;
+    }
+
+    if (!updateMeterVerificationYear(m_primaryMeterWidget))
+    {
+        m_database.rollback();
+        return false;
+    }
+
+    const int actTypeId =
+        ui->actTypeComboBox->currentData().toInt();
+
+    // Второй прибор при замене
+    if (actTypeId == 2)
+    {
+        const int secondaryActMeterId =
+            insertActMeter(m_editActId, m_secondaryMeterWidget, InstalledMeter);
+
+        if (secondaryActMeterId < 0)
+        {
+            m_database.rollback();
+            return false;
+        }
+
+        if (!insertReadings(secondaryActMeterId, m_secondaryMeterWidget))
+        {
+            m_database.rollback();
+            return false;
+        }
+    }
+
+    // ТТ - установка
+    if (actTypeId == 6)
+    {
+        if (!insertActCurrentTransformers(
+            m_editActId,
+            m_installedCurrentTransformerWidgets,
+            InstalledCurrentTransformer))
+        {
+            m_database.rollback();
+            return false;
+        }
+    }
+
+    // ТТ - замена
+    if (actTypeId == 7)
+    {
+        if (!insertActCurrentTransformers(
+            m_editActId,
+            m_removedCurrentTransformerWidgets,
+            RemovedCurrentTransformer))
+        {
+            m_database.rollback();
+            return false;
+        }
+
+        if (!insertActCurrentTransformers(
+            m_editActId,
+            m_installedCurrentTransformerWidgets,
+            InstalledCurrentTransformer))
+        {
+            m_database.rollback();
+            return false;
+        }
+    }
+
+    // Векторная диграмма
+    if (!insertVectorDiagram(m_editActId))
+    {
+        m_database.rollback();
+        return false;
+    }
+
+    if (!m_database.commit())
+    {
+        const QString error = m_database.lastError();
+
+        m_database.rollback();
+
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось завершить транзакцию: " + error);
+
+        return false;
+    }
+
+    QMessageBox::information(this, "Акт обновлён",
+        "Изменения успешно сохранены.");
+
+    return true;
+}
+
+
+
+bool CreateActWidget::updateActMainData()
+{
+    const int actTypeId = ui->actTypeComboBox->currentData().toInt();
+
+    const int connectionId = ui->connectionComboBox->currentData().toInt();
+
+    const int employeeId = ui->employeeComboBox->currentData().toInt();
+
+    const QString actDate = ui->actDateEdit->date().toString(Qt::ISODate);
+
+    const QString reason = ui->reasonPlainTextEdit->toPlainText().trimmed();
+
+    const QString result = ui->resultPlainTextEdit->toPlainText().trimmed();
+
+    QVariant workScheduleType;
+
+    if (actTypeId == 1 ||
+        actTypeId == 2 ||
+        actTypeId == 7)
+    {
+        workScheduleType = ui->workScheduleComboBox->currentData().toInt();
+    }
+
+    QVariant sealNumber;
+
+    if (ui->sealWidget->isVisible())
+    {
+        sealNumber = ui->sealLineEdit->text().trimmed();
+    }
+
+    QVariant replacementDuration;
+
+    if (actTypeId == 2 && ui->hasVectorDiagramCheckBox->isChecked())
+    {
+        replacementDuration = ui->replacementDurationSpinBox->value();
+    }
+
+    // Получаем актуальные данные представителя
+    QSqlQuery employeeQuery(m_database.getDatabase());
+
+    employeeQuery.prepare(
+        "SELECT short_name, position "
+        "FROM employees "
+        "WHERE id = :employeeId;");
+
+    employeeQuery.bindValue(":employeeId", employeeId);
+
+    if (!employeeQuery.exec() || !employeeQuery.next())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось получить данные представителя: "
+            + employeeQuery.lastError().text());
+
+        return false;
+    }
+
+    const QString employeeName =
+        employeeQuery.value("short_name").toString();
+
+    const QString employeePosition =
+        employeeQuery.value("position").toString();
+
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "UPDATE acts SET "
+        "act_type_id = :actTypeId, "
+        "act_date = :actDate, "
+        "connection_id = :connectionId, "
+        "employee_id = :employeeId, "
+        "employee_name = :employeeName, "
+        "employee_position = :employeePosition, "
+        "reason = :reason, "
+        "result = :result, "
+        "seal_number = :sealNumber, "
+        "replacement_duration_minutes = :replacementDuration, "
+        "work_schedule_type = :workScheduleType "
+        "WHERE id = :actId;");
+
+    query.bindValue(":actTypeId", actTypeId);
+    query.bindValue(":actDate", actDate);
+    query.bindValue(":connectionId", connectionId);
+
+    query.bindValue(":employeeId", employeeId);
+    query.bindValue(":employeeName", employeeName);
+    query.bindValue(":employeePosition", employeePosition);
+
+    query.bindValue(":reason", reason);
+    query.bindValue(":result", result);
+    query.bindValue(":sealNumber", sealNumber);
+
+    query.bindValue(":replacementDuration", replacementDuration);
+
+    query.bindValue(":workScheduleType", workScheduleType);
+
+    query.bindValue(":actId", m_editActId);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось обновить акт: " + query.lastError().text());
+
+        return false;
+    }
+
+    return true;
+}
+
+bool CreateActWidget::deleteActDetails()
+{
+    QSqlQuery query(m_database.getDatabase());
+
+    // Показания приборов
+    query.prepare(
+        "DELETE FROM meter_readings "
+        "WHERE act_meter_id IN ("
+        "SELECT id "
+        "FROM act_meters "
+        "WHERE act_id = :actId"
+        ");");
+
+    query.bindValue(":actId", m_editActId);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось удалить старые показания: " + query.lastError().text());
+
+        return false;
+    }
+
+    // Приборы учета
+    query.prepare(
+        "DELETE FROM act_meters "
+        "WHERE act_id = :actId;");
+
+    query.bindValue(":actId", m_editActId);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось удалить старые данные приборов учета: "
+            + query.lastError().text());
+
+        return false;
+    }
+
+    // Трансформаторы тока
+    query.prepare(
+        "DELETE FROM act_current_transformers "
+        "WHERE act_id = :actId;");
+
+    query.bindValue(":actId", m_editActId);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось удалить старые данные ТТ: " + query.lastError().text());
+
+        return false;
+    }
+
+    // Сторонние представители
+    query.prepare(
+        "DELETE FROM external_representatives "
+        "WHERE act_id = :actId;");
+
+    query.bindValue(":actId", m_editActId);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось удалить старых представителей: "
+            + query.lastError().text());
+
+        return false;
+    }
+
+    // Векторная диаграмма
+    query.prepare(
+        "DELETE FROM vector_diagrams "
+        "WHERE act_id = :actId;");
+
+    query.bindValue(":actId", m_editActId);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка баз данных",
+            "Не удалось удалить старую векторную диаграмму: "
+            + query.lastError().text());
+
+        return false;
+    }
 
     return true;
 }
