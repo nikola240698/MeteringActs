@@ -67,6 +67,13 @@ bool ExternalRepresentativeWidget::validate()
     return true;
 }
 
+void ExternalRepresentativeWidget::setData(const ExternalRepresentativeData &data)
+{
+    ui->organizationLineEdit->setText(data.organization);
+    ui->nameLineEdit->setText(data.shortName);
+    ui->positionLineEdit->setText(data.position);
+}
+
 
 
 

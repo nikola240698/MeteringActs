@@ -222,7 +222,7 @@ void MeterActWidget::setData(const ActMeterData &data)
     for (const ActMeterReadingData &reading : data.readings)
     {
         const QString value =
-            locale.toString(reading.value, 'f', 3);
+            locale.toString(reading.value, 'f', 2);
 
         switch (reading.typeId)
         {
@@ -232,7 +232,7 @@ void MeterActWidget::setData(const ActMeterData &data)
                 break;
             case 2:
                 ui->activeExportCheckBox->setChecked(true);
-                ui->activeExportCheckBox->setText(value);
+                ui->activeExportLineEdit->setText(value);
                 break;
             case 3:
                 ui->reactiveImportCheckBox->setChecked(true);

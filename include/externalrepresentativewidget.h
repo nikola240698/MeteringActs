@@ -6,6 +6,8 @@
 
 #include <QWidget>
 
+#include "actdata.h"
+
 
 QT_BEGIN_NAMESPACE
 
@@ -30,6 +32,10 @@ public:
     QString shortName() const;
 
     bool validate();
+
+    // Загрузка данных для редактирования акта
+    void setData(const ExternalRepresentativeData &data);
+
 
 signals:
     void removeRequested();

@@ -1781,6 +1781,33 @@ void CreateActWidget::loadActForEditing(int actId)
         }
     }
 
+    // Загружаем данные заключения
+    ui->reasonPlainTextEdit->setPlainText(data.reason);
+    ui->resultPlainTextEdit->setPlainText(data.result);
+    // Загружаем пломбу
+    ui->sealLineEdit->setText(data.sealNumber);
+
+    // Загружаем длительность замены прибора
+    if (data.actTypeId == 2 && data.vectorDiagram.exists)
+    {
+        ui->replacementDurationSpinBox->setValue(data.replacementDurationMinutes);
+    }
+
+    // Загружаем сторонних представителей
+    clearExternalRepresentatives();
+
+    for (const ExternalRepresentativeData &representativeData :
+        data.externalRepresentatives)
+    {
+        addExternalRepresentative();
+
+        ExternalRepresentativeWidget* representative =
+            m_externalRepresentativeWidgets.last();
+
+        representative->setData(representativeData);
+    }
+
+
 }
 
 const ActMeterData * CreateActWidget::meterByRole(const ActData &data, int role) const
