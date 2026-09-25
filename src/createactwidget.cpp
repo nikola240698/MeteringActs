@@ -1815,6 +1815,40 @@ void CreateActWidget::loadActForEditing(int actId)
         m_vectorDiagramWidget->setData(data.vectorDiagram);
     }
 
+    // Загружаем трансформаторы тока
+    int removedIndex = 0;
+    int installedIndex = 0;
+
+    for (const ActCurrentTransformerData &transformerData :
+        data.currentTransformers)
+    {
+        if (transformerData.role == RemovedCurrentTransformer)
+        {
+            // Первый виджет уже создан, дополнительные создаем по необходимости
+            if (removedIndex >= m_removedCurrentTransformerWidgets.size())
+            {
+                addRemovedCurrentTransformer();
+            }
+
+            m_removedCurrentTransformerWidgets[removedIndex]
+                ->setData(transformerData);
+
+            ++removedIndex;
+        }
+        else if (transformerData.role == InstalledCurrentTransformer)
+        {
+            if (installedIndex >= m_installedCurrentTransformerWidgets.size())
+            {
+                addInstalledCurrentTransformer();
+            }
+
+            m_installedCurrentTransformerWidgets[installedIndex]
+                ->setData(transformerData);
+
+            ++installedIndex;
+        }
+    }
+
 
 }
 

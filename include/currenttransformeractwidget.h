@@ -6,6 +6,7 @@
 #include <QWidget>
 
 #include "database.h"
+#include "actdata.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -35,6 +36,9 @@ public:
 
     bool validate();
     void clear();
+
+    // Загрузка данных для редактирования акта
+    void setData(const ActCurrentTransformerData &data);
 
 signals:
     void removeRequested();

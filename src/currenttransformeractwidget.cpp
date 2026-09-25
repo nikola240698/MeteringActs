@@ -125,6 +125,26 @@ void CurrentTransformerActWidget::clear()
     ui->accuracyLineEdit->clear();
 }
 
+void CurrentTransformerActWidget::setData(const ActCurrentTransformerData &data)
+{
+    clear();
+
+    m_currentTransformerId = data.currentTransformerId;
+
+    const int phaseIndex =
+        ui->phaseComboBox->findData(data.phase);
+
+    if (phaseIndex >= 0)
+    {
+        ui->phaseComboBox->setCurrentIndex(phaseIndex);
+    }
+
+    ui->nameLineEdit->setText(data.name);
+    ui->serialNumberLineEdit->setText(data.serialNumber);
+    ui->ratioLineEdit->setText(data.transformationRatio);
+    ui->accuracyLineEdit->setText(data.accuracyClass);
+}
+
 // метод поиска ТТ
 void CurrentTransformerActWidget::findCurrentTransformer()
 {
