@@ -4,9 +4,11 @@
 #include <QSqlError>
 #include <QDebug>
 #include <QHeaderView>
+#include <QMessageBox>
 
 #include "directorieswidget.h"
 #include "ui_directorieswidget.h"
+#include "areadialog.h"
 
 
 DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
@@ -70,6 +72,143 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
         {
             showAreasLevel();
         });
+
+    // Подключаем кнопку добавления слева
+    connect(ui->addLeftButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            if (m_level == DirectoryLevel::Areas)
+            {
+                AreaDialog dialog(m_database, this);
+
+                if (dialog.exec() == QDialog::Accepted)
+                    loadAreas();
+            }
+            else if (m_level == DirectoryLevel::Substations)
+            {
+                // Добавим позже
+            }
+        });
+
+    // Подключаем кнопку редактирования слева
+    connect(ui->editLeftButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            if (m_level != DirectoryLevel::Areas)
+                return;
+
+            const QModelIndex index =
+                ui->leftTableView->currentIndex();
+
+            if (!index.isValid())
+            {
+                QMessageBox::information(this, "Редактирование",
+                    "Выберите учаток для редактирования.");
+
+                return;
+            }
+
+            const int areaId = m_leftModel->index(index.row(), 0).data().toInt();
+
+            AreaDialog dialog(m_database, areaId, this);
+
+            if (dialog.exec() == QDialog::Accepted)
+            {
+                loadAreas();
+                clearSubstations();
+            }
+        });
+
+    // Слот кнопки удаления слева
+    connect(ui->deleteLeftButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            if (m_level != DirectoryLevel::Areas)
+                return;
+
+            const QModelIndex index = ui->leftTableView->currentIndex();
+
+            if (!index.isValid())
+            {
+                QMessageBox::information(this, "Удаление",
+                    "Выберите участок для удаления");
+
+                return;
+            }
+
+            const int row = index.row();
+
+            const int areaId =
+                m_leftModel->index(row, 0).data().toInt();
+
+            const QString areaName =
+                m_leftModel->index(row, 1).data().toString();
+
+            const auto answer = QMessageBox::question(
+                this, "Удаление участка", QString(
+                    "Удалить участок \"%1\"?\n\n"
+                    "Это действие нельзя отменить.")
+                    .arg(areaName),
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::No);
+
+            if (answer != QMessageBox::Yes)
+                return;
+
+            // Проверяем на наличие существующих ПС данного участка
+            QSqlQuery checkQuery(m_database.getDatabase());
+
+            checkQuery.prepare(
+                "SELECT EXISTS("
+                    "SELECT 1 "
+                    "FROM substations "
+                    "WHERE area_id = :areaId"
+                ");");
+
+            checkQuery.bindValue(":areaId", areaId);
+
+            if (!checkQuery.exec() || !checkQuery.next())
+            {
+                QMessageBox::critical(this, "Ошибка",
+                    "Не удалось проверить наличие подстанций.\n\n" +
+                    checkQuery.lastError().text());
+
+                return;
+            }
+
+            if (checkQuery.value(0).toBool())
+            {
+                QMessageBox::warning(this, "Удаление не возможно",
+                    QString(
+                        "Невозможно удалить участок \"%1\", "
+                        "пока в нём имеются подстанции.")
+                        .arg(areaName));
+
+                return;
+            }
+
+            QSqlQuery query(m_database.getDatabase());
+
+            query.prepare(
+                "DELETE FROM areas "
+                "WHERE id = :areaId;");
+
+            query.bindValue(":areaId", areaId);
+
+            if (!query.exec())
+            {
+                QMessageBox::critical(this, "Ошибка",
+                    "Не удалось удалить участок.\n\n" +
+                    query.lastError().text());
+
+
+                return;
+            }
+
+            loadAreas();
+            clearSubstations();
+        });
+
 }
 
 DirectoriesWidget::~DirectoriesWidget()
