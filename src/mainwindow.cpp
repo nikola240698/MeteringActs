@@ -5,6 +5,7 @@
 
 #include "createactwidget.h"
 #include "archivewidget.h"
+#include "directorieswidget.h"
 
 
 MainWindow::MainWindow(Database &database, QWidget *parent)
@@ -21,6 +22,10 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
     // Создаем виджет третьего окна и добавляем в stackWidget
     auto* archiveWidget = new ArchiveWidget(m_database, this);
     ui->stackedWidget->insertWidget(2, archiveWidget);
+
+    // Создаем страницу справочников
+    auto* directoriesWidget = new DirectoriesWidget(m_database, this);
+    ui->stackedWidget->insertWidget(3, directoriesWidget);
 
 
     // создаем группу кнопок для возможности уникального выбора

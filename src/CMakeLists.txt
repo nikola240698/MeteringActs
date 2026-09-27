@@ -19,6 +19,8 @@ add_executable(MeteringActs
         archivewidget.cpp
         actviewdialog.cpp
         editactdialog.cpp
+        directorieswidget.cpp
+        areadialog.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -36,6 +38,8 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/archivewidget.h
         ${MY_INCLUDE_DIR}/actviewdialog.h
         ${MY_INCLUDE_DIR}/editactdialog.h
+        ${MY_INCLUDE_DIR}/directorieswidget.h
+        ${MY_INCLUDE_DIR}/areadialog.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui
@@ -48,6 +52,8 @@ add_executable(MeteringActs
         ${MY_UI_DIR}/archivewidget.ui
         ${MY_UI_DIR}/actviewdialog.ui
         ${MY_UI_DIR}/editactdialog.ui
+        ${MY_UI_DIR}/directorieswidget.ui
+        ${MY_UI_DIR}/areadialog.ui
 )
 
 target_include_directories(MeteringActs PRIVATE
