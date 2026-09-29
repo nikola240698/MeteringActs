@@ -39,7 +39,7 @@ private:
     Database &m_database;
 
     DirectoryLevel m_level = DirectoryLevel::Areas;
-    int m_currentAreId = -1;
+    int m_currentAreaId = -1;
 
     QSqlQueryModel* m_leftModel = nullptr;
     QSqlQueryModel* m_rightModel = nullptr;
@@ -62,6 +62,12 @@ private:
     void clearConnections();
     // Метод настройки названий столбцов таблицы присоединений
     void setupConnectionsTable();
+
+    // Метод редактирования ПС
+    void editSubstation(int areaId, int substationId);
+    // Метод безопасного удаления ПС из БД
+    void deleteSubstation(
+        int areaId, int substationId, const QString &substationName);
 };
 
 

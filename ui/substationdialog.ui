@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AreaDialog</class>
- <widget class="QDialog" name="AreaDialog">
+ <class>SubstationDialog</class>
+ <widget class="QDialog" name="SubstationDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,27 +17,27 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Участок</string>
+   <string>Подстанция</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="titleLabel">
      <property name="text">
-      <string>Новый участок</string>
+      <string>Новая подстанция</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QLabel" name="nameLabel">
      <property name="text">
-      <string>Название участка:</string>
+      <string>Название подстанции:</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QLineEdit" name="nameLineEdit">
      <property name="placeholderText">
-      <string>Введите название участка...</string>
+      <string>Введите название подстанции...</string>
      </property>
     </widget>
    </item>
