@@ -68,6 +68,10 @@ private:
     // Метод безопасного удаления ПС из БД
     void deleteSubstation(
         int areaId, int substationId, const QString &substationName);
+
+    // Метод удаления присоединения
+    void deleteConnection(
+        int substationId, int connectionId, const QString &connectionName);
 };
 
 

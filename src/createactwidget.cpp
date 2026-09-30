@@ -6,6 +6,7 @@
 #include "actrepository.h"
 
 
+
 CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         : QWidget(parent), ui(new Ui::CreateActWidget), m_database(database)
 {

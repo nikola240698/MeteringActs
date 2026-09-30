@@ -10,6 +10,7 @@
 #include "ui_directorieswidget.h"
 #include "areadialog.h"
 #include "substationdialog.h"
+#include "connectiondialog.h"
 
 
 DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
@@ -268,107 +269,215 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
     connect(ui->addRightButton, &QPushButton::clicked, this,
         [this]()
         {
-            if (m_level != DirectoryLevel::Areas)
-                return;
-
-            const QModelIndex index =
-                ui->leftTableView->currentIndex();
-
-            if (!index.isValid())
+            // Добавляем подстанцию
+            if (m_level == DirectoryLevel::Areas)
             {
-                QMessageBox::information(this, "Добавление подстанции",
-                    "Сначала выберите учаток.");
+                const QModelIndex index =
+                    ui->leftTableView->currentIndex();
 
-                return;
+                if (!index.isValid())
+                {
+                    QMessageBox::information(this, "Добавление подстанции",
+                        "Сначала выберите участок.");
+
+                    return;
+                }
+
+                const int areaId = m_leftModel->index(index.row(), 0)
+                    .data().toInt();
+
+                SubstationDialog dialog(m_database, areaId, this);
+
+                if (dialog.exec() == QDialog::Accepted)
+                    loadSubstations(areaId);
+
+                    return;
             }
 
-            const int areaId = m_leftModel->index(index.row(), 0)
-                .data().toInt();
+            // Добавляем присоединение
+            if (m_level == DirectoryLevel::Substations)
+            {
+                const QModelIndex index =
+                    ui->leftTableView->currentIndex();
 
-            SubstationDialog dialog(m_database, areaId, this);
+                if (!index.isValid())
+                {
+                    QMessageBox::information(this, "Добавление присоединения",
+                        "Сначала выберите подстацнию.");
 
-            if (dialog.exec() == QDialog::Accepted)
-                loadSubstations(areaId);
+                    return;
+                }
+
+                const int substationId =
+                    m_leftModel->index(index.row(), 0).data().toInt();
+
+                ConnectionDialog dialog(
+                    m_database, substationId, this);
+
+                if (dialog.exec() == QDialog::Accepted)
+                    loadConnections(substationId);
+            }
         });
 
     // Подключаем кнопку редактирования справа
     connect(ui->editRightButton, &QPushButton::clicked, this,
         [this]()
         {
-            // Справа будут ПС только на уровне участков
-            if (m_level != DirectoryLevel::Areas)
-                return;
-
-            const QModelIndex areaIndex =
-                ui->leftTableView->currentIndex();
-
-            if (!areaIndex.isValid())
+            // Редактирование подстанции
+            if (m_level == DirectoryLevel::Areas)
             {
-                QMessageBox::information(this, "Редактирование",
-                    "Сначала выберите учаток");
+                const QModelIndex areaIndex =
+                    ui->leftTableView->currentIndex();
+
+                if (!areaIndex.isValid())
+                {
+                    QMessageBox::information(this, "Редактирование",
+                        "Сначала выберите участок");
+
+                    return;
+                }
+
+                const QModelIndex substationIndex =
+                    ui->rightTableView->currentIndex();
+
+                if (!substationIndex.isValid())
+                {
+                    QMessageBox::information(this, "Редактирование",
+                        "Выберите подстанцию для редактирования.");
+
+                    return;
+                }
+
+                const int areaId =
+                    m_leftModel->index(areaIndex.row(), 0).data().toInt();
+
+                const int substationId =
+                    m_rightModel->index(substationIndex.row(), 0).data().toInt();
+
+                editSubstation(areaId, substationId);
 
                 return;
             }
 
-            const QModelIndex substationIndex =
-                ui->rightTableView->currentIndex();
-
-            if (!substationIndex.isValid())
+            // Редактирование присоединения
+            if (m_level == DirectoryLevel::Substations)
             {
-                QMessageBox::information(this, "Редактирование",
-                    "Выберите подстанцию для редактирования.");
+                const QModelIndex substationIndex =
+                    ui->leftTableView->currentIndex();
 
-                return;
+                if (!substationIndex.isValid())
+                {
+                    QMessageBox::information(this, "Редактирование",
+                        "Сначала выберите подстанцию.");
+
+                    return;
+                }
+
+                const QModelIndex connectionIndex =
+                    ui->rightTableView->currentIndex();
+
+                if (!connectionIndex.isValid())
+                {
+                    QMessageBox::information(this, "Редактирование",
+                        "Выберите присоединение для редактирования.");
+
+                    return;
+                }
+
+                const int substationId =
+                    m_leftModel->index(substationIndex.row(), 0).data().toInt();
+
+                const int connectionId =
+                    m_rightModel->index(connectionIndex.row(), 0).data().toInt();
+
+                ConnectionDialog dialog(
+                    m_database, substationId, connectionId, this);
+
+                if (dialog.exec() == QDialog::Accepted)
+                    loadConnections(substationId);
             }
-
-            const int areaId =
-                m_leftModel->index(areaIndex.row(), 0).data().toInt();
-
-            const int substationId =
-                m_rightModel->index(substationIndex.row(), 0).data().toInt();
-
-            editSubstation(areaId, substationId);
         });
 
     // Подключаем кнопку удаления справа
     connect(ui->deleteRightButton, &QPushButton::clicked, this,
         [this]()
         {
-            if (m_level != DirectoryLevel::Areas)
-                return;
-
-            const QModelIndex areaIndex =
-                ui->leftTableView->currentIndex();
-
-            if (!areaIndex.isValid())
+            // Удаление подстанции
+            if (m_level == DirectoryLevel::Areas)
             {
-                QMessageBox::information(this, "Удаление",
-                    "Сначала выберите участок.");
+                const QModelIndex areaIndex =
+                    ui->leftTableView->currentIndex();
+
+                if (!areaIndex.isValid())
+                {
+                    QMessageBox::information(this, "Удаление",
+                        "Сначала выберите участок.");
+
+                    return;
+                }
+
+                const QModelIndex substationIndex =
+                    ui->rightTableView->currentIndex();
+
+                if (!substationIndex.isValid())
+                {
+                    QMessageBox::information(this, "Удаление",
+                        "Выберите подстанцию для удаления.");
+
+                    return;
+                }
+
+                const int areaId =
+                    m_leftModel->index(areaIndex.row(), 0).data().toInt();
+
+                const int substationId =
+                    m_rightModel->index(substationIndex.row(), 0).data().toInt();
+
+                const QString substationName =
+                    m_rightModel->index(substationIndex.row(), 1).data().toString();
+
+                deleteSubstation(areaId, substationId, substationName);
 
                 return;
             }
 
-            const QModelIndex substationIndex =
-                ui->rightTableView->currentIndex();
-
-            if (!substationIndex.isValid())
+            // Удаление присоединения
+            if (m_level == DirectoryLevel::Substations)
             {
-                QMessageBox::information(this, "Удаление",
-                    "Выберите подстанцию для удаления.");
+                const QModelIndex substationIndex =
+                    ui->leftTableView->currentIndex();
 
-                return;
+                if (!substationIndex.isValid())
+                {
+                    QMessageBox::information(this, "Удаление",
+                        "Сначала выберите подстанцию.");
+
+                    return;
+                }
+
+                const QModelIndex connectionIndex =
+                    ui->rightTableView->currentIndex();
+
+                if (!connectionIndex.isValid())
+                {
+                    QMessageBox::information(this, "Удаление",
+                        "Выберите присоединение для удаления.");
+
+                    return;
+                }
+
+                const int substationId =
+                    m_leftModel->index(substationIndex.row(), 0).data().toInt();
+
+                const int connectionId =
+                    m_rightModel->index(connectionIndex.row(), 0).data().toInt();
+
+                const QString connectionName =
+                    m_rightModel->index(connectionIndex.row(), 1).data().toString();
+
+                deleteConnection(
+                    substationId, connectionId, connectionName);
             }
-
-            const int areaId =
-                m_leftModel->index(areaIndex.row(), 0).data().toInt();
-
-            const int substationId =
-                m_rightModel->index(substationIndex.row(), 0).data().toInt();
-
-            const QString substationName =
-                m_rightModel->index(substationIndex.row(), 1).data().toString();
-
-            deleteSubstation(areaId, substationId, substationName);
         });
 }
 
@@ -644,6 +753,74 @@ void DirectoriesWidget::deleteSubstation(int areaId, int substationId, const QSt
     {
         showSubstationsLevel(areaId);
     }
+}
+
+void DirectoriesWidget::deleteConnection(int substationId, int connectionId, const QString &connectionName)
+{
+    const auto answer = QMessageBox::question(this, "Удаление присоединения",
+        QString(
+            "Удалить присоединение \"%1\"?\n\n"
+            "Это действие нельзя отменить.")
+            .arg(connectionName),
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+
+    if (answer != QMessageBox::Yes)
+        return;
+
+    // Проверяем, используется ли присоединение в актах
+    QSqlQuery checkQuery(m_database.getDatabase());
+
+    checkQuery.prepare(
+        "SELECT EXISTS("
+            "SELECT 1 "
+            "FROM acts "
+        "WHERE connection_id = :connectionId);");
+
+    checkQuery.bindValue(":connectionId", connectionId);
+
+    if (!checkQuery.exec() || !checkQuery.next())
+    {
+        QMessageBox::critical(this, "Ошибка",
+            "Не удалось проверить использование присоединения.\n\n" +
+            checkQuery.lastError().text());
+
+        return;
+    }
+
+    if (checkQuery.value(0).toBool())
+    {
+        QMessageBox::warning(this, "Удаление невозможно",
+            QString(
+                "Невозможно удалить присоединение \"%1\", "
+                "так как оно используется в актах.")
+                .arg(connectionName));
+
+        return;
+    }
+
+    // Удаляем, если нигде не используется
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "DELETE FROM connections "
+        "WHERE id = :connectionId "
+        "AND substation_id = :substationId;");
+
+    query.bindValue(":connectionId", connectionId);
+
+    query.bindValue(":substationId", substationId);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка",
+            "Не удалось удалить присоединение.\n\n" +
+            query.lastError().text());
+
+        return;
+    }
+
+    loadConnections(substationId);
 }
 
 
