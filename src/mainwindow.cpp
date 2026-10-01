@@ -27,6 +27,14 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
     auto* directoriesWidget = new DirectoriesWidget(m_database, this);
     ui->stackedWidget->insertWidget(3, directoriesWidget);
 
+    // Получаем сигнал при изменении списка сотрудников
+    connect(directoriesWidget, &DirectoriesWidget::employeesChanged,
+        createActWidget, &CreateActWidget::reloadEmployees);
+
+    // Получаем сигнал при изменении списка участков, ПС и присоединений
+    connect(directoriesWidget, &DirectoriesWidget::objectChanged,
+        createActWidget, &CreateActWidget::reloadObject);
+
 
     // создаем группу кнопок для возможности уникального выбора
     auto *navigationGroup = new QButtonGroup(this);
@@ -47,10 +55,6 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
     // выбираем начальные условия создания окна
     ui->createActButton->setChecked(true);
     ui->stackedWidget->setCurrentIndex(0);
-
-
-
-
 }
 
 

@@ -89,7 +89,10 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
                 AreaDialog dialog(m_database, this);
 
                 if (dialog.exec() == QDialog::Accepted)
+                {
                     loadAreas();
+                    emit objectChanged();
+                }
             }
             else if (m_level == DirectoryLevel::Substations)
             {
@@ -140,6 +143,7 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
                 {
                     loadAreas();
                     clearSubstations();
+                    emit objectChanged();
                 }
             }
             // Редактируем подстанцию
@@ -268,6 +272,7 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
 
             loadAreas();
             clearSubstations();
+            emit objectChanged();
         });
 
     // Слот кнопки добавления справа
@@ -294,8 +299,10 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
                 SubstationDialog dialog(m_database, areaId, this);
 
                 if (dialog.exec() == QDialog::Accepted)
+                {
                     loadSubstations(areaId);
-
+                    emit objectChanged();
+                }
                     return;
             }
 
@@ -320,7 +327,10 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
                     m_database, substationId, this);
 
                 if (dialog.exec() == QDialog::Accepted)
+                {
                     loadConnections(substationId);
+                    emit objectChanged();
+                }
             }
         });
 
@@ -399,7 +409,10 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
                     m_database, substationId, connectionId, this);
 
                 if (dialog.exec() == QDialog::Accepted)
+                {
                     loadConnections(substationId);
+                    emit objectChanged();
+                }
             }
         });
 
@@ -482,6 +495,7 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
 
                 deleteConnection(
                     substationId, connectionId, connectionName);
+                emit objectChanged();
             }
         });
 
@@ -504,7 +518,10 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
             EmployeeDialog dialog(m_database, this);
 
             if (dialog.exec() == QDialog::Accepted)
+            {
                 loadEmployees();
+                emit employeesChanged();
+            }
         });
 
     // Подключаем кнопку "Изменить"
@@ -530,7 +547,10 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
             EmployeeDialog dialog(m_database, employeeId, this);
 
             if (dialog.exec() == QDialog::Accepted)
+            {
                 loadEmployees();
+                emit employeesChanged();
+            }
         });
 
     // подключаем клик по строке для активации кнопки изменения активности
@@ -602,6 +622,7 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
 
             loadEmployees();
             updateEmployeeButtons();
+            emit employeesChanged();
         });
 
     // Подключаем кнопку удаления сотрудника
@@ -689,6 +710,7 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
             }
 
             loadEmployees();
+            emit employeesChanged();
         });
 
 

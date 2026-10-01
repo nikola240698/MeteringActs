@@ -34,6 +34,12 @@ public:
 
     ~DirectoriesWidget() override;
 
+signals:
+    // сигнал при изменении списка сотрудников
+    void employeesChanged();
+    // сигнал при изменении списка объектов
+    void objectChanged();
+
 private:
     Ui::DirectoriesWidget *ui;
     Database &m_database;

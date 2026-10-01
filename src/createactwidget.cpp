@@ -185,6 +185,79 @@ CreateActWidget::~CreateActWidget()
     delete ui;
 }
 
+void CreateActWidget::reloadEmployees()
+{
+    const QVariant currentEmployeeId =
+        ui->employeeComboBox->currentData();
+
+    loadEmployees();
+
+    if (currentEmployeeId.isValid())
+    {
+        const int index =
+            ui->employeeComboBox->findData(currentEmployeeId);
+
+        if (index >= 0)
+            ui->employeeComboBox->setCurrentIndex(index);
+    }
+}
+
+void CreateActWidget::reloadObject()
+{
+    const QVariant currentAreaId =
+        ui->areaComboBox->currentData();
+
+    const QVariant currentSubstationId =
+        ui->substationComboBox->currentData();
+
+    const QVariant currentConnectionId =
+        ui->connectionComboBox->currentData();
+
+    // Сначала заново загружаем участки
+    loadAreas();
+
+    // Если участок раньше не был выбран - больше восстанавливать нечего
+    if (!currentAreaId.isValid())
+        return;
+
+    const int areaIndex =
+        ui->areaComboBox->findData(currentAreaId);
+
+    // Если вдруг участок удалили
+    if (areaIndex < 0)
+        return;
+
+    // Восстанавливаем участок
+    ui->areaComboBox->setCurrentIndex(areaIndex);
+
+    if (!currentSubstationId.isValid())
+        return;
+
+    const int substationIndex =
+        ui->substationComboBox->findData(currentSubstationId);
+
+    // Если ПС удалили
+    if (substationIndex < 0)
+        return;
+
+    // Восстанавливаем подстанцию
+    ui->substationComboBox->setCurrentIndex(substationIndex);
+
+
+    if (!currentConnectionId.isValid())
+        return;
+
+    const int connectionIndex =
+        ui->connectionComboBox->findData(currentConnectionId);
+
+    // Если присоединение удалено
+    if (connectionIndex <0)
+        return;
+
+    // Восстанавливаем присоединение
+    ui->connectionComboBox->setCurrentIndex(connectionIndex);
+}
+
 // метод загрузки типов актов
 void CreateActWidget::loadActTypes() const
 {

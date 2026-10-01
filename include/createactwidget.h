@@ -69,6 +69,10 @@ public:
 signals:
     void actUpdated();
 
+public slots:
+    void reloadEmployees();
+    void reloadObject();
+
 private:
     Ui::CreateActWidget *ui;
 
