@@ -43,6 +43,7 @@ private:
 
     QSqlQueryModel* m_leftModel = nullptr;
     QSqlQueryModel* m_rightModel = nullptr;
+    QSqlQueryModel* m_employeesModel = nullptr;
 
     // метод загрузки списка участков
     void loadAreas();
@@ -72,6 +73,12 @@ private:
     // Метод удаления присоединения
     void deleteConnection(
         int substationId, int connectionId, const QString &connectionName);
+
+    // Методы работы со вкладкой представителей
+    void loadEmployees();
+    void setupEmployeesTable();
+    // Метод обновления активности персонала для кнопки
+    void updateEmployeeButtons();
 };
 
 

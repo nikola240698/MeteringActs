@@ -11,6 +11,7 @@
 #include "areadialog.h"
 #include "substationdialog.h"
 #include "connectiondialog.h"
+#include "employeedialog.h"
 
 
 DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
@@ -18,10 +19,14 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
 {
     ui->setupUi(this);
 
+    // -------------------------------------------
+    // Вкладка "Объекты"
+    // -------------------------------------------
+
     // Скрываем по умолчания кнопку "Назад"
     ui->backButton->setVisible(false);
 
-    // создаем модели
+    // создаем модели объектов
     m_leftModel = new QSqlQueryModel(this);
     m_rightModel = new QSqlQueryModel(this);
     // вставляем их в виджеты
@@ -479,6 +484,214 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
                     substationId, connectionId, connectionName);
             }
         });
+
+    // -------------------------------------------
+    // Вкладка "Сотрудники"
+    // -------------------------------------------
+
+    // создаем модель представителей
+    m_employeesModel = new QSqlQueryModel(this);
+    ui->employeesTableView->setModel(m_employeesModel);
+
+    loadEmployees();
+    setupEmployeesTable();
+    updateEmployeeButtons();
+
+    // Подключаем кнопку "Добавить"
+    connect(ui->addEmployeeButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            EmployeeDialog dialog(m_database, this);
+
+            if (dialog.exec() == QDialog::Accepted)
+                loadEmployees();
+        });
+
+    // Подключаем кнопку "Изменить"
+    connect(ui->editEmployeeButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            const QModelIndex currentIndex =
+                ui->employeesTableView->currentIndex();
+
+            if (!currentIndex.isValid())
+            {
+                QMessageBox::information(this, "Сотрудники",
+                    "Выберите сотрудника для редактирования.");
+
+                return;
+            }
+
+            const int row = currentIndex.row();
+
+            const int employeeId =
+                m_employeesModel->index(row, 0).data().toInt();
+
+            EmployeeDialog dialog(m_database, employeeId, this);
+
+            if (dialog.exec() == QDialog::Accepted)
+                loadEmployees();
+        });
+
+    // подключаем клик по строке для активации кнопки изменения активности
+    connect(ui->employeesTableView, &QTableView::clicked, this,
+        [this](const QModelIndex &)
+        {
+            updateEmployeeButtons();
+        });
+
+    // Подключаем кнопку изменения активности персонала
+    connect(ui->toggleEmployeeButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            const QModelIndex index =
+                ui->employeesTableView->currentIndex();
+
+            if (!index.isValid())
+            {
+                QMessageBox::information(this, "Сотрудники",
+                    "Выберите сотрудника.");
+
+                return;
+            }
+
+            const int row = index.row();
+
+            const int employeeId =
+                m_employeesModel->index(row, 0).data().toInt();
+
+            const QString employeeName =
+                m_employeesModel->index(row, 1).data().toString();
+
+            const bool isActive =
+                m_employeesModel->index(row, 4).data().toBool();
+
+            const QString question = isActive
+                ? QString("Перевести сотрудника \"%1\" в неактивные?")
+                    .arg(employeeName)
+                : QString("Восстановить сотрудника \"%1\"?")
+                    .arg(employeeName);
+
+            const auto answer = QMessageBox::question(this,
+                isActive ? "Увольнение сотрудника" : "Восстановление сотрудника",
+                question,
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::No);
+
+            if (answer != QMessageBox::Yes)
+                return;
+
+            QSqlQuery query(m_database.getDatabase());
+
+            query.prepare(
+                "UPDATE employees "
+                "SET is_active = :isActive "
+                "WHERE id = :employeeId;");
+
+            query.bindValue(":isActive", isActive ? 0 : 1);
+            query.bindValue(":employeeId", employeeId);
+
+            if (!query.exec())
+            {
+                QMessageBox::critical(this, "Ошибка",
+                    "Не удалось изменить статус сотрудника.\n\n" +
+                    query.lastError().text());
+
+                return;
+            }
+
+            loadEmployees();
+            updateEmployeeButtons();
+        });
+
+    // Подключаем кнопку удаления сотрудника
+    connect(ui->deleteEmployeeButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            const QModelIndex index = ui->employeesTableView->currentIndex();
+
+            if (!index.isValid())
+            {
+                QMessageBox::information(this, "Удаление сотрудника",
+                    "Выберите сотрудника для удаления.");
+
+                return;
+            }
+
+            const int row = index.row();
+
+            const int employeeId =
+                m_employeesModel->index(row, 0).data().toInt();
+
+            const QString employeeName =
+                m_employeesModel->index(row, 1).data().toString();
+
+            // Проверяем, использовался ли сотрудник в актах
+            QSqlQuery checkQuery(m_database.getDatabase());
+
+            checkQuery.prepare(
+                "SELECT EXISTS("
+                "SELECT 1 "
+                "FROM acts "
+                "WHERE employee_id = :employeeId);");
+
+            checkQuery.bindValue(":employeeId", employeeId);
+
+            if (!checkQuery.exec() || !checkQuery.next())
+            {
+                QMessageBox::critical(this, "Ошибка",
+                    "Не удалось проверить использование сотрудника.\n\n" +
+                    checkQuery.lastError().text());
+
+                return;
+            }
+
+            if (checkQuery.value(0).toBool())
+            {
+                QMessageBox::warning(this, "Удаление невозможно",
+                    QString(
+                        "Невозможно удалить сотрудника \"%1\", "
+                        "так как он используется в актах.\n\n"
+                        "Если сотрудник больше не работает, "
+                        "переведите его в неактивные.")
+                        .arg(employeeName));
+
+                return;
+            }
+
+            // Сотрудник нигде не используется - спрашиваем разрешение
+            const auto answer = QMessageBox::question(this, "Удаление сотрудника",
+                QString(
+                    "Удалить сотрудника \"%1\"?\n\n"
+                    "Это действие нельзя отменить.")
+                    .arg(employeeName),
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::No);
+
+            if (answer != QMessageBox::Yes)
+                return;
+
+            QSqlQuery query(m_database.getDatabase());
+
+            query.prepare(
+                "DELETE FROM employees "
+                "WHERE id = :employeeId;");
+
+            query.bindValue(":employeeId", employeeId);
+
+            if (!query.exec())
+            {
+                QMessageBox::critical(this, "Ошибка",
+                    "Неудалось удалить сотрудника.\n\n" +
+                    query.lastError().text());
+
+                return;
+            }
+
+            loadEmployees();
+        });
+
+
 }
 
 DirectoriesWidget::~DirectoriesWidget()
@@ -821,6 +1034,98 @@ void DirectoriesWidget::deleteConnection(int substationId, int connectionId, con
     }
 
     loadConnections(substationId);
+}
+
+void DirectoriesWidget::loadEmployees()
+{
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "SELECT "
+            "id, "
+            "short_name,"
+            "position, "
+            "CASE "
+                "WHEN is_active = 1 THEN 'Работает' "
+                "ELSE 'Не работает' "
+            "END AS status, "
+            "is_active "
+        "FROM employees "
+        "ORDER BY is_active DESC, short_name;");
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка",
+            "Не удалось загрузить сотрудников:\n" +
+            query.lastError().text());
+
+        return;
+    }
+
+    m_employeesModel->setQuery(std::move(query));
+
+    m_employeesModel->setHeaderData(1, Qt::Horizontal, "Ф.И.О.");
+    m_employeesModel->setHeaderData(2, Qt::Horizontal, "Должность");
+    m_employeesModel->setHeaderData(3, Qt::Horizontal, "Статус");
+
+    ui->employeesTableView->hideColumn(0);
+    ui->employeesTableView->hideColumn(4);
+
+    ui->employeesTableView->clearSelection();
+    ui->employeesTableView->setCurrentIndex(QModelIndex());
+
+    setupEmployeesTable();
+    updateEmployeeButtons();
+}
+
+void DirectoriesWidget::setupEmployeesTable()
+{
+    ui->employeesTableView->setSelectionBehavior(
+        QAbstractItemView::SelectRows);
+
+    ui->employeesTableView->setSelectionMode(
+        QAbstractItemView::SingleSelection);
+
+    ui->employeesTableView->setEditTriggers(
+        QAbstractItemView::NoEditTriggers);
+
+    QHeaderView* header =
+        ui->employeesTableView->horizontalHeader();
+
+    header->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+
+    header->setSectionResizeMode(2, QHeaderView::Stretch);
+
+    header->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+}
+
+void DirectoriesWidget::updateEmployeeButtons()
+{
+    const QModelIndex index =
+        ui->employeesTableView->currentIndex();
+
+    if (!index.isValid())
+    {
+        ui->editEmployeeButton->setEnabled(false);
+        ui->toggleEmployeeButton->setEnabled(false);
+        ui->deleteEmployeeButton->setEnabled(false);
+
+        ui->toggleEmployeeButton->setText("Уволить");
+        return;
+    }
+
+    const int row = index.row();
+
+    const bool isActive =
+        m_employeesModel->index(row, 4).data().toBool();
+
+    ui->editEmployeeButton->setEnabled(true);
+    ui->toggleEmployeeButton->setEnabled(true);
+    ui->deleteEmployeeButton->setEnabled(true);
+
+    if (isActive)
+        ui->toggleEmployeeButton->setText("Уволить");
+    else
+        ui->toggleEmployeeButton->setText("Восстановить");
 }
 
 

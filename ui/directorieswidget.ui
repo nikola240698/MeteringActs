@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>DirectoriesWidget</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="directoriesWidgetLayout">
    <item>
     <widget class="QLabel" name="titleLabel">
      <property name="font">
@@ -28,141 +28,229 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="contentLayout">
-     <item>
-      <widget class="QGroupBox" name="leftGroupBox">
-       <property name="title">
-        <string/>
-       </property>
-       <layout class="QVBoxLayout" name="leftLayout">
-        <item>
-         <widget class="QPushButton" name="backButton">
-          <property name="text">
-           <string>← Назад к участкам</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="leftTitleLabel">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Участки</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTableView" name="leftTableView">
-          <property name="editTriggers">
-           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
-          </property>
-          <attribute name="verticalHeaderVisible">
-           <bool>false</bool>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="leftButtonsLayout">
-          <item>
-           <widget class="QPushButton" name="addLeftButton">
-            <property name="text">
-             <string>Добавить</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="editLeftButton">
-            <property name="text">
-             <string>Изменить</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="deleteLeftButton">
-            <property name="text">
-             <string>Удалить</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="rightGroupBox">
-       <property name="title">
-        <string/>
-       </property>
-       <layout class="QVBoxLayout" name="rightLayout">
-        <item>
-         <widget class="QLabel" name="rightTitleLabel">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Подстанции</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTableView" name="rightTableView">
-          <property name="editTriggers">
-           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
-          </property>
-          <attribute name="verticalHeaderVisible">
-           <bool>false</bool>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="rightButtonsLayout">
-          <item>
-           <widget class="QPushButton" name="addRightButton">
-            <property name="text">
-             <string>Добавить</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="editRightButton">
-            <property name="text">
-             <string>Изменить</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="deleteRightButton">
-            <property name="text">
-             <string>Удалить</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QTabWidget" name="directoriesTabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="objectsTab">
+      <attribute name="title">
+       <string>Объекты</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="objectsTablayout">
+       <item>
+        <layout class="QHBoxLayout" name="contentLayout">
+         <item>
+          <widget class="QGroupBox" name="leftGroupBox">
+           <property name="title">
+            <string/>
+           </property>
+           <layout class="QVBoxLayout" name="leftLayout">
+            <item>
+             <widget class="QPushButton" name="backButton">
+              <property name="text">
+               <string>← Назад к участкам</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="leftTitleLabel">
+              <property name="font">
+               <font>
+                <pointsize>14</pointsize>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Участки</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableView" name="leftTableView">
+              <property name="editTriggers">
+               <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+              </property>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="leftButtonsLayout">
+              <item>
+               <widget class="QPushButton" name="addLeftButton">
+                <property name="text">
+                 <string>Добавить</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="editLeftButton">
+                <property name="text">
+                 <string>Изменить</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="deleteLeftButton">
+                <property name="text">
+                 <string>Удалить</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="rightGroupBox">
+           <property name="title">
+            <string/>
+           </property>
+           <layout class="QVBoxLayout" name="rightLayout">
+            <item>
+             <widget class="QLabel" name="rightTitleLabel">
+              <property name="font">
+               <font>
+                <pointsize>14</pointsize>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Подстанции</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableView" name="rightTableView">
+              <property name="editTriggers">
+               <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+              </property>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="rightButtonsLayout">
+              <item>
+               <widget class="QPushButton" name="addRightButton">
+                <property name="text">
+                 <string>Добавить</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="editRightButton">
+                <property name="text">
+                 <string>Изменить</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="deleteRightButton">
+                <property name="text">
+                 <string>Удалить</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="employeesTab">
+      <attribute name="title">
+       <string>Сотрудники</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="employeesTabLayout">
+       <item>
+        <widget class="QTableView" name="employeesTableView">
+         <property name="editTriggers">
+          <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+         </property>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="verticalHeaderVisible">
+          <bool>false</bool>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="employyesTabButtonLayout">
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="addEmployeeButton">
+           <property name="text">
+            <string>Добавить</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="editEmployeeButton">
+           <property name="text">
+            <string>Изменить</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="toggleEmployeeButton">
+           <property name="text">
+            <string>Уволить</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="deleteEmployeeButton">
+           <property name="text">
+            <string>Удалить</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
   </layout>
  </widget>

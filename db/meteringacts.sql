@@ -58,7 +58,11 @@ CREATE TABLE employees
     is_active       INTEGER NOT NULL DEFAULT 1
                     CHECK (is_active IN (0, 1))
 );
-INSERT INTO employees VALUES(1,'Алиферец Н.А.','Вед.инженер ССРЗА',1);
+INSERT INTO employees VALUES(1,'Алиферец Н.А.','Вед.инженер ССРЗА',1),
+  (2,'Мустафин Т.Д.','Вед.инженер ССРЗА',1),
+  (3,'Нестеров Л.А.','Вед.инженер ССРЗА',1),
+  (5,'Федотов А.С.','Вед.инженер ПС 220/110/35/10кВ "Заречная"',0),
+  (6,'Абашов Н.М.','Эл.монтер ССРЗА',0);
 CREATE TABLE meters
 (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -444,7 +448,7 @@ DELETE FROM sqlite_sequence;
 INSERT INTO sqlite_sequence VALUES('areas',6),
   ('substations',9),
   ('connections',5),
-  ('employees',1),
+  ('employees',6),
   ('meters',4),
   ('current_transformers',5),
   ('acts',39),
