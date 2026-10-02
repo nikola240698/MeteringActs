@@ -120,6 +120,54 @@ MetersWidget::~MetersWidget()
     delete ui;
 }
 
+void MetersWidget::reloadMeters()
+{
+    // Запоминаем выбранную строку
+    // Создаем переменную для id прибор
+    int selectedMeterId = -1;
+
+    // Получаем индекс выбранной строки
+    const QModelIndex currentIndex =
+        ui->metersTableView->currentIndex();
+
+    // Проверяем, что строка выбрана
+    if (currentIndex.isValid())
+    {
+        // получаем id прибора
+        selectedMeterId =
+            m_metersModel->index(currentIndex.row(), 0).data().toInt();
+    }
+
+    // Перезагружаем данные модели
+    loadMeters(ui->searchLineEdit->text());
+
+    // Проверяем, что выбор был до перезагрузки
+    if (selectedMeterId < 0)
+        return;
+
+    // Прочитываем каждую строку в поиске нужного id
+    for (int row = 0; row < m_metersModel->rowCount(); ++row)
+    {
+        // Получаем id прибора на текущей строке
+        const int meterId =
+            m_metersModel->index(row, 0).data().toInt();
+
+        // Сравниваем с записанным
+        if (meterId != selectedMeterId)
+            continue;
+
+        // Получаем индекс найденной строки
+        const QModelIndex index =
+            m_metersModel->index(row, 1);
+
+        // Ставим выбор на индекс найденной строки
+        ui->metersTableView->setCurrentIndex(index);
+        ui->metersTableView->selectRow(row);
+
+        break;
+    }
+}
+
 void MetersWidget::loadMeters(const QString &searchText)
 {
     QSqlQuery query(m_database.getDatabase());

@@ -27,6 +27,9 @@ public:
 
     ~MetersWidget() override;
 
+public slots:
+    void reloadMeters();
+
 private:
     Ui::MetersWidget *ui;
 

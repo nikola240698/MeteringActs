@@ -40,6 +40,9 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
     connect(directoriesWidget, &DirectoriesWidget::objectChanged,
         createActWidget, &CreateActWidget::reloadObject);
 
+    // Получаем сигнал при сохранении нового прибора
+    connect(createActWidget, &CreateActWidget::metersChanged,
+        metersWidget, &MetersWidget::reloadMeters);
 
     // создаем группу кнопок для возможности уникального выбора
     auto *navigationGroup = new QButtonGroup(this);

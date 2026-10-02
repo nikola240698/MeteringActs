@@ -68,6 +68,7 @@ public:
 
 signals:
     void actUpdated();
+    void metersChanged();
 
 public slots:
     void reloadEmployees();

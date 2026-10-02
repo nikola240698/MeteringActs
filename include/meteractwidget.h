@@ -62,6 +62,9 @@ public:
     // Метод загрузки данных
     void setData(const ActMeterData &data);
 
+signals:
+    void meterCreated();
+
 private:
     Ui::MeterActWidget *ui;
 

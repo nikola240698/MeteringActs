@@ -167,6 +167,13 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
 
     // кнопка очистки формы
     connect(ui->clearButton, &QPushButton::clicked, this, &CreateActWidget::clearForm);
+
+    // Подключаем сигналы о создании акта
+    connect(m_primaryMeterWidget, &MeterActWidget::meterCreated,
+        this, &CreateActWidget::metersChanged);
+
+    connect(m_secondaryMeterWidget, &MeterActWidget::meterCreated,
+        this, &CreateActWidget::metersChanged);
 }
 
 CreateActWidget::CreateActWidget(Database &database, int actId, QWidget *parent) :

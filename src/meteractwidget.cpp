@@ -342,6 +342,8 @@ void MeterActWidget::findMeterBySerial()
             m_meterId = dialog.createdMeterId();
 
             loadMeterData(m_meterId);
+
+            emit meterCreated();
         }
     }
 }
