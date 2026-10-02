@@ -10,6 +10,7 @@
 #include "meterswidget.h"
 #include "ui_meterswidget.h"
 #include "meterdialog.h"
+#include "actviewdialog.h"
 
 
 MetersWidget::MetersWidget(Database &database, QWidget *parent)
@@ -17,9 +18,13 @@ MetersWidget::MetersWidget(Database &database, QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Создаем модель основной таблицы
     m_metersModel = new QSqlQueryModel(this);
-
     ui->metersTableView->setModel(m_metersModel);
+
+    // Создаем модель таблицы истории
+    m_historyModel = new QSqlQueryModel(this);
+    ui->historytableView->setModel(m_historyModel);
 
     // Добавляем кнопку очистки для поля поиска
     ui->searchLineEdit->setClearButtonEnabled(true);
@@ -40,6 +45,22 @@ MetersWidget::MetersWidget(Database &database, QWidget *parent)
         [this]()
         {
             updateButtons();
+
+            const QModelIndex currentIndex =
+                ui->metersTableView->currentIndex();
+
+            if (!currentIndex.isValid())
+            {
+                clearMeterHistory();
+                return;
+            }
+
+            const int row = currentIndex.row();
+
+            const int meterId =
+                m_metersModel->index(row, 0).data().toInt();
+
+            loadMeterHistory(meterId);
         });
 
     // Подключаем кнопку добавления нового прибора
@@ -85,6 +106,13 @@ MetersWidget::MetersWidget(Database &database, QWidget *parent)
         });
 
     updateButtons();
+
+    // Подключаем слот двойного нажатия на строку в истории акта
+    connect(ui->historytableView, &QTableView::doubleClicked, this,
+        [this](const QModelIndex &)
+        {
+            openSelectedHistoryAct();
+        });
 }
 
 MetersWidget::~MetersWidget()
@@ -137,6 +165,7 @@ void MetersWidget::loadMeters(const QString &searchText)
     ui->metersTableView->setCurrentIndex(QModelIndex());
 
     updateButtons();
+    clearMeterHistory();
 }
 
 
@@ -251,6 +280,119 @@ void MetersWidget::deleteSelectedMeter()
     // Обновляем таблицу с сохранением текущего поиска
     loadMeters(ui->searchLineEdit->text());
 }
+
+void MetersWidget::loadMeterHistory(int meterId)
+{
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "SELECT "
+            "a.id, "
+            "a.act_date, "
+            "at.name AS act_type_name, "
+            "ar.name AS area_name, "
+            "s.name AS substation_name, "
+            "c.name AS connection_name, "
+            "CASE am.role "
+                "WHEN 1 THEN 'Проверяемый' "
+                "WHEN 2 THEN 'Снятый' "
+                "WHEN 3 THEN 'Установленный' "
+                "WHEN 4 THEN 'Снятие показаний' "
+                "WHEN 5 THEN 'Существующий' "
+                "ELSE 'Неизвестно' "
+            "END AS meter_role "
+        "FROM act_meters am "
+
+        "JOIN acts a "
+        "ON a.id = am.act_id "
+
+        "JOIN act_types at "
+        "ON at.id = a.act_type_id "
+
+        "JOIN connections c "
+        "ON c.id = a.connection_id "
+
+        "JOIN substations s "
+        "ON s.id = c.substation_id "
+
+        "JOIN areas ar "
+        "ON ar.id = s.area_id "
+
+        "WHERE am.meter_id = :meterId "
+
+        "ORDER BY a.act_date DESC, a.id DESC;");
+
+    query.bindValue(":meterId", meterId);
+
+    if (!query.exec())
+    {
+        qDebug() << "Не удалось загрузить историю прибора: "
+                << query.lastError().text();
+
+        clearMeterHistory();
+         return;
+    }
+
+    m_historyModel->setQuery(std::move(query));
+
+    m_historyModel->setHeaderData(1, Qt::Horizontal, "Дата");
+    m_historyModel->setHeaderData(2, Qt::Horizontal, "Тип акта");
+    m_historyModel->setHeaderData(3, Qt::Horizontal, "Участок");
+    m_historyModel->setHeaderData(4, Qt::Horizontal, "Подстанция");
+    m_historyModel->setHeaderData(5, Qt::Horizontal, "Присоединение");
+    m_historyModel->setHeaderData(6, Qt::Horizontal, "Роль");
+
+    ui->historytableView->hideColumn(0);
+
+    setupHistoryTale();
+}
+
+void MetersWidget::clearMeterHistory()
+{
+    m_historyModel->clear();
+}
+
+void MetersWidget::setupHistoryTale()
+{
+    QHeaderView* header =
+        ui->historytableView->horizontalHeader();
+
+    header->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(2, QHeaderView::Stretch);
+    header->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(4, QHeaderView::Stretch);
+    header->setSectionResizeMode(5, QHeaderView::Stretch);
+    header->setSectionResizeMode(6, QHeaderView::ResizeToContents);
+}
+
+void MetersWidget::openSelectedHistoryAct()
+{
+    const QModelIndex currentIndex =
+        ui->historytableView->currentIndex();
+
+    if (!currentIndex.isValid())
+        return;
+
+    const int row = currentIndex.row();
+
+    const int actId =
+        m_historyModel->index(row, 0).data().toInt();
+
+    if (actId < 0)
+        return;
+
+    ActViewDialog dialog(m_database, actId, this);
+
+    dialog.exec();
+}
+
+
+
+
+
+
+
+
 
 
 

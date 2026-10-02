@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>MetersWidget</string>
   </property>
+  <property name="toolTip">
+   <string>Двойное нажатие по строке для открытия акта</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="titlelabel">
@@ -41,6 +44,38 @@
    </item>
    <item>
     <widget class="QTableView" name="metersTableView">
+     <property name="editTriggers">
+      <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+     </property>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="historyLabel">
+     <property name="text">
+      <string>История прибора</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTableView" name="historytableView">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>200</height>
+      </size>
+     </property>
      <property name="editTriggers">
       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
      </property>

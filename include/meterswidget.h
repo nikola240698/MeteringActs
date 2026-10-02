@@ -32,14 +32,28 @@ private:
 
     Database &m_database;
 
+    // Модель основного списка приборов
     QSqlQueryModel* m_metersModel = nullptr;
+    // Модель истории прибора учета
+    QSqlQueryModel* m_historyModel = nullptr;
 
+    // метод загрузки приборов
     void loadMeters(const QString &searchText = QString());
+    // Метод настройки таблицы
     void setupMetersTable();
-
+    // Метод настройки кнопок
     void updateButtons();
-
+    // Метод удаления выбранного прибора
     void deleteSelectedMeter();
+
+    // Метод загрузки истории прибора
+    void loadMeterHistory(int meterId);
+    // Метод очистки истории (не браузера)))
+    void clearMeterHistory();
+    // Настройка таблицы истории прибора
+    void setupHistoryTale();
+    // Метод открытия акта
+    void openSelectedHistoryAct();
 };
 
 
