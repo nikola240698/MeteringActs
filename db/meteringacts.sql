@@ -62,7 +62,7 @@ INSERT INTO employees VALUES(1,'Алиферец Н.А.','Вед.инженер 
   (2,'Мустафин Т.Д.','Вед.инженер ССРЗА',1),
   (3,'Нестеров Л.А.','Вед.инженер ССРЗА',1),
   (5,'Федотов А.С.','Вед.инженер ПС 220/110/35/10кВ "Заречная"',0),
-  (6,'Абашов Н.М.','Эл.монтер ССРЗА',0);
+  (6,'Абашов Н.М.','Эл.монтер ССРЗА',1);
 CREATE TABLE meters
 (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,9 +79,11 @@ CREATE TABLE meters
     note                TEXT
 );
 INSERT INTO meters VALUES(1,'Для проверки','12345','0,5',2026,'ХЗ',2026,''),
-  (2,'VBG','123','',2026,'',NULL,''),
+  (2,'VBG','123','0.002',2026,'',NULL,''),
   (3,'МИР С-07','49215224063674','0,5S',2024,'НПО "МИР"',2024,''),
-  (4,'МИР С-07','49214525137153','0,5S',2026,'НПО "МИР"',2024,'');
+  (4,'МИР С-07','49214525137153','0,5S',2026,'НПО "МИР"',2024,''),
+  (5,'Меркурий 234 ART2-04 PR','49400993-23г.','0.5S',2023,'ООО "НПК "ИНКОТЕКС"',2023,''),
+  (6,'VBh','234234234','0.5',2000,'1213123',2000,'');
 CREATE TABLE act_types
 (
     id      INTEGER PRIMARY KEY,
@@ -447,9 +449,9 @@ CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;
 INSERT INTO sqlite_sequence VALUES('areas',6),
   ('substations',9),
-  ('connections',5),
+  ('connections',6),
   ('employees',6),
-  ('meters',4),
+  ('meters',7),
   ('current_transformers',5),
   ('acts',39),
   ('act_meters',52),

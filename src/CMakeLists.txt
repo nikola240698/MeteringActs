@@ -24,6 +24,7 @@ add_executable(MeteringActs
         substationdialog.cpp
         connectiondialog.cpp
         employeedialog.cpp
+        meterswidget.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -46,6 +47,7 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/substationdialog.h
         ${MY_INCLUDE_DIR}/connectiondialog.h
         ${MY_INCLUDE_DIR}/employeedialog.h
+        ${MY_INCLUDE_DIR}/meterswidget.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui
@@ -63,6 +65,7 @@ add_executable(MeteringActs
         ${MY_UI_DIR}/substationdialog.ui
         ${MY_UI_DIR}/connectiondialog.ui
         ${MY_UI_DIR}/employeedialog.ui
+        ${MY_UI_DIR}/meterswidget.ui
 )
 
 target_include_directories(MeteringActs PRIVATE

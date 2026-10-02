@@ -6,6 +6,7 @@
 #include "createactwidget.h"
 #include "archivewidget.h"
 #include "directorieswidget.h"
+#include "meterswidget.h"
 
 
 MainWindow::MainWindow(Database &database, QWidget *parent)
@@ -18,6 +19,10 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
     // создаем виджет первого окна и добавляем его в stackWidget
     auto* createActWidget = new CreateActWidget(m_database, this);
     ui->stackedWidget->insertWidget(0, createActWidget);
+
+    // Создаем виджет окна с прибора учета
+    auto* metersWidget = new MetersWidget(m_database, this);
+    ui->stackedWidget->insertWidget(1, metersWidget);
 
     // Создаем виджет третьего окна и добавляем в stackWidget
     auto* archiveWidget = new ArchiveWidget(m_database, this);
