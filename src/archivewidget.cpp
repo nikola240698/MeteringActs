@@ -158,6 +158,11 @@ ArchiveWidget::~ArchiveWidget()
     delete ui;
 }
 
+void ArchiveWidget::reloadActs()
+{
+    applyFilters();
+}
+
 void ArchiveWidget::loadActs(
     const QString &searchText,
     int actTypeId,
@@ -419,6 +424,8 @@ void ArchiveWidget::editSelectedAct()
     {
         // Обновляем архив
         applyFilters();
+
+        emit actsChanged();
     }
 }
 
@@ -483,6 +490,8 @@ void ArchiveWidget::deleteSelectedAct()
     }
 
     applyFilters();
+
+    emit actsChanged();
 
     QMessageBox::information(this, "Акт удалён",
         "Акт успешно удалён.");

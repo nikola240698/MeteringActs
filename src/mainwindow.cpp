@@ -44,6 +44,18 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
     connect(createActWidget, &CreateActWidget::metersChanged,
         metersWidget, &MetersWidget::reloadMeters);
 
+    // Получаем сигнал при добавлении нового акта в окне создания
+    connect(createActWidget, &CreateActWidget::actCreated,
+        archiveWidget, &ArchiveWidget::reloadActs);
+
+    // Получаем сигнал для обновления истории при создании нового акта
+    connect(createActWidget, &CreateActWidget::actCreated,
+        metersWidget, &MetersWidget::reloadHistory);
+
+    // Получаем сигнал при изменении акта
+    connect(archiveWidget, &ArchiveWidget::actsChanged,
+        metersWidget, &MetersWidget::reloadMeters);
+
     // создаем группу кнопок для возможности уникального выбора
     auto *navigationGroup = new QButtonGroup(this);
     // разрешаем только уникальный выбор

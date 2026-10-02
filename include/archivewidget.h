@@ -29,6 +29,12 @@ public:
 
     ~ArchiveWidget() override;
 
+public slots:
+    void reloadActs();
+
+signals:
+    void actsChanged();
+
 private:
     Ui::ArchiveWidget *ui;
 

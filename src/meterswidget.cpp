@@ -168,6 +168,23 @@ void MetersWidget::reloadMeters()
     }
 }
 
+void MetersWidget::reloadHistory()
+{
+    const QModelIndex currentIndex =
+        ui->metersTableView->currentIndex();
+
+    if (!currentIndex.isValid())
+    {
+        clearMeterHistory();
+        return;
+    }
+
+    const int meterId =
+        m_metersModel->index(currentIndex.row(), 0).data().toInt();
+
+    loadMeterHistory(meterId);
+}
+
 void MetersWidget::loadMeters(const QString &searchText)
 {
     QSqlQuery query(m_database.getDatabase());

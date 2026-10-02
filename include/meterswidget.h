@@ -29,6 +29,7 @@ public:
 
 public slots:
     void reloadMeters();
+    void reloadHistory();
 
 private:
     Ui::MetersWidget *ui;
