@@ -32,6 +32,7 @@ public:
 public slots:
     void reloadCurrentTransformers();
 
+
 private:
     Ui::CurrentTransformersWidget *ui;
 

@@ -42,6 +42,7 @@ public:
 
 signals:
     void removeRequested();
+    void currentTransformerCreated();
 
 private:
     Ui::CurrentTransformerActWidget *ui;

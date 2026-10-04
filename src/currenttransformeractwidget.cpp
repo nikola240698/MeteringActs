@@ -200,6 +200,10 @@ void CurrentTransformerActWidget::findCurrentTransformer()
         }
         // если всё хорошо, то загружаем данные введенного ТТ
         loadCurrentTransformer(dialog.currentTransformerId());
+
+        // Испускаем сигнал, что в БД появился новый ТТ
+        emit currentTransformerCreated();
+
         return;
     }
     // получаем id найденного ТТ

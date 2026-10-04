@@ -70,6 +70,7 @@ signals:
     void actUpdated();
     void actCreated();
     void metersChanged();
+    void currentTransformersChanged();
 
 public slots:
     void reloadEmployees();

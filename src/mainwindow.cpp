@@ -8,6 +8,7 @@
 #include "directorieswidget.h"
 #include "equipmentwidget.h"
 #include "meterswidget.h"
+#include "currenttransformerswidget.h"
 
 
 MainWindow::MainWindow(Database &database, QWidget *parent)
@@ -27,6 +28,10 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
 
     // Получаем виджет приборов учета для соединения сигналов
     auto* metersWidget = equipmentWidget->metersWidget();
+
+    // Получаем виджет ТТ
+    auto* currentTransformersWidget =
+        equipmentWidget->currentTransformerWidget();
 
     // Создаем виджет третьего окна и добавляем в stackWidget
     auto* archiveWidget = new ArchiveWidget(m_database, this);
@@ -48,17 +53,30 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
     connect(createActWidget, &CreateActWidget::metersChanged,
         metersWidget, &MetersWidget::reloadMeters);
 
+    // Получаем сигнал при сохранении нового ТТ
+    connect(createActWidget, &CreateActWidget::currentTransformersChanged,
+        currentTransformersWidget,
+        &CurrentTransformersWidget::reloadCurrentTransformers);
+
     // Получаем сигнал при добавлении нового акта в окне создания
     connect(createActWidget, &CreateActWidget::actCreated,
         archiveWidget, &ArchiveWidget::reloadActs);
+
+    // Получаем сигнал при добавлении нового ТТ в окне создания
+    connect(createActWidget, &CreateActWidget::actCreated,
+        currentTransformersWidget,
+        &CurrentTransformersWidget::reloadCurrentTransformers);
 
     // Получаем сигнал для обновления истории при создании нового акта
     connect(createActWidget, &CreateActWidget::actCreated,
         metersWidget, &MetersWidget::reloadHistory);
 
-    // Получаем сигнал при изменении акта
+    // Получаем сигналы при изменении акта
     connect(archiveWidget, &ArchiveWidget::actsChanged,
         metersWidget, &MetersWidget::reloadMeters);
+    connect(archiveWidget, &ArchiveWidget::actsChanged,
+        currentTransformersWidget,
+        &CurrentTransformersWidget::reloadCurrentTransformers);
 
     // создаем группу кнопок для возможности уникального выбора
     auto *navigationGroup = new QButtonGroup(this);

@@ -1684,6 +1684,10 @@ void CreateActWidget::addRemovedCurrentTransformer()
     auto* transformer = new CurrentTransformerActWidget(
         m_database, ui->removedCtContainerWidget);
 
+    // Получаем сигнал об изменении записей ТТ в БД
+    connect(transformer, &CurrentTransformerActWidget::currentTransformerCreated,
+        this, &CreateActWidget::currentTransformersChanged);
+
     ui->removedCtContainerWidget->layout()->addWidget(transformer);
 
     m_removedCurrentTransformerWidgets.append(transformer);
@@ -1699,6 +1703,10 @@ void CreateActWidget::addInstalledCurrentTransformer()
 {
     auto* transformer = new CurrentTransformerActWidget(
         m_database, ui->installedCtContainerWidget);
+
+    // Получаем сигнал об изменении записей ТТ в БД
+    connect(transformer, &CurrentTransformerActWidget::currentTransformerCreated,
+        this, &CreateActWidget::currentTransformersChanged);
 
     ui->installedCtContainerWidget->layout()->addWidget(transformer);
 
