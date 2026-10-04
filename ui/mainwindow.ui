@@ -73,7 +73,7 @@
            <item>
             <widget class="QPushButton" name="metersButton">
              <property name="text">
-              <string>Приборы учета</string>
+              <string>Оборудование</string>
              </property>
              <property name="checkable">
               <bool>true</bool>

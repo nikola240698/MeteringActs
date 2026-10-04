@@ -47,7 +47,9 @@ CREATE TABLE connections
 );
 INSERT INTO connections VALUES(1,1,'ЦРП-2',10.0,'200/5'),
   (2,1,'Ввод-10 Т-1',10.0,'400/5'),
-  (3,2,'ЦУ-2',10.0,NULL);
+  (3,2,'ЦУ-2',10.0,NULL),
+  (7,6,'Ввод 10кВ Т-1',10.0,'200/5'),
+  (8,3,'ЦУ',10.0,'75/5');
 CREATE TABLE employees
 (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -83,7 +85,8 @@ INSERT INTO meters VALUES(1,'Для проверки','12345','0,5',2026,'ХЗ',
   (3,'МИР С-07','49215224063674','0,5S',2024,'НПО "МИР"',2024,''),
   (4,'МИР С-07','49214525137153','0,5S',2026,'НПО "МИР"',2024,''),
   (5,'Меркурий 234 ART2-04 PR','49400993-23г.','0.5S',2023,'ООО "НПК "ИНКОТЕКС"',2023,''),
-  (6,'VBh','234234234','0.5',2000,'1213123',2000,'');
+  (6,'VBh','234234234','0.5',2000,'1213123',2000,''),
+  (8,'ДАЛА СА4У-Э720 Т1','NK001107','1',2018,'Saiman',2018,'');
 CREATE TABLE act_types
 (
     id      INTEGER PRIMARY KEY,
@@ -171,7 +174,9 @@ INSERT INTO acts VALUES(1,NULL,1,'2026-09-10',2,1,'Алиферец Н.А.','В�
   (36,NULL,6,'2026-09-22',2,1,'Алиферец Н.А.','Вед.инженер ССРЗА','123123','12313','VH"N',NULL,'2026-09-22 09:24:53',NULL,NULL),
   (37,NULL,7,'2026-09-15',2,1,'Алиферец Н.А.','Вед.инженер ССРЗА','Replaced Поменяли','Just One Только один','MRET/22-03',NULL,'2026-09-22 10:50:25',NULL,2),
   (38,NULL,7,'2026-09-22',2,1,'Алиферец Н.А.','Вед.инженер ССРЗА','Replaced','Just one','MRET',NULL,'2026-09-22 10:50:38',NULL,1),
-  (39,NULL,1,'2026-09-22',1,1,'Алиферец Н.А.','Вед.инженер ССРЗА','3123','123','123123',NULL,'2026-09-22 18:00:02',NULL,2);
+  (39,NULL,1,'2026-09-22',1,1,'Алиферец Н.А.','Вед.инженер ССРЗА','3123','123','123123',NULL,'2026-09-22 18:00:02',NULL,2),
+  (40,NULL,3,'2026-10-02',7,2,'Мустафин Т.Д.','Вед.инженер ССРЗА','Захотелось так','Пожтому поменяли','132',NULL,'2026-10-02 17:35:31',NULL,NULL);
+INSERT INTO acts VALUES(41,NULL,3,'2026-10-02',8,3,'Нестеров Л.А.','Вед.инженер ССРЗА','аыва','ыфваыав','а23',NULL,'2026-10-02 17:37:04',NULL,NULL);
 CREATE TABLE act_meters
 (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -227,7 +232,9 @@ INSERT INTO act_meters VALUES(29,2,4,1,'МИР С-07','49214525137153','0,5S',20
   (47,38,1,5,'Для проверки','12345','0,5',2026),
   (48,39,1,1,'Для проверки','12345','0,5',2026),
   (51,37,2,5,'VBG','123','',2026),
-  (52,1,3,1,'МИР С-07','49215224063674','0,5S',2024);
+  (52,1,3,1,'МИР С-07','49215224063674','0,5S',2024),
+  (53,40,2,4,'VBG','123','0.002',2026),
+  (54,41,1,4,'Для проверки','12345','0,5',2026);
 CREATE TABLE reading_types
 (
     id          INTEGER PRIMARY KEY,
@@ -319,7 +326,9 @@ INSERT INTO meter_readings VALUES(59,29,1,123.35),
   (132,52,1,1215.12),
   (133,52,2,652.25),
   (134,52,3,15432.0),
-  (135,52,4,1651.21);
+  (135,52,4,1651.21),
+  (136,53,1,65465.564),
+  (137,54,1,114.0);
 CREATE TABLE vector_diagrams
 (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -398,11 +407,11 @@ CREATE TABLE current_transformers
     manufacture_year        INTEGER,
     note                    TEXT
 );
-INSERT INTO current_transformers VALUES(1,'ТОЛ-10','123456','200/5','0,5',NULL,NULL,''),
-  (2,'ТОЛ','123','200/5','0,5/10Р','СВЭЛ',2026,'Просто так'),
+INSERT INTO current_transformers VALUES(1,'ТОЛ-10','123456','200/5','0,5','',1990,''),
+  (2,'ТОЛ','123','200/5','0,5/10Р','СВЭЛ',1990,'Просто так'),
   (3,'jgjhgj','1234','ghjg','ghj','',1990,''),
   (4,'iuo','12345','ouoiu','uio','',1990,''),
-  (5,'uuiyiu','456','yuiyui','yuiy','',1990,'');
+  (5,'uuiyiu2312','456','yuiyui','yuiy','',1990,'');
 CREATE TABLE act_current_transformers
 (
     id                      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -449,13 +458,13 @@ CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
 DELETE FROM sqlite_sequence;
 INSERT INTO sqlite_sequence VALUES('areas',6),
   ('substations',9),
-  ('connections',6),
+  ('connections',8),
   ('employees',6),
-  ('meters',7),
-  ('current_transformers',5),
-  ('acts',39),
-  ('act_meters',52),
-  ('meter_readings',135),
+  ('meters',8),
+  ('current_transformers',8),
+  ('acts',41),
+  ('act_meters',54),
+  ('meter_readings',137),
   ('act_current_transformers',34),
   ('vector_diagrams',16),
   ('external_representatives',32);

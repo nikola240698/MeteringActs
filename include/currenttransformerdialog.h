@@ -22,7 +22,11 @@ class CurrentTransformerDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit CurrentTransformerDialog(Database &database, QWidget *parent = nullptr);
+    explicit CurrentTransformerDialog(
+        Database &database, QWidget *parent = nullptr);
+
+    explicit CurrentTransformerDialog(
+        Database &database, int currentTransformerId, QWidget* parent = nullptr);
 
     ~CurrentTransformerDialog() override;
 
@@ -38,12 +42,17 @@ private:
     Database &m_database;
 
     int m_currentTransformerId = -1;
+    int m_editCurrentTransformerId = -1;
 
     bool validateForm();
     bool saveCurrentTransformer();
 
     // метод проверки на существующий серийный номер в БД
-    bool serialNumberExists(const QString &serialNumber);
+    bool serialNumberExists(
+        const QString &serialNumber, int excludeId = -1);
+
+    bool loadCurrentTransformer();
+    bool updateCurrentTransformer();
 };
 
 

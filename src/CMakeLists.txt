@@ -26,6 +26,7 @@ add_executable(MeteringActs
         employeedialog.cpp
         meterswidget.cpp
         currenttransformerswidget.cpp
+        equipmentwidget.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -50,6 +51,7 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/employeedialog.h
         ${MY_INCLUDE_DIR}/meterswidget.h
         ${MY_INCLUDE_DIR}/currenttransformerswidget.h
+        ${MY_INCLUDE_DIR}/equipmentwidget.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui
@@ -69,6 +71,7 @@ add_executable(MeteringActs
         ${MY_UI_DIR}/employeedialog.ui
         ${MY_UI_DIR}/meterswidget.ui
         ${MY_UI_DIR}/currenttransformerswidget.ui
+        ${MY_UI_DIR}/equipmentwidget.ui
 )
 
 target_include_directories(MeteringActs PRIVATE

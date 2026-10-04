@@ -6,6 +6,7 @@
 #include <QWidget>
 
 #include "database.h"
+#include "actviewdialog.h"
 
 class QSqlQueryModel;
 
@@ -46,8 +47,13 @@ private:
     void loadHistory(int currentTransformerId);
     void clearHistory();
     void setupHistoryTable();
+    void setupHistoryColumns();
 
     void updateButtons();
+
+    void deleteCurrentTransformer();
+
+    void openSelectedHistoryAct();
 };
 
 

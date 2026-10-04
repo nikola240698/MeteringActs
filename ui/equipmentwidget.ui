@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>EquipmentWidget</class>
+ <widget class="QWidget" name="EquipmentWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1130</width>
+    <height>704</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>EquipmentWidget</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="equipmentTabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="metersTab">
+      <attribute name="title">
+       <string>Приборы учета</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="metersLayout"/>
+     </widget>
+     <widget class="QWidget" name="currentTransformersTab">
+      <attribute name="title">
+       <string>Трансформаторы тока</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="ctLayout"/>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
