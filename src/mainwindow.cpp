@@ -9,6 +9,7 @@
 #include "equipmentwidget.h"
 #include "meterswidget.h"
 #include "currenttransformerswidget.h"
+#include "settingswidget.h"
 
 
 MainWindow::MainWindow(Database &database, QWidget *parent)
@@ -40,6 +41,11 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
     // Создаем страницу справочников
     auto* directoriesWidget = new DirectoriesWidget(m_database, this);
     ui->stackedWidget->insertWidget(3, directoriesWidget);
+
+    // Создаем страницу настроек
+    auto* settingsWidget =
+        new SettingsWidget(m_database, this);
+    ui->stackedWidget->insertWidget(4, settingsWidget);
 
     // Получаем сигнал при изменении списка сотрудников
     connect(directoriesWidget, &DirectoriesWidget::employeesChanged,
