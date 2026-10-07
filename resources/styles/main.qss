@@ -207,31 +207,6 @@ QPushButton:disabled {
     Группы
    =========================== */
 
-QGroupBox {
-    margin-top: 14px;
-    padding-top: 14px;
-
-    background-color: #FFFFFF;
-
-    border: 1px solid #E1E5EA;
-    border-radius: 8px;
-
-    font-weight: 600;
-    color: #374151;
-}
-
-QGroupBox::title {
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-
-    left: 14px;
-
-    padding: 0 6px;
-
-    background-color: #FFFFFF;
-    color: #374151;
-}
-
 QTextEdit,
 QPlainTextEdit,
 QListWidget,
@@ -298,10 +273,65 @@ QTabBar::tab:disabled {
     color: #B6BDC7;
 }
 
+/* ===========================
+    Заголовок страницы
+   =========================== */
 
+#pageHeaderWidget {
+    background-color: transparent;
+}
 
+#pageTitleLabel {
+    background-color: transparent;
+    color: #0F1F38;
 
+    font-size: 28px;
+    font-weight: 700;
+}
 
+#pageSubtitleLabel {
+    background-color: transparent;
+
+    color: #6B7280;
+
+    font-size: 14px;
+    font-weight: 400;
+}
+
+/* ===========================
+    Карточки CreateActWidget
+   =========================== */
+
+QFrame[card="true"] {
+    background-color: #FFFFFF;
+
+    border: 1px solid #D6E0EA;
+    border-radius: 8px;
+}
+
+QLabel[cardTitle="true"] {
+    min-height: 42px;
+    max-height: 42px;
+
+    padding-left: 18px;
+
+    background-color: #EDF5FC;
+    color: #0F1F38;
+
+    border: none;
+    border-bottom: 1px solid #DDE5EE;
+
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+
+    font-size: 15px;
+    font-weight: 600;
+}
+
+QWidget[cardBody="true"] {
+    background-color: #FFFFFF;
+    border: none;
+}
 
 
 
