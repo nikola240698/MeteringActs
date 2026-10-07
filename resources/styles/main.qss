@@ -5,7 +5,7 @@
 QWidget {
     background-color: #F4F6F8;
     color: #1F2937;
-    font-size: 14px;
+    font-size: 9pt;
 }
 
 QMainWindow {
@@ -139,14 +139,14 @@ QPushButton:disabled {
 
 #appTitleLabel{
     color: #FFFFFF;
-    font-size: 24px;
+    font-size: 18pt;
     font-weight: 700;
     padding-left: 12px;
 }
 
 #appSubtitleLabel {
     color: #9EADBC;
-    font-size: 12px;
+    font-size: 9pt;
     padding-left: 12px;
 }
 
@@ -167,7 +167,7 @@ QPushButton:disabled {
 
     color: #D6DEE7;
 
-    font-size: 14px;
+    font-size: 9pt;
     font-weight: 500;
 
     text-align: left;
@@ -251,7 +251,7 @@ QTabBar::tab {
     border: none;
     border-bottom: 3px solid transparent;
 
-    font-size: 14px;
+    font-size: 9pt;
     font-weight: 500;
 }
 
@@ -285,7 +285,7 @@ QTabBar::tab:disabled {
     background-color: transparent;
     color: #0F1F38;
 
-    font-size: 28px;
+    font-size: 20pt;
     font-weight: 700;
 }
 
@@ -294,7 +294,7 @@ QTabBar::tab:disabled {
 
     color: #6B7280;
 
-    font-size: 14px;
+    font-size: 9pt;
     font-weight: 400;
 }
 
@@ -324,7 +324,7 @@ QLabel[cardTitle="true"] {
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
 
-    font-size: 15px;
+    font-size: 10pt;
     font-weight: 600;
 }
 
@@ -332,6 +332,166 @@ QWidget[cardBody="true"] {
     background-color: #FFFFFF;
     border: none;
 }
+
+
+
+/* ===========================
+    Карточки CreateActWidget
+   =========================== */
+
+#actionBarSeparator {
+    background-color: #D7E0EA;
+    border: none;
+    max-height: 1px;
+}
+
+QPushButton[buttonRole="primary"] {
+    min-height: 42px;
+    padding: 0 22px;
+
+    background-color: #2563EB;
+    color: #FFFFFF;
+
+    border: 1px solid #2563EB;
+    border-radius: 6px;
+
+    font-weight: 600;
+}
+
+QPushButton[buttonRole="primary"]:hover {
+    background-color: #1D4ED8;
+    border-color: #1D4ED8;
+}
+
+QPushButton[buttonRole="primary"]:pressed {
+    background-color: #1E40AF;
+    border-color: #1E40AF;
+}
+
+QPushButton[buttonRole="primary"]:disabled {
+    background-color: #B8C7DC;
+    border-color: #B8C7DC;
+    color: #F8FAFC;
+}
+
+QPushButton[buttonRole="secondary"] {
+    min-height: 42px;
+    padding: 0 20px;
+
+    background-color: #F8FAFC;
+    color: #334155;
+
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+
+    font-weight: 500;
+}
+
+QPushButton[buttonRole="secondary"]:hover {
+    background-color: #F1F5F9;
+    border-color: #94A3B8;
+}
+
+QPushButton[buttonRole="secondary"]:pressed {
+    background-color: #E2E8F0;
+}
+
+/* ===========================
+    Scroll Bar
+   =========================== */
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 8px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical {
+    background: #CBD5E1;
+    min-height: 30px;
+    border-radius: 4px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+    border: none,
+    background: none;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: transparent;
+}
+
+#externalRepresentativesScrollArea {
+    background: transparent;
+    border: none;
+}
+
+#externalRepresentativesScrollArea > QWidget > QWidget {
+    background: transparent;
+}
+
+QPushButton[buttonRole="add"] {
+    min-height: 34px;
+    max-height: 34px;
+
+    padding: 0 14px;
+
+    background-color: #FFFFFF;
+    color: #475569;
+
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+
+    font-weight: 500;
+}
+
+QPushButton[buttonRole="add"]:hover {
+    background-color: #F8FAFC;
+    border-color: #94A3B8;
+    color: #1E293B;
+}
+
+QPushButton[buttonRole="add"]:pressed {
+    background-color: #F1F5F9;
+}
+
+QWidget[externalRepresentative="true"] {
+    background-color: #F8FAFC;
+
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+}
+
+QPushButton[buttonRole="dangerText"] {
+    min-height: 30px;
+
+    padding: 0 10px;
+
+    background: transparent;
+    color: #64748B;
+
+    border: none;
+    border-radius: 5px;
+}
+
+QPushButton[buttonRole="dangerText"]:hover {
+    background-color: #FEF2F2;
+    color:#DC2626;
+}
+
+QPushButton[buttonRole="dangerText"]:pressed {
+    background-color: #FEE2E2;
+    color: #B91C1C;
+}
+
+
+
+
+
+
 
 
 

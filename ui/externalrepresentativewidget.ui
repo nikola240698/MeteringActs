@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>ExternalRepresentativeWidget</string>
   </property>
+  <property name="externalRepresentative" stdset="0">
+   <bool>true</bool>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QFormLayout" name="formLayout">
@@ -67,6 +70,9 @@
       <widget class="QPushButton" name="removeButton">
        <property name="text">
         <string>Удалить</string>
+       </property>
+       <property name="buttonRole" stdset="0">
+        <string>dangerText</string>
        </property>
       </widget>
      </item>
