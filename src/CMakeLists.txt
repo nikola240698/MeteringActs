@@ -77,6 +77,8 @@ add_executable(MeteringActs
         ${MY_UI_DIR}/currenttransformerswidget.ui
         ${MY_UI_DIR}/equipmentwidget.ui
         ${MY_UI_DIR}/settingswidget.ui
+
+        ${CMAKE_SOURCE_DIR}/resources/resources.qrc
 )
 
 target_include_directories(MeteringActs PRIVATE

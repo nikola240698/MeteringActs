@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef MAINWINDOW_H
-#define AINWINDOW_H
+#define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QPushButton>

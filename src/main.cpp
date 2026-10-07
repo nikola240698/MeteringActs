@@ -5,6 +5,8 @@
 #include <QSettings>
 #include <QDateTime>
 #include <QDebug>
+#include <QFile>
+#include <QDebug>
 
 #include "database.h"
 #include "mainwindow.h"
@@ -14,6 +16,21 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    // Подключаем добавленные ресурсы и настройки
+    QFile styleFile(":/styles/main.qss");
+
+    if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        const QString styleSheet =
+            QString::fromUtf8(styleFile.readAll());
+
+        a.setStyleSheet(styleSheet);
+    }
+    else
+    {
+        qDebug() << "Error in load style file.";
+    }
 
     // Для сохраненных настроек, чтобы было понятно откуда брать
     QCoreApplication::setOrganizationName("MRET");
