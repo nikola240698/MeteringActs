@@ -1493,8 +1493,11 @@ void CreateActWidget::addExternalRepresentative()
     // создаем новый виджет представителя
     auto *representative = new ExternalRepresentativeWidget(ui->externalRepresentativesContainer);
 
-        // добавляем его в контейнер
-    ui->externalRepresentativesContainer->layout()->addWidget(representative);
+    // добавляем его в контейнер
+    auto *layout = qobject_cast<QVBoxLayout *>(
+        ui->externalRepresentativesContainer->layout());
+
+    layout->insertWidget(layout->count() - 1, representative);
 
     // запоминаем указатель
     m_externalRepresentativeWidgets.append(representative);

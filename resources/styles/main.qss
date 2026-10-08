@@ -458,13 +458,6 @@ QPushButton[buttonRole="add"]:pressed {
     background-color: #F1F5F9;
 }
 
-QWidget[externalRepresentative="true"] {
-    background-color: #F8FAFC;
-
-    border: 1px solid #E2E8F0;
-    border-radius: 6px;
-}
-
 QPushButton[buttonRole="dangerText"] {
     min-height: 30px;
 
@@ -487,6 +480,31 @@ QPushButton[buttonRole="dangerText"]:pressed {
     color: #B91C1C;
 }
 
+/* ===========================
+    Карточка стороннего представителя
+   =========================== */
+
+QFrame#representativeCardFrame {
+    background-color: #FFFFFF;
+    border: 1px solid #D6E0EB;
+    border-radius: 6px;
+}
+
+QFrame#representativeCardFrame QLabel {
+    background: transparent;
+    border: none;
+}
+
+QFrame#representativeCardFrame QLineEdit {
+    background-color: #FFFFFF;
+    border: 1px solid #CFD8E3;
+    border-radius: 5px;
+}
+
+QFrame#representativeCardFrame QPushButton {
+    background: transparent;
+    border: none;
+}
 
 
 
