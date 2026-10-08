@@ -415,7 +415,7 @@ QScrollBar::handle:vertical {
 QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical {
     height: 0px;
-    border: none,
+    border: none;
     background: none;
 }
 
@@ -486,6 +486,7 @@ QPushButton[buttonRole="dangerText"]:pressed {
     background-color: #FEE2E2;
     color: #B91C1C;
 }
+
 
 
 

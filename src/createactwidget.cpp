@@ -1493,7 +1493,7 @@ void CreateActWidget::addExternalRepresentative()
     // создаем новый виджет представителя
     auto *representative = new ExternalRepresentativeWidget(ui->externalRepresentativesContainer);
 
-    // добавляем его в контейнер
+        // добавляем его в контейнер
     ui->externalRepresentativesContainer->layout()->addWidget(representative);
 
     // запоминаем указатель
