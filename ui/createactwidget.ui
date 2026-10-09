@@ -493,7 +493,7 @@
                       <rect>
                        <x>0</x>
                        <y>0</y>
-                       <width>385</width>
+                       <width>96</width>
                        <height>196</height>
                       </rect>
                      </property>
@@ -994,6 +994,60 @@
                 </layout>
                </widget>
               </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="removedCtPhaseContainer" native="true">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <layout class="QVBoxLayout" name="removedCtPhaseContainerLayout">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="installedCtPhaseContainer" native="true">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <layout class="QVBoxLayout" name="installedCtPhaseContainerLayout">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
              </layout>
             </widget>
            </item>

@@ -30,6 +30,7 @@ add_executable(MeteringActs
         databasebackupmanager.cpp
         settingswidget.cpp
         currenttransformerphasewidget.cpp
+        currenttransformerphasepanel.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -58,6 +59,7 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/databasebackupmanager.h
         ${MY_INCLUDE_DIR}/settingswidget.h
         ${MY_INCLUDE_DIR}/currenttransformerphasewidget.h
+        ${MY_INCLUDE_DIR}/currenttransformerphasepanel.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui
@@ -80,6 +82,7 @@ add_executable(MeteringActs
         ${MY_UI_DIR}/equipmentwidget.ui
         ${MY_UI_DIR}/settingswidget.ui
         ${MY_UI_DIR}/currenttransformerphasewidget.ui
+        ${MY_UI_DIR}/currenttransformerphasepanel.ui
 
         ${CMAKE_SOURCE_DIR}/resources/resources.qrc
 )

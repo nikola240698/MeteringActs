@@ -4,7 +4,8 @@
 #include "createactwidget.h"
 #include "ui_createactwidget.h"
 #include "actrepository.h"
-
+#include "currenttransformerphasewidget.h"
+#include "currenttransformerphasepanel.h"
 
 
 CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
@@ -20,6 +21,20 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     ui->secondMeterContainerWidget->layout()->addWidget(m_secondaryMeterWidget);
     // отключаем по стандарту видимость второго прибора
     ui->secondaryMeterCard->setVisible(false);
+
+    // Создаем виджеты-блоки для добавления ТТ
+    m_removedCtPhasePanel = new CurrentTransformerPhasePanel(
+        m_database, ui->removedCtPhaseContainer);
+    ui->removedCtPhaseContainer->layout()->addWidget(
+        m_removedCtPhasePanel);
+
+    m_installedCtPhasePanel = new CurrentTransformerPhasePanel(
+        m_database, ui->installedCtPhaseContainer);
+    ui->installedCtPhaseContainer->layout()->addWidget(
+        m_installedCtPhasePanel);
+
+    ui->removedCtPhaseContainer->setVisible(false);
+    ui->installedCtPhaseContainer->setVisible(false);
 
     // создаем виджет векторной диаграммы
     m_vectorDiagramWidget = new VectorDiagramWidget(ui->vectorDiagramContainerWidget);
@@ -1348,6 +1363,10 @@ bool CreateActWidget::updateMeterVerificationYear(MeterActWidget* meterWidget)
 // метод показа/скрытия поля для второго прибора учета
 void CreateActWidget::updateActTypeUi()
 {
+    // Временно для проверки скрываем панели
+    ui->removedCtPhaseContainer->setVisible(false);
+    ui->installedCtPhaseContainer->setVisible(false);
+
     // Если тип акта не выбран
     if (!ui->actTypeComboBox->currentData().isValid())
     {
@@ -1424,7 +1443,9 @@ void CreateActWidget::updateActTypeUi()
             ui->secondaryMeterCard->setVisible(false);
             // поля для ввода трансформаторов тока
             ui->removedCurrentTransformersGroupBox->setVisible(false);
-            ui->installedCurrentTransformersGroupBox->setVisible(true);
+            ui->installedCurrentTransformersGroupBox->setVisible(false);
+
+            ui->installedCtPhaseContainer->setVisible(true);
             // сразу добавляем окно для ввода данных
             if (m_installedCurrentTransformerWidgets.isEmpty())
             {
@@ -1437,8 +1458,10 @@ void CreateActWidget::updateActTypeUi()
             ui->primaryMeterCardTitle->setText("Прибор учета");
             ui->secondaryMeterCard->setVisible(false);
             // поля для ввода трансформаторов тока
-            ui->removedCurrentTransformersGroupBox->setVisible(true);
-            ui->installedCurrentTransformersGroupBox->setVisible(true);
+            ui->removedCurrentTransformersGroupBox->setVisible(false);
+            ui->installedCurrentTransformersGroupBox->setVisible(false);
+            ui->removedCtPhaseContainer->setVisible(true);
+            ui->installedCtPhaseContainer->setVisible(true);
             // сразу добавляем по одному полю для вода данных
             if (m_removedCurrentTransformerWidgets.isEmpty())
             {
@@ -1692,6 +1715,11 @@ void CreateActWidget::addRemovedCurrentTransformer()
         this, &CreateActWidget::currentTransformersChanged);
 
     ui->removedCtContainerWidget->layout()->addWidget(transformer);
+
+    // Для проверки
+    auto* transformerPhase = new CurrentTransformerPhaseWidget(
+        m_database, "A", this);
+    ui->removedCtContainerWidget->layout()->addWidget(transformerPhase);
 
     m_removedCurrentTransformerWidgets.append(transformer);
 

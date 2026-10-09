@@ -17,6 +17,7 @@
 #include "vectordiagramwidget.h"
 #include "currenttransformeractwidget.h"
 
+class CurrentTransformerPhasePanel;
 
 QT_BEGIN_NAMESPACE
 
@@ -83,6 +84,9 @@ private:
 
     MeterActWidget* m_primaryMeterWidget = nullptr;
     MeterActWidget* m_secondaryMeterWidget = nullptr;
+
+    CurrentTransformerPhasePanel *m_removedCtPhasePanel = nullptr;
+    CurrentTransformerPhasePanel *m_installedCtPhasePanel = nullptr;
 
     VectorDiagramWidget* m_vectorDiagramWidget = nullptr;
 
