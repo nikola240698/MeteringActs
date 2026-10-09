@@ -359,17 +359,37 @@ void MeterActWidget::setupReadings()
     ui->reactiveImportLineEdit->setEnabled(false);
     ui->reactiveExportLineEdit->setEnabled(false);
     // слоты связи выбора CheckBox и включения LineEdit
-    connect(ui->activeImportCheckBox, &QCheckBox::toggled,
-        ui->activeImportLineEdit, &QLineEdit::setEnabled);
+    connect(ui->activeImportCheckBox, &QCheckBox::toggled, this,
+        [this](bool checked)
+        {
+            ui->activeImportLineEdit->setEnabled(checked);
+            if (checked)
+                ui->activeImportLineEdit->setFocus();
+        });
 
-    connect(ui->activeExportCheckBox, &QCheckBox::toggled,
-        ui->activeExportLineEdit, &QLineEdit::setEnabled);
+    connect(ui->activeExportCheckBox, &QCheckBox::toggled,this,
+        [this](bool checked)
+        {
+            ui->activeExportLineEdit->setEnabled(checked);
+            if (checked)
+                ui->activeExportLineEdit->setFocus();
+        });
 
-    connect(ui->reactiveImportCheckBox, &QCheckBox::toggled,
-        ui->reactiveImportLineEdit, &QLineEdit::setEnabled);
+    connect(ui->reactiveImportCheckBox, &QCheckBox::toggled,this,
+        [this](bool checked)
+        {
+            ui->reactiveImportLineEdit->setEnabled(checked);
+            if (checked)
+                ui->reactiveImportLineEdit->setFocus();
+        });
 
-    connect(ui->reactiveExportCheckBox, &QCheckBox::toggled,
-        ui->reactiveExportLineEdit, &QLineEdit::setEnabled);
+    connect(ui->reactiveExportCheckBox, &QCheckBox::toggled,this,
+        [this](bool checked)
+        {
+            ui->reactiveExportLineEdit->setEnabled(checked);
+            if (checked)
+                ui->reactiveExportLineEdit->setFocus();
+        });
 
     // создаем валидатор десятичных чисел
     auto *validator = new QDoubleValidator(0.0,  9999999.999, 3, this);

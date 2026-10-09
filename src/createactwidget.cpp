@@ -19,7 +19,7 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     m_secondaryMeterWidget = new MeterActWidget(m_database, ui->secondMeterContainerWidget);
     ui->secondMeterContainerWidget->layout()->addWidget(m_secondaryMeterWidget);
     // отключаем по стандарту видимость второго прибора
-    ui->secondaryMeterGroupBox->setVisible(false);
+    ui->secondaryMeterCard->setVisible(false);
 
     // создаем виджет векторной диаграммы
     m_vectorDiagramWidget = new VectorDiagramWidget(ui->vectorDiagramContainerWidget);
@@ -1351,8 +1351,8 @@ void CreateActWidget::updateActTypeUi()
     // Если тип акта не выбран
     if (!ui->actTypeComboBox->currentData().isValid())
     {
-        ui->primaryMeterGroupBox->setTitle("Прибор учета");
-        ui->secondaryMeterGroupBox->setVisible(false);
+        ui->primaryMeterCardTitle->setText("Прибор учета");
+        ui->secondaryMeterCard->setVisible(false);
         // скрываем поле пломбы пока не выберется тип акта
         ui->sealWidget->setVisible(false);
         // скрываем блоки ТТ
@@ -1389,39 +1389,39 @@ void CreateActWidget::updateActTypeUi()
     {
         case 1:     // проверка
         {
-            ui->primaryMeterGroupBox->setTitle("Проверяемый прибор");
-            ui->secondaryMeterGroupBox->setVisible(false);
+            ui->primaryMeterCardTitle->setText("Проверяемый прибор учета");
+            ui->secondaryMeterCard->setVisible(false);
             break;
         }
         case 2:     // Замена
         {
-            ui->primaryMeterGroupBox->setTitle("Снимаемый прибор");
-            ui->secondaryMeterGroupBox->setTitle("Устанавливаемый прибор");
-            ui->secondaryMeterGroupBox->setVisible(true);
+            ui->primaryMeterCardTitle->setText("Снимаемый прибор учета");
+            ui->secondaryMeterCardTitle->setText("Устанавливаемый прибор учета");
+            ui->secondaryMeterCard->setVisible(true);
             break;
         }
         case 3:     // Снятие показаний
         {
-            ui->primaryMeterGroupBox->setTitle("Прибор учета");
-            ui->secondaryMeterGroupBox->setVisible(false);
+            ui->primaryMeterCardTitle->setText("Прибор учета");
+            ui->secondaryMeterCard->setVisible(false);
             break;
         }
         case 4:     // Демонтаж
         {
-            ui->primaryMeterGroupBox->setTitle("Демонтируемый прибор");
-            ui->secondaryMeterGroupBox->setVisible(false);
+            ui->primaryMeterCardTitle->setText("Демонтируемый прибор учета");
+            ui->secondaryMeterCard->setVisible(false);
             break;
         }
         case 5:     // Установка
         {
-            ui->primaryMeterGroupBox->setTitle("Устанавливаемый прибор");
-            ui->secondaryMeterGroupBox->setVisible(false);
+            ui->primaryMeterCardTitle->setText("Устанавливаемый прибор учета");
+            ui->secondaryMeterCard->setVisible(false);
             break;
         }
         case 6:     // Установка прибора учета и ТТ
         {
-            ui->primaryMeterGroupBox->setTitle("Устанавливаемый прибор");
-            ui->secondaryMeterGroupBox->setVisible(false);
+            ui->primaryMeterCardTitle->setText("Устанавливаемый прибор учета");
+            ui->secondaryMeterCard->setVisible(false);
             // поля для ввода трансформаторов тока
             ui->removedCurrentTransformersGroupBox->setVisible(false);
             ui->installedCurrentTransformersGroupBox->setVisible(true);
@@ -1434,8 +1434,8 @@ void CreateActWidget::updateActTypeUi()
         }
         case 7:     // Замена ТТ
         {
-            ui->primaryMeterGroupBox->setTitle("Прибор учета");
-            ui->secondaryMeterGroupBox->setVisible(false);
+            ui->primaryMeterCardTitle->setText("Прибор учета");
+            ui->secondaryMeterCard->setVisible(false);
             // поля для ввода трансформаторов тока
             ui->removedCurrentTransformersGroupBox->setVisible(true);
             ui->installedCurrentTransformersGroupBox->setVisible(true);
@@ -1452,8 +1452,8 @@ void CreateActWidget::updateActTypeUi()
         }
         default:
         {
-            ui->primaryMeterGroupBox->setTitle("Прибор учета");
-            ui->secondaryMeterGroupBox->setVisible(false);
+            ui->primaryMeterCardTitle->setText("Прибор учета");
+            ui->secondaryMeterCard->setVisible(false);
             break;
         }
     }

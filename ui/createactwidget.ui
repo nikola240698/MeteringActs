@@ -75,7 +75,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="mainTab">
       <attribute name="title">
@@ -797,8 +797,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>229</width>
-            <height>320</height>
+            <width>883</width>
+            <height>482</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -818,34 +818,180 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QGroupBox" name="primaryMeterGroupBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+            <widget class="QFrame" name="primaryMeterCard">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
              </property>
-             <property name="title">
-              <string>Прибор учета</string>
+             <property name="frameShape">
+              <enum>QFrame::Shape::NoFrame</enum>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_6">
+             <property name="frameShadow">
+              <enum>QFrame::Shadow::Raised</enum>
+             </property>
+             <property name="card" stdset="0">
+              <bool>true</bool>
+             </property>
+             <layout class="QVBoxLayout" name="primaryMeterCardLayout">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
               <item>
-               <widget class="QWidget" name="meterContainerWidget" native="true">
-                <layout class="QVBoxLayout" name="verticalLayout_3"/>
+               <widget class="QLabel" name="primaryMeterCardTitle">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>42</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>42</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Прибор учета</string>
+                </property>
+                <property name="cardTitle" stdset="0">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="primaryMeterCardBody" native="true">
+                <property name="cardBody" stdset="0">
+                 <bool>true</bool>
+                </property>
+                <layout class="QVBoxLayout" name="primaryMeterCardBodyLayout">
+                 <property name="spacing">
+                  <number>8</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>20</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>16</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>20</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>18</number>
+                 </property>
+                 <item>
+                  <widget class="QWidget" name="meterContainerWidget" native="true">
+                   <layout class="QVBoxLayout" name="verticalLayout_3"/>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
              </layout>
             </widget>
            </item>
            <item>
-            <widget class="QGroupBox" name="secondaryMeterGroupBox">
-             <property name="title">
-              <string>Устанавливаемый прибор</string>
+            <widget class="QFrame" name="secondaryMeterCard">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
+             <property name="frameShape">
+              <enum>QFrame::Shape::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Shadow::Raised</enum>
+             </property>
+             <property name="card" stdset="0">
+              <bool>true</bool>
+             </property>
+             <layout class="QVBoxLayout" name="secondaryMeterCardLayout">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
               <item>
-               <widget class="QWidget" name="secondMeterContainerWidget" native="true">
-                <layout class="QVBoxLayout" name="verticalLayout_5"/>
+               <widget class="QLabel" name="secondaryMeterCardTitle">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>42</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>42</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Устанавливаемый прибор учета</string>
+                </property>
+                <property name="cardTitle" stdset="0">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="secondaryMeterCardBody" native="true">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="cardBody" stdset="0">
+                 <bool>true</bool>
+                </property>
+                <layout class="QVBoxLayout" name="secondaryMeterCardBodyLayout">
+                 <property name="spacing">
+                  <number>8</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>20</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>16</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>20</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>18</number>
+                 </property>
+                 <item>
+                  <widget class="QWidget" name="secondMeterContainerWidget" native="true">
+                   <layout class="QVBoxLayout" name="verticalLayout_5"/>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
              </layout>
