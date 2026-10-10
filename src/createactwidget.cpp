@@ -189,6 +189,12 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
 
     connect(m_secondaryMeterWidget, &MeterActWidget::meterCreated,
         this, &CreateActWidget::metersChanged);
+
+    // Подключаем слоты подачи сигнала при создании ТТ
+    connect(m_removedCtPhasePanel, &CurrentTransformerPhasePanel::currentTransformerCreated,
+        this, &CreateActWidget::currentTransformersChanged);
+    connect(m_installedCtPhasePanel, &CurrentTransformerPhasePanel::currentTransformerCreated,
+        this, &CreateActWidget::currentTransformersChanged);
 }
 
 CreateActWidget::CreateActWidget(Database &database, int actId, QWidget *parent) :
@@ -616,35 +622,20 @@ bool CreateActWidget::validateForm()
     // для акта установки ТТ
     if (actTypeId == 6)
     {
-        if (!validateCurrentTransformers(
-            m_installedCurrentTransformerWidgets, "Установленные трансформаторы тока"))
-        {
-            ui->actTabWidget->setCurrentWidget(ui->metersTab);
+        if (!m_installedCtPhasePanel->validate())
             return false;
-        }
     }
     // для акта замены ТТ
     if (actTypeId == 7)
     {
-        if (!validateCurrentTransformers(
-            m_removedCurrentTransformerWidgets, "Снятые трансформаторы тока"))
-        {
-            ui->actTabWidget->setCurrentWidget(ui->metersTab);
+        if (!m_removedCtPhasePanel->validate())
             return false;
-        }
 
-        if (!validateCurrentTransformers(
-            m_installedCurrentTransformerWidgets, "Установленные трансформаторы тока"))
-        {
-            ui->actTabWidget->setCurrentWidget(ui->metersTab);
+        if (!m_installedCtPhasePanel->validate())
             return false;
-        }
-        // проверяем на различие снятых и установленных ТТ
+
         if (!validateCurrentTransformerReplacement())
-        {
-            ui->actTabWidget->setCurrentWidget(ui->metersTab);
             return false;
-        }
     }
 
     // 17. Проверяем правильно выбранный характер работ
@@ -737,9 +728,11 @@ bool CreateActWidget::saveAct()
     // пробуем записать трансформаторы тока
     if (actTypeId == 6)
     {
+        const QList<ActCurrentTransformerData> installedTransformers =
+            m_installedCtPhasePanel->data(InstalledCurrentTransformer);
+
         if (!insertActCurrentTransformers(
-            actId,
-            m_installedCurrentTransformerWidgets, InstalledCurrentTransformer))
+            actId,installedTransformers))
         {
             m_database.rollback();
             return false;
@@ -748,23 +741,25 @@ bool CreateActWidget::saveAct()
     if (actTypeId == 7)
     {
         // снятые ТТ
+        const QList<ActCurrentTransformerData> removedTransformers =
+            m_removedCtPhasePanel->data(RemovedCurrentTransformer);
+
         if (!insertActCurrentTransformers(
             actId,
-            m_removedCurrentTransformerWidgets, RemovedCurrentTransformer))
+            removedTransformers))
         {
             m_database.rollback();
             return false;
         }
         // установленные ТТ
-        for (CurrentTransformerActWidget* transformer
-            : m_installedCurrentTransformerWidgets)
+        const QList<ActCurrentTransformerData> installedTransformers =
+           m_installedCtPhasePanel->data(InstalledCurrentTransformer);
+
+        if (!insertActCurrentTransformers(
+            actId, installedTransformers))
         {
-            if (!insertActCurrentTransformer(
-                actId, transformer, InstalledCurrentTransformer))
-            {
-                m_database.rollback();
-                return false;
-            }
+            m_database.rollback();
+            return false;
         }
     }
 
@@ -885,10 +880,11 @@ bool CreateActWidget::updateAct()
     // ТТ - установка
     if (actTypeId == 6)
     {
+        const QList<ActCurrentTransformerData> installedTransformers =
+            m_installedCtPhasePanel->data(InstalledCurrentTransformer);
+
         if (!insertActCurrentTransformers(
-            m_editActId,
-            m_installedCurrentTransformerWidgets,
-            InstalledCurrentTransformer))
+            m_editActId, installedTransformers))
         {
             m_database.rollback();
             return false;
@@ -898,19 +894,21 @@ bool CreateActWidget::updateAct()
     // ТТ - замена
     if (actTypeId == 7)
     {
+        const QList <ActCurrentTransformerData> removedTransformers =
+            m_removedCtPhasePanel->data(RemovedCurrentTransformer);
+
         if (!insertActCurrentTransformers(
-            m_editActId,
-            m_removedCurrentTransformerWidgets,
-            RemovedCurrentTransformer))
+            m_editActId, removedTransformers))
         {
             m_database.rollback();
             return false;
         }
 
+        const QList<ActCurrentTransformerData> installedTransformers =
+            m_installedCtPhasePanel->data(InstalledCurrentTransformer);
+
         if (!insertActCurrentTransformers(
-            m_editActId,
-            m_installedCurrentTransformerWidgets,
-            InstalledCurrentTransformer))
+            m_editActId, installedTransformers))
         {
             m_database.rollback();
             return false;
@@ -1775,74 +1773,32 @@ void CreateActWidget::removeInstalledCurrentTransformer(CurrentTransformerActWid
 }
 
 // универсальный метод проверки заполненности формы ТТ
-bool CreateActWidget::validateCurrentTransformers(const QList<CurrentTransformerActWidget *> &transformers,
-    const QString &groupName)
-{
-    // проверяем, что добавлены поля ввода ТТ
-    if (transformers.isEmpty())
-    {
-        QMessageBox::warning(this, "Не добавлены трансформаторы тока",
-            "Добавьте хотя бы один ТТ в группу \"" + groupName + "\".");
-        return false;
-    }
-    // создаем набор фаз
-    QSet<QString> usedPhases;
-    // пробегаемся по каждому блоку трансформатора
-    for (CurrentTransformerActWidget *transformer : transformers)
-    {
-        // проверяем, что он существует
-        if (!transformer)
-            continue;
-        // проверяем найден ли ТТ и введена ли фаза
-        if (!transformer->validate())
-        {
-            return false;
-        }
-        // получаем название фазы
-        const QString phase = transformer->phase();
 
-        // проверяем на повторение фазы
-        if (usedPhases.contains(phase))
-        {
-            QMessageBox::warning(this, "Повторение фазы",
-                "В группе \"" + groupName + "\" фаза " + phase
-                + " указана более одного раза.");
-
-            return false;
-        }
-        // добавляем найденную фазу в набор
-        usedPhases.insert(phase);
-    }
-    return true;
-}
 
 bool CreateActWidget::validateCurrentTransformerReplacement()
 {
+    const QList<ActCurrentTransformerData> removed =
+        m_removedCtPhasePanel->data(RemovedCurrentTransformer);
+
+    const QList<ActCurrentTransformerData> installed =
+        m_installedCtPhasePanel->data(InstalledCurrentTransformer);
+
     QSet<int> removedTransformerIds;
 
-    // собираем id всех снимаемых ТТ
-    for (CurrentTransformerActWidget* transformer :
-        m_removedCurrentTransformerWidgets)
+    for (const ActCurrentTransformerData &transformer : removed)
     {
-        if (!transformer)
-            continue;
-
-        removedTransformerIds.insert(transformer->currentTransformerId());
+        removedTransformerIds.insert(
+            transformer.currentTransformerId);
     }
 
-    // Проверяем устанавливаемые ТТ
-    for (const CurrentTransformerActWidget *transformer :
-        m_installedCurrentTransformerWidgets)
+    for (const ActCurrentTransformerData &transformer : installed)
     {
-        if (!transformer)
-            continue;
-
-        const int transformerId = transformer->currentTransformerId();
-        if (removedTransformerIds.contains(transformerId))
+        if (removedTransformerIds.contains(
+            transformer.currentTransformerId))
         {
             QMessageBox::warning(this, "Ошибка выбора трансформатора тока",
                 "Трансформатор тока с заводским номером "
-                + transformer->serialNumber()
+                + transformer.serialNumber
                 + " одновременно указан как снятый и установленный.");
 
             return false;
@@ -1852,15 +1808,11 @@ bool CreateActWidget::validateCurrentTransformerReplacement()
     return true;
 }
 
+
 bool CreateActWidget::insertActCurrentTransformer(
     int actId,
-    CurrentTransformerActWidget *transformer,
-    int role)
+    const ActCurrentTransformerData &transformer)
 {
-    // проверяем что существует поля для ввода
-    if (!transformer)
-        return false;
-
     // создаем запрос и подготавливаем его
     QSqlQuery query(m_database.getDatabase());
     query.prepare(
@@ -1887,18 +1839,18 @@ bool CreateActWidget::insertActCurrentTransformer(
 
     query.bindValue(":actId", actId);
 
-    query.bindValue(":currentTransformerId", transformer->currentTransformerId());
-    query.bindValue(":role", role);
-    query.bindValue(":phase", transformer->phase());
-    query.bindValue(":name", transformer->name());
-    query.bindValue(":serialNumber", transformer->serialNumber());
-    query.bindValue(":transformationRatio", transformer->transformerRatio());
-    query.bindValue(":accuracyClass", transformer->accuracyClass());
+    query.bindValue(":currentTransformerId", transformer.currentTransformerId);
+    query.bindValue(":role", transformer.role);
+    query.bindValue(":phase", transformer.phase);
+    query.bindValue(":name", transformer.name);
+    query.bindValue(":serialNumber", transformer.serialNumber);
+    query.bindValue(":transformationRatio", transformer.transformationRatio);
+    query.bindValue(":accuracyClass", transformer.accuracyClass);
 
     if (!query.exec())
     {
         QMessageBox::warning(this, "Ошибка базы данных",
-            "Не удалось добавить акт трансформатора тока: "
+            "Не удалось добавить трансформатор тока в акт: "
             + query.lastError().text());
 
         return false;
@@ -1909,13 +1861,12 @@ bool CreateActWidget::insertActCurrentTransformer(
 
 bool CreateActWidget::insertActCurrentTransformers(
     int actId,
-    const QList<CurrentTransformerActWidget *> &transformers,
-    int role)
+    const QList<ActCurrentTransformerData> &transformers)
 {
-    for (CurrentTransformerActWidget* transformer : transformers)
+    for (const ActCurrentTransformerData &transformer : transformers)
     {
         if (!insertActCurrentTransformer(
-            actId, transformer, role))
+            actId, transformer))
         {
             return false;
         }
@@ -1991,6 +1942,17 @@ void CreateActWidget::clearCurrentTransformers()
     }
 
     m_installedCurrentTransformerWidgets.clear();
+
+    // Удаляем ТТ из карточек
+    if (m_removedCtPhasePanel)
+    {
+        m_removedCtPhasePanel->clear();
+    }
+
+    if (m_installedCtPhasePanel)
+    {
+        m_installedCtPhasePanel->clear();
+    }
 }
 
 // очищаем вкладку "Основное"
@@ -2184,40 +2146,24 @@ void CreateActWidget::loadActForEditing(int actId)
     }
 
     // Загружаем трансформаторы тока
-    int removedIndex = 0;
-    int installedIndex = 0;
+    QList<ActCurrentTransformerData> removedTransformers;
+    QList<ActCurrentTransformerData> installedTransformers;
 
-    for (const ActCurrentTransformerData &transformerData :
+    for (const ActCurrentTransformerData &transformer :
         data.currentTransformers)
     {
-        if (transformerData.role == RemovedCurrentTransformer)
+        if (transformer.role == RemovedCurrentTransformer)
         {
-            // Первый виджет уже создан, дополнительные создаем по необходимости
-            if (removedIndex >= m_removedCurrentTransformerWidgets.size())
-            {
-                addRemovedCurrentTransformer();
-            }
-
-            m_removedCurrentTransformerWidgets[removedIndex]
-                ->setData(transformerData);
-
-            ++removedIndex;
+            removedTransformers.append(transformer);
         }
-        else if (transformerData.role == InstalledCurrentTransformer)
+        else if (transformer.role == InstalledCurrentTransformer)
         {
-            if (installedIndex >= m_installedCurrentTransformerWidgets.size())
-            {
-                addInstalledCurrentTransformer();
-            }
-
-            m_installedCurrentTransformerWidgets[installedIndex]
-                ->setData(transformerData);
-
-            ++installedIndex;
+            installedTransformers.append(transformer);
         }
     }
 
-
+    m_removedCtPhasePanel->setData(removedTransformers);
+    m_installedCtPhasePanel->setData(installedTransformers);
 }
 
 const ActMeterData * CreateActWidget::meterByRole(const ActData &data, int role) const

@@ -31,7 +31,7 @@ public:
     void setData(const QList<ActCurrentTransformerData> &transformers);
     QList<ActCurrentTransformerData> data(int role) const;
 
-    bool validate(bool requireAllPhases = true);
+    bool validate();
 
     bool isEmpty() const;
 

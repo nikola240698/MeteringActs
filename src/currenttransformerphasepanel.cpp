@@ -3,6 +3,7 @@
 #include "currenttransformerphasewidget.h"
 
 #include <QHBoxLayout>
+#include <QMessageBox>
 #include <QSizePolicy>
 
 CurrentTransformerPhasePanel::CurrentTransformerPhasePanel(
@@ -108,24 +109,14 @@ QList<ActCurrentTransformerData> CurrentTransformerPhasePanel::data(int role) co
     return result;
 }
 
-bool CurrentTransformerPhasePanel::validate(bool requireAllPhases)
+bool CurrentTransformerPhasePanel::validate()
 {
-    if (!requireAllPhases)
-        return true;
-
-    if (!m_phaseA->hasCurrentTransformer())
+    if (isEmpty())
     {
-        return m_phaseA->validate();
-    }
+        QMessageBox::warning(this, "Не добавлены трансформаторы тока",
+            "Выберите хотя бы один трансформатор тока.");
 
-    if (!m_phaseB->hasCurrentTransformer())
-    {
-        return m_phaseB->validate();
-    }
-
-    if (!m_phaseC->hasCurrentTransformer())
-    {
-        return m_phaseC->validate();
+        return false;
     }
 
     return true;

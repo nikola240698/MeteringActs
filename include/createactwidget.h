@@ -156,18 +156,15 @@ private:
     void removeRemovedCurrentTransformer(CurrentTransformerActWidget* transformer);
     void removeInstalledCurrentTransformer(CurrentTransformerActWidget* transformer);
 
-    // универсальный метод проверки заполнения формы ТТ
-    bool validateCurrentTransformers(
-        const QList<CurrentTransformerActWidget *> &transformers,
-        const QString &groupName);
+
     // Метод проверки на совпадение снятых и установленных ТТ по id
     bool validateCurrentTransformerReplacement();
     // метод сохранения акта трансформаторов тока
     bool insertActCurrentTransformer(
-        int actId, CurrentTransformerActWidget* transformer, int role);
+        int actId, const ActCurrentTransformerData &transformer);
     // маленький метод упрощения создания актов ТТ
     bool insertActCurrentTransformers(
-        int actId, const QList<CurrentTransformerActWidget *> &transformers, int role);
+        int actId, const QList<ActCurrentTransformerData> &transformers);
 
     // методы для очистки формы
     void clearForm();

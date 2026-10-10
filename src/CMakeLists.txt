@@ -82,7 +82,7 @@ add_executable(MeteringActs
         ${MY_UI_DIR}/equipmentwidget.ui
         ${MY_UI_DIR}/settingswidget.ui
         ${MY_UI_DIR}/currenttransformerphasewidget.ui
-        ${MY_UI_DIR}/currenttransformerphasepanel.ui
+
 
         ${CMAKE_SOURCE_DIR}/resources/resources.qrc
 )
