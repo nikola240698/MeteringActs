@@ -204,6 +204,44 @@ QPushButton:disabled {
     color: #FFFFFF;
 }
 
+/* ===========================
+    CheckBox
+   =========================== */
+
+QCheckBox {
+    spacing: 8px;
+    background-color: transparent;
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+
+    background-color: #FFFFFF;
+    border: 1px solid #94A3B8;
+    border-radius: 4px;
+}
+
+QCheckBox::indicator:hover {
+    border-color: #3B82F6;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #2563EB;
+    border-color: #2563EB;
+
+    image: url(:/icons/check.svg);
+}
+
+QCheckBox::indicator:checked:hover {
+    background-color: #1D4ED8;
+    border-color: #1D4ED8;
+}
+
+QCheckBox::indicator:disabled {
+    background-color: #F1F5F9;
+    border-color: #CBD5E1;
+}
 
 /* ===========================
     Группы
@@ -524,11 +562,9 @@ QFrame#representativeCardFrame QPushButton {
 
 #CurrentTransformerPhaseWidget #phaseTitleLabel {
     background-color: transparent;
-    color: #334155;
-
-    font-weight: 500;
-
-    padding-left: 10px;
+    color: #475569;
+    font-weight: 600;
+    padding: 0;
 }
 
 #CurrentTransformerPhaseWidget #phaseGroupBox {
@@ -567,6 +603,11 @@ QFrame#representativeCardFrame QPushButton {
 #CurrentTransformerPhaseWidget #addButton:pressed {
     background-color: #F1F5F9;
     color: #2563EB;
+}
+
+#removedCtPhaseContainer,
+#installedCtPhaseContainer {
+    background-color: transparent;
 }
 
 /* ===========================
@@ -657,11 +698,39 @@ QFrame#representativeCardFrame QPushButton {
     padding: 0 10px;
 }
 
+/* ===========================
+    Карточка векторной диаграммы
+   =========================== */
 
+#vectorDiagramCardBody,
+#vectorDiagramContainerWidget,
+#vectorDiagramContainerWidget QWidget {
+    background-color: #FFFFFF;
+}
 
+#vectorDiagramContainerWidget QGroupBox {
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
 
+    margin-top: 20px;
 
+    font-weight: 600;
+    color: #475569;
+}
 
+#vectorDiagramContainerWidget QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+
+    left: 0;
+    padding: 0;
+
+    background-color: transparent;
+    color: #475569;
+
+    font-weight: 600;
+}
 
 
 

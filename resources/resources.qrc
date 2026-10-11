@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>styles/main.qss</file>
+        <file>icons/check.svg</file>
     </qresource>
 </RCC>
