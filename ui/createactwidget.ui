@@ -493,7 +493,7 @@
                       <rect>
                        <x>0</x>
                        <y>0</y>
-                       <width>96</width>
+                       <width>385</width>
                        <height>196</height>
                       </rect>
                      </property>
@@ -789,6 +789,12 @@
        </property>
        <item>
         <widget class="QScrollArea" name="ctScrollArea">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
@@ -879,19 +885,19 @@
                 </property>
                 <layout class="QVBoxLayout" name="primaryMeterCardBodyLayout">
                  <property name="spacing">
-                  <number>8</number>
+                  <number>0</number>
                  </property>
                  <property name="leftMargin">
-                  <number>20</number>
+                  <number>0</number>
                  </property>
                  <property name="topMargin">
-                  <number>16</number>
+                  <number>0</number>
                  </property>
                  <property name="rightMargin">
-                  <number>20</number>
+                  <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>18</number>
+                  <number>0</number>
                  </property>
                  <item>
                   <widget class="QWidget" name="meterContainerWidget" native="true">
@@ -972,19 +978,19 @@
                 </property>
                 <layout class="QVBoxLayout" name="secondaryMeterCardBodyLayout">
                  <property name="spacing">
-                  <number>8</number>
+                  <number>0</number>
                  </property>
                  <property name="leftMargin">
-                  <number>20</number>
+                  <number>0</number>
                  </property>
                  <property name="topMargin">
-                  <number>16</number>
+                  <number>0</number>
                  </property>
                  <property name="rightMargin">
-                  <number>20</number>
+                  <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>18</number>
+                  <number>0</number>
                  </property>
                  <item>
                   <widget class="QWidget" name="secondMeterContainerWidget" native="true">
@@ -1048,48 +1054,6 @@
               <property name="bottomMargin">
                <number>0</number>
               </property>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="removedCurrentTransformersGroupBox">
-             <property name="title">
-              <string>Снятые трансформаторы тока</string>
-             </property>
-             <layout class="QVBoxLayout" name="removedCtLayout">
-              <item>
-               <widget class="QWidget" name="removedCtContainerWidget" native="true">
-                <layout class="QVBoxLayout" name="verticalLayout_14"/>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="addRemoveCtButton">
-                <property name="text">
-                 <string>Добавить</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="installedCurrentTransformersGroupBox">
-             <property name="title">
-              <string>Установленные трансформаторы тока</string>
-             </property>
-             <layout class="QVBoxLayout" name="installedCtLayout">
-              <item>
-               <widget class="QWidget" name="installedCtContainerWidget" native="true">
-                <layout class="QVBoxLayout" name="verticalLayout_15"/>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="addInstalledCtButton">
-                <property name="text">
-                 <string>Добавить</string>
-                </property>
-               </widget>
-              </item>
              </layout>
             </widget>
            </item>

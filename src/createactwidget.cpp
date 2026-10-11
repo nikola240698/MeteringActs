@@ -33,9 +33,6 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     ui->installedCtPhaseContainer->layout()->addWidget(
         m_installedCtPhasePanel);
 
-    ui->removedCtPhaseContainer->setVisible(false);
-    ui->installedCtPhaseContainer->setVisible(false);
-
     // создаем виджет векторной диаграммы
     m_vectorDiagramWidget = new VectorDiagramWidget(ui->vectorDiagramContainerWidget);
     // добавляем поля векторной диаграммы на главный экран
@@ -48,8 +45,8 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     ui->actDateEdit->setDate(QDate::currentDate());
 
     // скрываем поля для ввода данных про трансформаторы тока
-    ui->removedCurrentTransformersGroupBox->setVisible(false);
-    ui->installedCurrentTransformersGroupBox->setVisible(false);
+    ui->removedCtPhaseContainer->setVisible(false);
+    ui->installedCtPhaseContainer->setVisible(false);
 
     // Заполняем ComboBox характера работ
     ui->workScheduleComboBox->addItem("Выберите характер работ...", 0);
@@ -154,17 +151,7 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
             updateVectorDiagramUi();
         });
 
-    // сигналы для кнопок работы с трансформаторами тока
-    connect(ui->addRemoveCtButton, &QPushButton::clicked, this,
-    [this]()
-    {
-        addRemovedCurrentTransformer();
-    });
-    connect(ui->addInstalledCtButton, &QPushButton::clicked, this,
-        [this]()
-        {
-            addInstalledCurrentTransformer();
-        });
+
 
     // сигнал нажатия кнопки сохранения
     connect(ui->createButton, &QPushButton::clicked, this,
@@ -1373,8 +1360,8 @@ void CreateActWidget::updateActTypeUi()
         // скрываем поле пломбы пока не выберется тип акта
         ui->sealWidget->setVisible(false);
         // скрываем блоки ТТ
-        ui->removedCurrentTransformersGroupBox->setVisible(false);
-        ui->installedCurrentTransformersGroupBox->setVisible(false);
+        ui->removedCtPhaseContainer->setVisible(false);
+        ui->installedCtPhaseContainer->setVisible(false);
         // Обновляем отображение полей векторной диаграммы
         updateVectorDiagramUi();
         return;
@@ -1384,8 +1371,8 @@ void CreateActWidget::updateActTypeUi()
     // Отображаем поле пломбы везде кроме демонтажа
     ui->sealWidget->setVisible(actTypeId != 4);
     // скрываем блоки ТТ
-    ui->removedCurrentTransformersGroupBox->setVisible(false);
-    ui->installedCurrentTransformersGroupBox->setVisible(false);
+    ui->removedCtPhaseContainer->setVisible(false);
+    ui->installedCtPhaseContainer->setVisible(false);
 
     // Настраиваем отображение поля характера работ
     // переменная выбора типов актов в котором нужен характер работ
@@ -1440,15 +1427,9 @@ void CreateActWidget::updateActTypeUi()
             ui->primaryMeterCardTitle->setText("Устанавливаемый прибор учета");
             ui->secondaryMeterCard->setVisible(false);
             // поля для ввода трансформаторов тока
-            ui->removedCurrentTransformersGroupBox->setVisible(false);
-            ui->installedCurrentTransformersGroupBox->setVisible(false);
-
+            ui->removedCtPhaseContainer->setVisible(false);
             ui->installedCtPhaseContainer->setVisible(true);
-            // сразу добавляем окно для ввода данных
-            if (m_installedCurrentTransformerWidgets.isEmpty())
-            {
-                addInstalledCurrentTransformer();
-            }
+
             break;
         }
         case 7:     // Замена ТТ
@@ -1456,19 +1437,9 @@ void CreateActWidget::updateActTypeUi()
             ui->primaryMeterCardTitle->setText("Прибор учета");
             ui->secondaryMeterCard->setVisible(false);
             // поля для ввода трансформаторов тока
-            ui->removedCurrentTransformersGroupBox->setVisible(false);
-            ui->installedCurrentTransformersGroupBox->setVisible(false);
             ui->removedCtPhaseContainer->setVisible(true);
             ui->installedCtPhaseContainer->setVisible(true);
-            // сразу добавляем по одному полю для вода данных
-            if (m_removedCurrentTransformerWidgets.isEmpty())
-            {
-                addRemovedCurrentTransformer();
-            }
-            if (m_installedCurrentTransformerWidgets.isEmpty())
-            {
-                addInstalledCurrentTransformer();
-            }
+
             break;
         }
         default:
@@ -1703,78 +1674,8 @@ bool CreateActWidget::insertVectorDiagram(int actId)
     return true;
 }
 
-void CreateActWidget::addRemovedCurrentTransformer()
-{
-    auto* transformer = new CurrentTransformerActWidget(
-        m_database, ui->removedCtContainerWidget);
-
-    // Получаем сигнал об изменении записей ТТ в БД
-    connect(transformer, &CurrentTransformerActWidget::currentTransformerCreated,
-        this, &CreateActWidget::currentTransformersChanged);
-
-    ui->removedCtContainerWidget->layout()->addWidget(transformer);
-
-    // Для проверки
-    auto* transformerPhase = new CurrentTransformerPhaseWidget(
-        m_database, "A", this);
-    ui->removedCtContainerWidget->layout()->addWidget(transformerPhase);
-
-    m_removedCurrentTransformerWidgets.append(transformer);
-
-    connect(transformer, &CurrentTransformerActWidget::removeRequested, this,
-        [this, transformer]()
-        {
-            removeRemovedCurrentTransformer(transformer);
-        });
-}
-
-void CreateActWidget::addInstalledCurrentTransformer()
-{
-    auto* transformer = new CurrentTransformerActWidget(
-        m_database, ui->installedCtContainerWidget);
-
-    // Получаем сигнал об изменении записей ТТ в БД
-    connect(transformer, &CurrentTransformerActWidget::currentTransformerCreated,
-        this, &CreateActWidget::currentTransformersChanged);
-
-    ui->installedCtContainerWidget->layout()->addWidget(transformer);
-
-    m_installedCurrentTransformerWidgets.append(transformer);
-
-    connect(transformer, &CurrentTransformerActWidget::removeRequested, this,
-        [this, transformer]()
-        {
-            removeInstalledCurrentTransformer(transformer);
-        });
-}
-
-void CreateActWidget::removeRemovedCurrentTransformer(CurrentTransformerActWidget *transformer)
-{
-    if (!transformer)
-        return;
-
-    m_removedCurrentTransformerWidgets.removeOne(transformer);
-
-    ui->removedCtContainerWidget->layout()->removeWidget(transformer);
-
-    transformer->deleteLater();
-}
-
-void CreateActWidget::removeInstalledCurrentTransformer(CurrentTransformerActWidget *transformer)
-{
-    if (!transformer)
-        return;
-
-    m_installedCurrentTransformerWidgets.removeOne(transformer);
-
-    ui->installedCtContainerWidget->layout()->removeWidget(transformer);
-
-    transformer->deleteLater();
-}
 
 // универсальный метод проверки заполненности формы ТТ
-
-
 bool CreateActWidget::validateCurrentTransformerReplacement()
 {
     const QList<ActCurrentTransformerData> removed =
@@ -1919,30 +1820,6 @@ void CreateActWidget::clearExternalRepresentatives()
 // очищаем все созданные трансформаторы тока
 void CreateActWidget::clearCurrentTransformers()
 {
-    for (CurrentTransformerActWidget* transformer :
-        m_removedCurrentTransformerWidgets)
-    {
-        if (!transformer)
-            continue;
-
-        ui->removedCtContainerWidget->layout()->removeWidget(transformer);
-        transformer->deleteLater();
-    }
-
-    m_removedCurrentTransformerWidgets.clear();
-
-    for (CurrentTransformerActWidget* transformer :
-        m_installedCurrentTransformerWidgets)
-    {
-        if (!transformer)
-            continue;
-
-        ui->installedCtContainerWidget->layout()->removeWidget(transformer);
-        transformer->deleteLater();
-    }
-
-    m_installedCurrentTransformerWidgets.clear();
-
     // Удаляем ТТ из карточек
     if (m_removedCtPhasePanel)
     {

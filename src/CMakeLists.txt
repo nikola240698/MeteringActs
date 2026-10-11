@@ -11,7 +11,6 @@ add_executable(MeteringActs
         meteractwidget.cpp
         externalrepresentativewidget.cpp
         vectordiagramwidget.cpp
-        currenttransformeractwidget.cpp
         currenttransformerdialog.cpp
         actrepository.cpp
         docxgenerator.cpp
@@ -39,7 +38,6 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/meteractwidget.h
         ${MY_INCLUDE_DIR}/externalrepresentativewidget.h
         ${MY_INCLUDE_DIR}/vectordiagramwidget.h
-        ${MY_INCLUDE_DIR}/currenttransformeractwidget.h
         ${MY_INCLUDE_DIR}/currenttransformerdialog.h
         ${MY_INCLUDE_DIR}/actrepository.h
         ${MY_INCLUDE_DIR}/actdata.h
@@ -67,7 +65,6 @@ add_executable(MeteringActs
         ${MY_UI_DIR}/meteractwidget.ui
         ${MY_UI_DIR}/externalrepresentativewidget.ui
         ${MY_UI_DIR}/vectordiagramwidget.ui
-        ${MY_UI_DIR}/currenttransformeractwidget.ui
         ${MY_UI_DIR}/currenttransformerdialog.ui
         ${MY_UI_DIR}/archivewidget.ui
         ${MY_UI_DIR}/actviewdialog.ui

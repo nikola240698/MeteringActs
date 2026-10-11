@@ -25,6 +25,8 @@ CurrentTransformerPhaseWidget::CurrentTransformerPhaseWidget(
     ui->serialNumberLineEdit->setPlaceholderText(
         "Введите заводской номер...");
 
+    setFocusPolicy(Qt::StrongFocus);
+
     setState(State::Empty);
 
     connect(ui->addButton, &QPushButton::clicked, this,
@@ -205,6 +207,8 @@ void CurrentTransformerPhaseWidget::setState(State state)
             break;
 
         case State::Filled:
+            ui->serialNumberLineEdit->clearFocus();
+
             ui->stateStackedWidget->setCurrentWidget(ui->dataPage);
 
             ui->serialNumberLineEdit->setVisible(false);
@@ -215,6 +219,8 @@ void CurrentTransformerPhaseWidget::setState(State state)
             ui->cancelButton->setVisible(false);
             ui->editButton->setVisible(true);
             ui->clearButton->setVisible(true);
+
+            setFocus();
 
             break;
     }
