@@ -45,8 +45,8 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     ui->actDateEdit->setDate(QDate::currentDate());
 
     // скрываем поля для ввода данных про трансформаторы тока
-    ui->removedCtPhaseContainer->setVisible(false);
-    ui->installedCtPhaseContainer->setVisible(false);
+    ui->removedCtCard->setVisible(false);
+    ui->installedCtCard->setVisible(false);
 
     // Заполняем ComboBox характера работ
     ui->workScheduleComboBox->addItem("Выберите характер работ...", 0);
@@ -1349,8 +1349,8 @@ bool CreateActWidget::updateMeterVerificationYear(MeterActWidget* meterWidget)
 void CreateActWidget::updateActTypeUi()
 {
     // Временно для проверки скрываем панели
-    ui->removedCtPhaseContainer->setVisible(false);
-    ui->installedCtPhaseContainer->setVisible(false);
+    ui->removedCtCard->setVisible(false);
+    ui->installedCtCard->setVisible(false);
 
     // Если тип акта не выбран
     if (!ui->actTypeComboBox->currentData().isValid())
@@ -1360,8 +1360,8 @@ void CreateActWidget::updateActTypeUi()
         // скрываем поле пломбы пока не выберется тип акта
         ui->sealWidget->setVisible(false);
         // скрываем блоки ТТ
-        ui->removedCtPhaseContainer->setVisible(false);
-        ui->installedCtPhaseContainer->setVisible(false);
+        ui->removedCtCard->setVisible(false);
+        ui->installedCtCard->setVisible(false);
         // Обновляем отображение полей векторной диаграммы
         updateVectorDiagramUi();
         return;
@@ -1371,8 +1371,8 @@ void CreateActWidget::updateActTypeUi()
     // Отображаем поле пломбы везде кроме демонтажа
     ui->sealWidget->setVisible(actTypeId != 4);
     // скрываем блоки ТТ
-    ui->removedCtPhaseContainer->setVisible(false);
-    ui->installedCtPhaseContainer->setVisible(false);
+    ui->removedCtCard->setVisible(false);
+    ui->installedCtCard->setVisible(false);
 
     // Настраиваем отображение поля характера работ
     // переменная выбора типов актов в котором нужен характер работ
@@ -1427,8 +1427,8 @@ void CreateActWidget::updateActTypeUi()
             ui->primaryMeterCardTitle->setText("Устанавливаемый прибор учета");
             ui->secondaryMeterCard->setVisible(false);
             // поля для ввода трансформаторов тока
-            ui->removedCtPhaseContainer->setVisible(false);
-            ui->installedCtPhaseContainer->setVisible(true);
+            ui->removedCtCard->setVisible(false);
+            ui->installedCtCard->setVisible(true);
 
             break;
         }
@@ -1437,8 +1437,8 @@ void CreateActWidget::updateActTypeUi()
             ui->primaryMeterCardTitle->setText("Прибор учета");
             ui->secondaryMeterCard->setVisible(false);
             // поля для ввода трансформаторов тока
-            ui->removedCtPhaseContainer->setVisible(true);
-            ui->installedCtPhaseContainer->setVisible(true);
+            ui->removedCtCard->setVisible(true);
+            ui->installedCtCard->setVisible(true);
 
             break;
         }

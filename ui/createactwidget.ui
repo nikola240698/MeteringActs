@@ -493,7 +493,7 @@
                       <rect>
                        <x>0</x>
                        <y>0</y>
-                       <width>385</width>
+                       <width>96</width>
                        <height>196</height>
                       </rect>
                      </property>
@@ -1004,56 +1004,178 @@
             </widget>
            </item>
            <item>
-            <widget class="QWidget" name="removedCtPhaseContainer" native="true">
+            <widget class="QFrame" name="removedCtCard">
              <property name="minimumSize">
               <size>
                <width>0</width>
                <height>0</height>
               </size>
              </property>
-             <layout class="QVBoxLayout" name="removedCtPhaseContainerLayout">
-              <property name="spacing">
-               <number>0</number>
-              </property>
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
+             <property name="frameShape">
+              <enum>QFrame::Shape::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Shadow::Raised</enum>
+             </property>
+             <property name="card" stdset="0">
+              <bool>true</bool>
+             </property>
+             <layout class="QVBoxLayout" name="removedCtCardLayout">
+              <item>
+               <widget class="QLabel" name="removedCtCardTitle">
+                <property name="text">
+                 <string>Снимаемые трансформаторы тока</string>
+                </property>
+                <property name="cardTitle" stdset="0">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="removedCtCardBody" native="true">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="cardBody" stdset="0">
+                 <bool>true</bool>
+                </property>
+                <layout class="QVBoxLayout" name="removedCtCardBodyLayout">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>8</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>10</number>
+                 </property>
+                 <item>
+                  <widget class="QWidget" name="removedCtPhaseContainer" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <layout class="QVBoxLayout" name="removedCtPhaseContainerLayout">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
            <item>
-            <widget class="QWidget" name="installedCtPhaseContainer" native="true">
+            <widget class="QFrame" name="installedCtCard">
              <property name="minimumSize">
               <size>
                <width>0</width>
                <height>0</height>
               </size>
              </property>
-             <layout class="QVBoxLayout" name="installedCtPhaseContainerLayout">
-              <property name="spacing">
-               <number>0</number>
-              </property>
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
+             <property name="frameShape">
+              <enum>QFrame::Shape::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Shadow::Raised</enum>
+             </property>
+             <property name="card" stdset="0">
+              <bool>true</bool>
+             </property>
+             <layout class="QVBoxLayout" name="installedCtCardLayout">
+              <item>
+               <widget class="QLabel" name="installedCtCardTitle">
+                <property name="text">
+                 <string>Устанавливаемые трансофрматоры тока</string>
+                </property>
+                <property name="cardTitle" stdset="0">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="installedCtCardBody" native="true">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="cardBody" stdset="0">
+                 <bool>true</bool>
+                </property>
+                <layout class="QVBoxLayout" name="installedCtCardBodyLayout">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>8</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>10</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>10</number>
+                 </property>
+                 <item>
+                  <widget class="QWidget" name="installedCtPhaseContainer" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <layout class="QVBoxLayout" name="installedCtPhaseContainerLayout">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>

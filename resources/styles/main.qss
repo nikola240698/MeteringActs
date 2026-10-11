@@ -8,6 +8,8 @@ QWidget {
     font-size: 9pt;
 }
 
+
+
 QMainWindow {
     background-color: #F4F6F8;
 }
@@ -333,6 +335,16 @@ QWidget[cardBody="true"] {
     border: none;
 }
 
+/* ===========================
+    Карточки MeterContainer
+   =========================== */
+
+#meterContainerWidget,
+#seccondMeterContainerWidget,
+#MeterActWidget,
+#MeterActWidget QWidget {
+    background-color: transparent;
+}
 
 
 /* ===========================
@@ -506,13 +518,144 @@ QFrame#representativeCardFrame QPushButton {
     border: none;
 }
 
+/* ===========================
+    Карточка ТТ
+   =========================== */
 
+#CurrentTransformerPhaseWidget #phaseTitleLabel {
+    background-color: transparent;
+    color: #334155;
 
+    font-weight: 500;
 
+    padding-left: 10px;
+}
 
+#CurrentTransformerPhaseWidget #phaseGroupBox {
+    background-color: #FFFFFF;
 
+    border: 1px solid #D3E0EA;
+    border-radius: 7px;
+}
 
+#CurrentTransformerPhaseWidget #stateStackedWidget,
+#CurrentTransformerPhaseWidget #emptyPage,
+#CurrentTransformerPhaseWidget #dataPage {
+    background-color: transparent;
+}
 
+#CurrentTransformerPhaseWidget #addButton {
+    min-height: 0;
+
+    padding: 0;
+
+    background-color: transparent;
+    color: #64748B;
+
+    border: none;
+    border-radius: 6px;
+
+    font-size: 16pt;
+    font-weight: 400;
+}
+
+#CurrentTransformerPhaseWidget #addButton:hover {
+    background-color: #F8FAFC;
+    color: #2563EB;
+}
+
+#CurrentTransformerPhaseWidget #addButton:pressed {
+    background-color: #F1F5F9;
+    color: #2563EB;
+}
+
+/* ===========================
+    Кнопки карточки ТТ
+   =========================== */
+
+#CurrentTransformerPhaseWidget #editButton {
+    min-height: 30px;
+    max-height: 30px;
+
+    padding: 0 10px;
+
+    background-color: #EFF6FF;
+    color: #2563EB;
+
+    border: 1px solid #BFDBFE;
+    border-radius: 6px;
+
+    font-weight: 500;
+}
+
+#CurrentTransformerPhaseWidget #editButton:hover {
+    background-color: #DBEAFE;
+    border-color: #93C5FD;
+    color: #1D4ED8;
+}
+
+#CurrentTransformerPhaseWidget #editButton:pressed {
+    background-color: #BFDBFE;
+    border-color: #60A5FA;
+}
+
+#CurrentTransformerPhaseWidget #clearButton {
+    min-height: 30px;
+    max-height: 30px;
+
+    padding: 0 10px;
+
+    background-color: transparent;
+    color: #64748B;
+
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+
+    font-weight: 400;
+}
+
+#CurrentTransformerPhaseWidget #clearButton:hover {
+    background-color: #FEF2F2;
+    border-color: #FECACA;
+    color: #DC2626;
+}
+
+#CurrentTransformerPhaseWidget #clearButton:pressed {
+    background-color: #FEE2E2;
+    border-color: #FCA5A5;
+    color: #B91C1C;
+}
+
+#CurrentTransformerPhaseWidget #cancelButton {
+    min-height: 30px;
+    max-height: 30px;
+
+    padding: 0 10px;
+
+    background-color: #FFFFFF;
+    color: #475569;
+
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+
+    font-weight: 400;
+}
+
+#CurrentTransformerPhaseWidget #cancelButton:hover {
+    background-color: #F8FAFC;
+    border-color: #94A3B8;
+    color: #334155;
+}
+
+#CurrentTransformerPhaseWidget #cancelButton:pressed {
+    background-color: #F1F5F9;
+}
+
+#CurrentTrnaformerPhaseWidget #findButton {
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0 10px;
+}
 
 
 

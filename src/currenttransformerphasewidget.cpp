@@ -20,7 +20,7 @@ CurrentTransformerPhaseWidget::CurrentTransformerPhaseWidget(
 {
     ui->setupUi(this);
 
-    ui->phaseGroupBox->setTitle("Фаза " + m_phase);
+    ui->phaseTitleLabel->setText("Фаза \"" + m_phase + "\"");
 
     ui->serialNumberLineEdit->setPlaceholderText(
         "Введите заводской номер...");
