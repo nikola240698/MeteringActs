@@ -39,7 +39,7 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     ui->vectorDiagramContainerWidget->layout()->addWidget(m_vectorDiagramWidget);
     // сразу скрываем все поля
     ui->vectorDiagramContainerWidget->setVisible(false);
-    ui->replacementDurationWidget->setVisible(false);
+
 
     // устанавливаем сегодняшнюю дату
     ui->actDateEdit->setDate(QDate::currentDate());
@@ -1570,11 +1570,12 @@ bool CreateActWidget::insertExternalRepresentatives(int actId)
 // метод управления блоком векторной диаграммы
 void CreateActWidget::updateVectorDiagramUi()
 {
-    // Проверяем на наличие действительного значения
+    // Если тип акта всё еще не выбран
     if (!ui->actTypeComboBox->currentData().isValid())
     {
         // устанавливаем видимость
-        ui->vectorDiagramGroupBox->setVisible(false);
+        ui->vectorDiagramCard->setVisible(false);
+        ui->replacementDurationCard->setVisible(false);
         return;
     }
     // получаем id типа акта
@@ -1586,25 +1587,25 @@ void CreateActWidget::updateVectorDiagramUi()
             actTypeId == 5 ||   // Установка
             actTypeId == 6 ||   // Установка прибора и ТТ
             actTypeId == 7;     // Замена ТТ
-    // устанавливаем видимость согласно переменной
-    ui->vectorDiagramGroupBox->setVisible(supportsVectorDiagram);
+    // Устанавливаем видимость карточки векторной диаграммы
+    ui->vectorDiagramCard->setVisible(supportsVectorDiagram);
     // меняем видимость в случае изменения переменной
     if (!supportsVectorDiagram)
     {
-        ui->vectorDiagramContainerWidget->setVisible(false);
-        ui->replacementDurationWidget->setVisible(false);
+        ui->replacementDurationCard->setVisible(false);
         return;
     }
     // булева переменная выбора наличия векторной диаграммы
     const bool hasVectorDiagram = ui->hasVectorDiagramCheckBox->isChecked();
-    // устанавливаем видимость
+
+    // устанавливаем видимость самой векторной диаграммы
     ui->vectorDiagramContainerWidget->setVisible(hasVectorDiagram);
+
     // переменная показа времени замены прибора
     const bool showReplacementDuration = actTypeId == 2 && hasVectorDiagram;
+
     // меняем видимость
-    ui->replacementDurationWidget->setVisible(showReplacementDuration);
-
-
+    ui->replacementDurationCard->setVisible(showReplacementDuration);
 }
 
 // Метод сохранения векторной диаграммы

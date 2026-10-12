@@ -1906,12 +1906,12 @@ bool DocxGenerator::processVectorDiagram(const ActData &data)
         return false;
     }
 
-    const bool hasVEctorDiagram = data.vectorDiagram.exists;
+    const bool hasVectorDiagram = data.vectorDiagram.exists;
 
     if (!processConditionalBlock(
         document,
         "vector_diagram",
-        hasVEctorDiagram,
+        hasVectorDiagram,
         "Без нагрузки."))
     {
         return false;
@@ -1924,7 +1924,7 @@ bool DocxGenerator::processVectorDiagram(const ActData &data)
     }
 
     // Если диаграммы нет, то вместо нее записываем "Без нагрузки."
-    if (!hasVEctorDiagram)
+    if (!hasVectorDiagram)
     {
         return true;
     }

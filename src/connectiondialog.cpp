@@ -149,7 +149,7 @@ bool ConnectionDialog::updateConnection()
     if (ctRatio.isEmpty())
         query.bindValue(":ctRatio", QVariant());
     else
-        query.bindValue("ctRation", ctRatio);
+        query.bindValue(":ctRatio", ctRatio);
 
     query.bindValue(":connectionId", m_connectionId);
     query.bindValue(":substationId", m_substationId);

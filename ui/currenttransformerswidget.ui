@@ -32,6 +32,9 @@
      </item>
      <item>
       <widget class="QLineEdit" name="searchLineEdit">
+       <property name="placeholderText">
+        <string>Наименование или заводской номер...</string>
+       </property>
        <property name="clearButtonEnabled">
         <bool>true</bool>
        </property>
