@@ -189,12 +189,12 @@
  </widget>
  <tabstops>
   <tabstop>currentALineEdit</tabstop>
+  <tabstop>currentBLineEdit</tabstop>
+  <tabstop>currentCLineEdit</tabstop>
   <tabstop>angleALineEdit</tabstop>
   <tabstop>angleATypeComboBox</tabstop>
-  <tabstop>currentBLineEdit</tabstop>
   <tabstop>angleBLineEdit</tabstop>
   <tabstop>angleBTypeComboBox</tabstop>
-  <tabstop>currentCLineEdit</tabstop>
   <tabstop>angleCLineEdit</tabstop>
   <tabstop>angleCTypeComboBox</tabstop>
   <tabstop>uabLineEdit</tabstop>

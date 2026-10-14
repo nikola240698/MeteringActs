@@ -556,6 +556,14 @@ QFrame#representativeCardFrame QPushButton {
     border: none;
 }
 
+QPushButton#addExternalRepresentativeButton {
+    qproperty-icon: url(:/icons/add.svg);
+    qproperty-iconSize: 18px 18px;
+}
+
+
+
+
 /* ===========================
     Карточка ТТ
    =========================== */
@@ -731,6 +739,43 @@ QFrame#representativeCardFrame QPushButton {
 
     font-weight: 600;
 }
+
+/* ===========================
+    Поле ввода пломбы
+   =========================== */
+
+QWidget#sealWidget,
+QWidget#workScheduleWidget {
+    background-color: transparent;
+}
+
+/* ===========================
+   Область сторонних представителей
+   =========================== */
+
+QScrollArea#externalRepresentativesScrollArea {
+    background: transparent;
+    border: none;
+}
+
+QScrollArea#externalRepresntativesScrollArea > QWidget,
+QWidget#externalRepresentativesScrollContents,
+QWidget#externalRepresentativesContainer {
+    background: transparent;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -469,7 +469,7 @@
                    <number>0</number>
                   </property>
                   <item>
-                   <widget class="QScrollArea" name="scrollArea">
+                   <widget class="QScrollArea" name="externalRepresentativesScrollArea">
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -488,7 +488,7 @@
                     <property name="widgetResizable">
                      <bool>true</bool>
                     </property>
-                    <widget class="QWidget" name="scrollAreaWidgetContents">
+                    <widget class="QWidget" name="externalRepresentativesScrollContents">
                      <property name="geometry">
                       <rect>
                        <x>0</x>
@@ -565,7 +565,7 @@
                 <item>
                  <widget class="QPushButton" name="addExternalRepresentativeButton">
                   <property name="text">
-                   <string>⊕ Добавить представителя</string>
+                   <string>Добавить представителя</string>
                   </property>
                   <property name="buttonRole" stdset="0">
                    <string>add</string>
@@ -1323,7 +1323,7 @@
            <item>
             <widget class="QFrame" name="vectorDiagramCard">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -1445,7 +1445,7 @@
            <item>
             <widget class="QFrame" name="replacementDurationCard">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -1514,7 +1514,7 @@
                 <property name="cardBody" stdset="0">
                  <bool>true</bool>
                 </property>
-                <layout class="QVBoxLayout" name="replacementDurationCardBodyLayout">
+                <layout class="QHBoxLayout" name="horizontalLayout">
                  <property name="spacing">
                   <number>12</number>
                  </property>
@@ -1531,61 +1531,43 @@
                   <number>10</number>
                  </property>
                  <item>
-                  <widget class="QWidget" name="replacementDurationWidget" native="true">
-                   <layout class="QHBoxLayout" name="horizontalLayout_5">
-                    <property name="leftMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>0</number>
-                    </property>
-                    <item>
-                     <widget class="QLabel" name="replacementDurationLabel">
-                      <property name="text">
-                       <string>Время замены прибора учета</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QSpinBox" name="replacementDurationSpinBox">
-                      <property name="minimumSize">
-                       <size>
-                        <width>110</width>
-                        <height>0</height>
-                       </size>
-                      </property>
-                      <property name="keyboardTracking">
-                       <bool>true</bool>
-                      </property>
-                      <property name="suffix">
-                       <string>мин.</string>
-                      </property>
-                      <property name="value">
-                       <number>1</number>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <spacer name="replacemnetDurationSpacer">
-                      <property name="orientation">
-                       <enum>Qt::Orientation::Horizontal</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
+                  <widget class="QLabel" name="replacementDurationLabel">
+                   <property name="text">
+                    <string>Продолжительность:</string>
+                   </property>
                   </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="replacementDurationSpinBox">
+                   <property name="minimumSize">
+                    <size>
+                     <width>110</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="keyboardTracking">
+                    <bool>true</bool>
+                   </property>
+                   <property name="suffix">
+                    <string>мин.</string>
+                   </property>
+                   <property name="value">
+                    <number>1</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="replacemnetDurationSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Orientation::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
                  </item>
                 </layout>
                </widget>
@@ -1633,101 +1615,204 @@
         <number>12</number>
        </property>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_13">
-         <item>
-          <widget class="QGroupBox" name="reasonResultGroupBox">
-           <property name="title">
-            <string>Заключение</string>
-           </property>
-           <layout class="QGridLayout" name="gridLayout_7">
-            <item row="5" column="0">
-             <widget class="QWidget" name="sealWidget" native="true">
-              <layout class="QHBoxLayout" name="horizontalLayout_3">
-               <property name="leftMargin">
-                <number>0</number>
+        <widget class="QFrame" name="conclusionCard">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Shape::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Shadow::Raised</enum>
+         </property>
+         <property name="card" stdset="0">
+          <bool>true</bool>
+         </property>
+         <layout class="QVBoxLayout" name="conclusionCardLayout">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="conclusionCardTitle">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>42</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>42</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Заключение</string>
+            </property>
+            <property name="cardTitle" stdset="0">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="conclusionCardBody" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="cardBody" stdset="0">
+             <bool>true</bool>
+            </property>
+            <layout class="QVBoxLayout" name="conclusionCardBodyLayout">
+             <property name="spacing">
+              <number>10</number>
+             </property>
+             <property name="leftMargin">
+              <number>16</number>
+             </property>
+             <property name="topMargin">
+              <number>6</number>
+             </property>
+             <property name="rightMargin">
+              <number>16</number>
+             </property>
+             <property name="bottomMargin">
+              <number>16</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="reasonLabel">
+               <property name="text">
+                <string>Причина выполнения работ:</string>
                </property>
-               <property name="topMargin">
-                <number>0</number>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPlainTextEdit" name="reasonPlainTextEdit">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>50</height>
+                </size>
                </property>
-               <property name="rightMargin">
-                <number>0</number>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>80</height>
+                </size>
                </property>
-               <property name="bottomMargin">
-                <number>0</number>
+               <property name="placeholderText">
+                <string>Укажите причину выполнения работ...</string>
                </property>
-               <item>
-                <widget class="QLabel" name="sealLabel">
-                 <property name="text">
-                  <string>Пломба:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="sealLineEdit">
-                 <property name="placeholderText">
-                  <string>МРЭТ/22-03</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="resultLabel">
-              <property name="text">
-               <string>Результат:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QPlainTextEdit" name="reasonPlainTextEdit">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>50</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>80</height>
-               </size>
-              </property>
-              <property name="placeholderText">
-               <string>Укажите причину выполнения работ...</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="reasonLabel">
-              <property name="text">
-               <string>Причина:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QPlainTextEdit" name="resultPlainTextEdit">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>50</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>80</height>
-               </size>
-              </property>
-              <property name="placeholderText">
-               <string>Укажите результат выполнения работ...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="resultLabel">
+               <property name="text">
+                <string>Результат выполнения работ:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPlainTextEdit" name="resultPlainTextEdit">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>50</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>80</height>
+                </size>
+               </property>
+               <property name="placeholderText">
+                <string>Укажите результат выполнения работ...</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QWidget" name="sealWidget" native="true">
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="sealLabel">
+                  <property name="text">
+                   <string>Пломба:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="sealLineEdit">
+                  <property name="maximumSize">
+                   <size>
+                    <width>300</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="placeholderText">
+                   <string>МРЭТ/22-03</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Orientation::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_13"/>
        </item>
        <item>
         <spacer name="verticalSpacer_4">
