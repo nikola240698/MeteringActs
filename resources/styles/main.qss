@@ -20,6 +20,20 @@ QLabel {
 }
 
 /* ===========================
+    Диалоговые окна
+   =========================== */
+
+QDialog {
+    background-color: #F4F6F8;
+    color: #1F2937;
+}
+
+QDialog QLabel {
+    background-color: transparent;
+    color: #1F2937;
+}
+
+/* ===========================
     Поля ввода
    =========================== */
 
@@ -379,8 +393,7 @@ QWidget[cardBody="true"] {
 
 #meterContainerWidget,
 #seccondMeterContainerWidget,
-#MeterActWidget,
-#MeterActWidget QWidget {
+#MeterActWidget {
     background-color: transparent;
 }
 
@@ -765,6 +778,63 @@ QWidget#externalRepresentativesContainer {
 }
 
 
+/* ===========================
+    Таблицы
+   =========================== */
+
+QTableView {
+    border-color: #FFFFFF;
+    alternate-background-color: #F8FAFC;
+
+    color: #334155;
+
+    border: 1px solid #D6E0EA;
+    border-radius: 6px;
+
+    gridline-color: #E2E8F0;
+
+    selection-background-color: #E8F0FE;
+    selection-color: #1D4ED8;
+
+    outline: 0;
+}
+
+QTableView::item {
+    padding: 6px 8px;
+    border: none;
+    border-bottom: 1px solid #E8EDF3;
+}
+
+QTableView::item:selected {
+    background-color: #E8F0FE;
+    color: #1D4ED8;
+}
+
+QHeaderView::section {
+    min-height: 34px;
+
+    padding: 0 8px;
+
+    background-color: #F8FAFC;
+    color: #475569;
+
+    border: none;
+    border-right: 1px solid #E2E8F0;
+    border-bottom: 1px solid #D6E0EA;
+
+    font-weight: 600;
+}
+
+QHeaderView::section:last {
+    border-right: none;
+}
+
+QTableCornerButton::section {
+    background-color: #F8FAFC;
+    border: none;
+    border-right: 1px solid #E2E9F0;
+    border-bottom: 1px solid #D6E0EA;
+}
 
 
 

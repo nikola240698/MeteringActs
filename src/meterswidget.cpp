@@ -1,7 +1,7 @@
 
 #include <QSqlQueryModel>
-#include <QSqLQuery>
-#include <QsqlError>
+#include <QSqlQuery>
+#include <QSqlError>
 #include <QDebug>
 #include <QHeaderView>
 #include <QItemSelectionModel>
