@@ -961,6 +961,23 @@ QTableCornerButton::section {
     qproperty-iconSize: 18px 18px;
 }
 
+QWidget[cardHeader="true"] {
+    background-color: #EDF5FC;
+
+    border: none;
+    border-bottom: 1px solid #DDE5EE;
+
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+}
+
+#metersToolBarWidget QLabel,
+#ctToolBarWidget QLabel {
+    color: #0F1F38;
+    font-weight: 600;
+}
+
+
 
 
 

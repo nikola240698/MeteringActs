@@ -69,14 +69,23 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QWidget" name="ctToolbarWidget" native="true">
+       <widget class="QWidget" name="ctToolBarWidget" native="true">
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>0</height>
+          <height>56</height>
          </size>
         </property>
-        <layout class="QHBoxLayout" name="ctToolbarWidgetLayout">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>56</height>
+         </size>
+        </property>
+        <property name="cardHeader" stdset="0">
+         <bool>true</bool>
+        </property>
+        <layout class="QHBoxLayout" name="ctToolBarWidgetLayout">
          <property name="spacing">
           <number>10</number>
          </property>
@@ -155,9 +164,7 @@
       </item>
       <item>
        <layout class="QHBoxLayout" name="buttonsLayout">
-        <property name="spacing">
-         <number>6</number>
-        </property>
+
         <property name="topMargin">
          <number>0</number>
         </property>
@@ -218,9 +225,9 @@
    <item>
     <widget class="QFrame" name="ctHistoryCard">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
-       <verstretch>200</verstretch>
+       <verstretch>0</verstretch>
       </sizepolicy>
      </property>
      <property name="frameShape">

@@ -79,6 +79,9 @@
           <height>56</height>
          </size>
         </property>
+        <property name="cardHeader" stdset="0">
+         <bool>true</bool>
+        </property>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <property name="spacing">
           <number>10</number>
