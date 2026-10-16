@@ -979,6 +979,74 @@ QWidget[cardHeader="true"] {
 
 
 
+/* ===========================
+    Календарь
+   =========================== */
+
+QCalendarWidget {
+    min-width: 300px;
+    min-width: 250px;
+
+    background-color: #FFFFFF;
+    border: 1px solid #D8E2EE;
+}
+
+// Верхняя панель: меясц, год, стрелки
+QCalendarWidget QWidget#qt_calendar_navigationbar {
+    min-height: 40px;
+
+    background-color: #EDF5FC;
+    border-bottom: 1px solid #D8E2EE;
+}
+
+// Месяц и год
+QCalendarWidget QToolButton {
+    min-height: 30px;
+
+    padding: 0 8px;
+
+    background-color: transparent;
+    color: #0F1F38;
+
+    border: none;
+    border-radius: 5px;
+
+    font-weight: 600;
+}
+
+QCalendarWidget QToolButton:hover {
+    background-color: #DCEBFA;
+}
+
+// Таблица дней
+QCalendarWidget QAbstractItemView {
+    background-color: #FFFFFF;
+    color: #334155;
+
+    border: none;
+    outline: none;
+
+    selection-background-color: #2563EB;
+    selection-color: #FFFFFF;
+}
+
+// Поле редактирования года
+QCalendarWidget QSpinBox {
+    min-height: 30px;
+
+    background-color: #FFFFFF;
+    color: #0F1F38;
+
+    border: 1px solid #CBD5E1;
+    border-radius: 5px;
+}
+
+// Енопки изменения года
+QCalendarWidget QSpinBox::up-button,
+QCalendarWidget QSpinBox::down-button {
+    width: 16px;
+}
+
 
 
 

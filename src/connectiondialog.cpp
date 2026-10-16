@@ -83,6 +83,43 @@ bool ConnectionDialog::insertConnection()
     const QString name =
         ui->nameLineEdit->text().trimmed();
 
+    // Проверяем на наличие такого же имени в БД
+    QSqlQuery checkQuery(m_database.getDatabase());
+
+    checkQuery.prepare(
+        "SELECT EXISTS("
+            "SELECT 1 "
+            "FROM connections "
+            "WHERE substation_id = :substationId "
+            "AND name =:name"
+        ");");
+
+    checkQuery.bindValue(":substationId", m_substationId);
+    checkQuery.bindValue(":name", name);
+
+    // Проверяем, что вообще что-либо нашли
+    if (!checkQuery.exec() || !checkQuery.next())
+    {
+        QMessageBox::critical(this, "Ошибка",
+            "Не удалось проверить наличие присоединения.");
+
+        return false;
+    }
+
+    if (checkQuery.value(0).toBool())
+    {
+        QMessageBox::warning(this, "Присоединение уже существует",
+            QString(
+                "Присоединение \"%1\" уже существует на этой подстанции.\n\n"
+                "Введите другое название.")
+                .arg(name));
+
+        ui->nameLineEdit->setFocus();
+        ui->nameLineEdit->selectAll();
+
+        return false;
+    }
+
     const double voltage =
         ui->voltageDoubleSpinBox->value();
 
@@ -126,6 +163,46 @@ bool ConnectionDialog::updateConnection()
 {
     const QString name =
         ui->nameLineEdit->text().trimmed();
+
+    // Проверяем, что измененное имя не встречается уже в БД
+    QSqlQuery checkQuery(m_database.getDatabase());
+
+    checkQuery.prepare(
+        "SELECT EXISTS("
+            "SELECT 1 "
+            "FROM connections "
+            "WHERE substation_id = :substationId "
+            "AND name = :name "
+            "AND id <> :connectionId"
+        ");");
+
+    checkQuery.bindValue(":substationId", m_substationId);
+    checkQuery.bindValue(":name", name);
+    checkQuery.bindValue(":connectionId", m_connectionId);
+
+    if (!checkQuery.exec() || !checkQuery.next())
+    {
+        QMessageBox::critical(this, "Ошибка",
+            "Не удалось проверить название присоединия");
+
+        return false;
+    }
+
+    if (checkQuery.value(0).toBool())
+    {
+        QMessageBox::warning(this, "Присоединение уже существует",
+            QString(
+                "Присоединение \"%1\" уже существует на этой подстанции.\n\n"
+                "Введите другое название.")
+                .arg(name));
+
+        ui->nameLineEdit->setFocus();
+        ui->nameLineEdit->selectAll();
+
+        return false;
+    }
+
+
 
     const double voltage =
         ui->voltageDoubleSpinBox->value();

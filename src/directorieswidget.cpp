@@ -315,7 +315,7 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
                 if (!index.isValid())
                 {
                     QMessageBox::information(this, "Добавление присоединения",
-                        "Сначала выберите подстацнию.");
+                        "Сначала выберите подстанцию.");
 
                     return;
                 }
@@ -890,7 +890,17 @@ void DirectoriesWidget::setupConnectionsTable()
 
     ui->rightTableView->hideColumn(0);
 
-    ui->rightTableView->horizontalHeader()->setStretchLastSection(true);
+    auto* header = ui->rightTableView->horizontalHeader();
+
+    // Название присоединения занимает всё свободное место
+    header->setSectionResizeMode(1, QHeaderView::Stretch);
+
+    // Остальные столбцы фиксированная ширина
+    header->setSectionResizeMode(2, QHeaderView::Fixed);
+    header->setSectionResizeMode(3, QHeaderView::Fixed);
+
+    ui->rightTableView->setColumnWidth(2, 120);
+    ui->rightTableView->setColumnWidth(3, 85);
 }
 
 void DirectoriesWidget::editSubstation(int areaId, int substationId)
