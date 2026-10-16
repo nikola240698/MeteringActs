@@ -408,6 +408,10 @@ QWidget[cardBody="true"] {
     max-height: 1px;
 }
 
+/* ===========================
+    Кнопки
+   =========================== */
+
 QPushButton[buttonRole="primary"] {
     min-height: 42px;
     padding: 0 22px;
@@ -437,6 +441,7 @@ QPushButton[buttonRole="primary"]:disabled {
     color: #F8FAFC;
 }
 
+
 QPushButton[buttonRole="secondary"] {
     min-height: 42px;
     padding: 0 20px;
@@ -458,6 +463,47 @@ QPushButton[buttonRole="secondary"]:hover {
 QPushButton[buttonRole="secondary"]:pressed {
     background-color: #E2E8F0;
 }
+
+QPushButton[buttonRole="secondary"]:disabled {
+    background-color: #F3F4F6;
+    border-color: #E5E7EB;
+    color: #9CA3AF;
+}
+
+
+QPushButton[buttonRole="danger"] {
+    min-height: 42px;
+    padding: 0 18px;
+
+    background-color: #FFFFFF;
+    color: #64748B;
+
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+
+    font-weight: 500;
+}
+
+QPushButton[buttonRole="danger"]:hover {
+    background-color: #FEF2F2;
+    border-color: #DC2626;
+
+    border-color: #FCA5A5;
+}
+
+QPushButton[buttonRole="danger"]:pressed {
+    background-color: #FEE2E2;
+    border-color: #B91C1C;
+
+    border-color: #F87171;
+}
+
+QPushButton[buttonRole="danger"]:disabled {
+    background-color: #F3F4F6;
+    border-color: #E5E7EB;
+    color: #9CA3AF;
+}
+
 
 /* ===========================
     Scroll Bar
@@ -834,6 +880,85 @@ QTableCornerButton::section {
     border: none;
     border-right: 1px solid #E2E9F0;
     border-bottom: 1px solid #D6E0EA;
+}
+
+/* ===========================
+    История приборов учета
+   =========================== */
+
+#historyCard #historyLabel {
+    min-height: 38px;
+    max-height: 38px;
+    padding-left: 16px;
+}
+
+#historyCard QTableView {
+    border: none;
+    border-radius: 0;
+}
+
+#addMeterButton {
+    qproperty-icon: url(:/icons/add-white.svg);
+    qproperty-iconSize: 18px 18px;
+}
+#editMeterButton {
+    qproperty-icon: url(:/icons/edit.svg);
+    qproperty-iconSize: 18px 18px;
+}
+
+#deleteMeterButton {
+    qproperty-icon: url(:/icons/delete.svg);
+    qproperty-iconSize: 18px 18px;
+}
+
+#addMeterButton,
+#editMeterButton,
+#deleteMeterButton {
+    min-height: 36px;
+    max-height: 36px;
+
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+/* ===========================
+    История трансформаторов тока
+   =========================== */
+
+#ctHistoryCard QTableView {
+    border: none;
+    border-radius: 0;
+}
+
+#ctHistoryCard #historyLabel {
+    min-height: 38px;
+    max-height: 38px;
+    padding-left: 16px;
+}
+
+#addCtButton,
+#editCtButton,
+#deleteCtButton {
+    min-height: 36px;
+    max-height: 36px;
+
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+#addCtButton {
+    qproperty-icon: url(:/icons/add-white.svg);
+    qproperty-iconSize: 18px 18px;
+}
+
+#editCtButton {
+    qproperty-icon: url(:/icons/edit.svg);
+    qproperty-iconSize: 18px 18px;
+}
+
+#deleteCtButton {
+    qproperty-icon: url(:/icons/delete.svg);
+    qproperty-iconSize: 18px 18px;
 }
 
 

@@ -41,7 +41,7 @@ CurrentTransformersWidget::CurrentTransformersWidget(
         });
 
     // Подключаем кнопку "Добавить"
-    connect(ui->addButton, &QPushButton::clicked, this,
+    connect(ui->addCtButton, &QPushButton::clicked, this,
         [this]()
         {
             CurrentTransformerDialog dialog(m_database, this);
@@ -53,7 +53,7 @@ CurrentTransformersWidget::CurrentTransformersWidget(
         });
 
     // Подключаем кнопку "Изменить"
-    connect(ui->editButton, &QPushButton::clicked, this,
+    connect(ui->editCtButton, &QPushButton::clicked, this,
         [this]()
         {
             const QModelIndex currentIndex =
@@ -77,7 +77,7 @@ CurrentTransformersWidget::CurrentTransformersWidget(
         });
 
     // Подключаем кнопку удаления
-    connect(ui->deleteButton, &QPushButton::clicked,
+    connect(ui->deleteCtButton, &QPushButton::clicked,
         this, &CurrentTransformersWidget::deleteCurrentTransformer);
 
     // Подключаем сигнал при смене выбора в таблице
@@ -326,8 +326,8 @@ void CurrentTransformersWidget::updateButtons()
     const bool selected =
         ui->ctTableView->currentIndex().isValid();
 
-    ui->editButton->setEnabled(selected);
-    ui->deleteButton->setEnabled(selected);
+    ui->editCtButton->setEnabled(selected);
+    ui->deleteCtButton->setEnabled(selected);
 }
 
 void CurrentTransformersWidget::deleteCurrentTransformer()
