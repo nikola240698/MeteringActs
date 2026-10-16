@@ -892,6 +892,9 @@ void DirectoriesWidget::setupConnectionsTable()
 
     auto* header = ui->rightTableView->horizontalHeader();
 
+    // Отключаем режим растягивания последнего столбца
+    header->setStretchLastSection(false);
+
     // Название присоединения занимает всё свободное место
     header->setSectionResizeMode(1, QHeaderView::Stretch);
 
@@ -1154,10 +1157,27 @@ void DirectoriesWidget::updateEmployeeButtons()
     ui->toggleEmployeeButton->setEnabled(true);
     ui->deleteEmployeeButton->setEnabled(true);
 
+    // Меняем свойство кнопок при изменении активности сотрудника
+    ui->toggleEmployeeButton->setProperty("buttonDismiss", isActive);
+    ui->toggleEmployeeButton->setProperty("buttonReinstate", !isActive);
+
     if (isActive)
+    {
+        // Меняем текст и иконку
         ui->toggleEmployeeButton->setText("Уволить");
+        ui->toggleEmployeeButton->setIcon(QIcon(":/icons/dismiss.svg"));
+    }
     else
+    {
+        // меняем текст и иконку
         ui->toggleEmployeeButton->setText("Восстановить");
+        ui->toggleEmployeeButton->setIcon(QIcon(":/icons/reinstate.svg"));
+    }
+
+    // Обновляем свойство кнопки для правильного отображения
+    ui->toggleEmployeeButton->style()->unpolish(ui->toggleEmployeeButton);
+    ui->toggleEmployeeButton->style()->polish(ui->toggleEmployeeButton);
+    ui->toggleEmployeeButton->update();
 }
 
 

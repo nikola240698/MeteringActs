@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>883</width>
-    <height>631</height>
+    <width>968</width>
+    <height>618</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,136 +38,509 @@
       </attribute>
       <layout class="QVBoxLayout" name="objectsTablayout">
        <item>
-        <layout class="QHBoxLayout" name="contentLayout">
+        <layout class="QHBoxLayout" name="contentLayout" stretch="2,3">
          <item>
-          <widget class="QGroupBox" name="leftGroupBox">
-           <property name="title">
-            <string/>
+          <widget class="QFrame" name="leftCard">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
            </property>
-           <layout class="QVBoxLayout" name="leftLayout">
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Raised</enum>
+           </property>
+           <property name="card" stdset="0">
+            <bool>true</bool>
+           </property>
+           <layout class="QVBoxLayout" name="leftCardLayout">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
-             <widget class="QPushButton" name="backButton">
-              <property name="text">
-               <string>← Назад к участкам</string>
+             <widget class="QWidget" name="leftCardTitle" native="true">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>42</height>
+               </size>
               </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>42</height>
+               </size>
+              </property>
+              <property name="cardHeader" stdset="0">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout">
+               <property name="spacing">
+                <number>14</number>
+               </property>
+               <property name="leftMargin">
+                <number>12</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>12</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QPushButton" name="backButton">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Участки</string>
+                 </property>
+                 <property name="flatNavigation" stdset="0">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="leftTitleLabel">
+                 <property name="font">
+                  <font>
+                   <pointsize>14</pointsize>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Участки</string>
+                 </property>
+                 <property name="cardHeaderTitle" stdset="0">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_4">
+                 <property name="orientation">
+                  <enum>Qt::Orientation::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="leftTitleLabel">
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-                <bold>true</bold>
-               </font>
+             <widget class="QWidget" name="leftCardBody" native="true">
+              <property name="cardBody" stdset="0">
+               <bool>true</bool>
               </property>
-              <property name="text">
-               <string>Участки</string>
-              </property>
+              <layout class="QVBoxLayout" name="leftCardBodyLayout">
+               <property name="spacing">
+                <number>8</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QTableView" name="leftTableView">
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+                 </property>
+                 <property name="selectionMode">
+                  <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+                 </property>
+                 <property name="selectionBehavior">
+                  <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+                 </property>
+                 <attribute name="verticalHeaderVisible">
+                  <bool>false</bool>
+                 </attribute>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="leftButtonsWidget" native="true">
+                 <layout class="QHBoxLayout" name="leftButtonsWidgetLayout">
+                  <property name="spacing">
+                   <number>8</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>8</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>8</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>8</number>
+                  </property>
+                  <item>
+                   <widget class="QPushButton" name="addLeftButton">
+                    <property name="minimumSize">
+                     <size>
+                      <width>120</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>120</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Добавить</string>
+                    </property>
+                    <property name="buttonRole" stdset="0">
+                     <string>primary</string>
+                    </property>
+                    <property name="buttonIcon" stdset="0">
+                     <string>add-white</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="editLeftButton">
+                    <property name="minimumSize">
+                     <size>
+                      <width>120</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>120</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Изменить</string>
+                    </property>
+                    <property name="buttonRole" stdset="0">
+                     <string>secondary</string>
+                    </property>
+                    <property name="buttonIcon" stdset="0">
+                     <string>edit</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="deleteLeftButton">
+                    <property name="minimumSize">
+                     <size>
+                      <width>120</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>120</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Удалить</string>
+                    </property>
+                    <property name="buttonRole" stdset="0">
+                     <string>danger</string>
+                    </property>
+                    <property name="buttonIcon" stdset="0">
+                     <string>delete</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_2">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
              </widget>
-            </item>
-            <item>
-             <widget class="QTableView" name="leftTableView">
-              <property name="editTriggers">
-               <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
-              </property>
-              <property name="selectionMode">
-               <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
-              </property>
-              <property name="selectionBehavior">
-               <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
-              </property>
-              <attribute name="verticalHeaderVisible">
-               <bool>false</bool>
-              </attribute>
-             </widget>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="leftButtonsLayout">
-              <item>
-               <widget class="QPushButton" name="addLeftButton">
-                <property name="text">
-                 <string>Добавить</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="editLeftButton">
-                <property name="text">
-                 <string>Изменить</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="deleteLeftButton">
-                <property name="text">
-                 <string>Удалить</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
             </item>
            </layout>
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="rightGroupBox">
-           <property name="title">
-            <string/>
+          <widget class="QFrame" name="rightCard">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
            </property>
-           <layout class="QVBoxLayout" name="rightLayout">
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Raised</enum>
+           </property>
+           <property name="card" stdset="0">
+            <bool>true</bool>
+           </property>
+           <layout class="QVBoxLayout" name="rightCardLayout">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
-             <widget class="QLabel" name="rightTitleLabel">
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-                <bold>true</bold>
-               </font>
+             <widget class="QWidget" name="rightCardTitle" native="true">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>42</height>
+               </size>
               </property>
-              <property name="text">
-               <string>Подстанции</string>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>42</height>
+               </size>
               </property>
+              <property name="cardHeader" stdset="0">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="rightCardTitleLayout">
+               <property name="spacing">
+                <number>14</number>
+               </property>
+               <property name="leftMargin">
+                <number>12</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>12</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="rightTitleLabel">
+                 <property name="font">
+                  <font>
+                   <pointsize>14</pointsize>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Подстанции</string>
+                 </property>
+                 <property name="cardHeaderTitle" stdset="0">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
             <item>
-             <widget class="QTableView" name="rightTableView">
-              <property name="editTriggers">
-               <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
-              </property>
-              <property name="selectionMode">
-               <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
-              </property>
-              <property name="selectionBehavior">
-               <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
-              </property>
-              <attribute name="verticalHeaderVisible">
-               <bool>false</bool>
-              </attribute>
+             <widget class="QWidget" name="rightCardBody" native="true">
+              <layout class="QVBoxLayout" name="rightCardBodyLayout">
+               <property name="spacing">
+                <number>8</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QTableView" name="rightTableView">
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+                 </property>
+                 <property name="selectionMode">
+                  <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+                 </property>
+                 <property name="selectionBehavior">
+                  <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+                 </property>
+                 <attribute name="verticalHeaderVisible">
+                  <bool>false</bool>
+                 </attribute>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="rightButtonsWidget" native="true">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <layout class="QHBoxLayout" name="rightButtonsWidgetLayout">
+                  <property name="spacing">
+                   <number>8</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>8</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>8</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>8</number>
+                  </property>
+                  <item>
+                   <spacer name="horizontalSpacer_3">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="addRightButton">
+                    <property name="minimumSize">
+                     <size>
+                      <width>120</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>120</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Добавить</string>
+                    </property>
+                    <property name="buttonRole" stdset="0">
+                     <string>primary</string>
+                    </property>
+                    <property name="buttonIcon" stdset="0">
+                     <string>add-white</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="editRightButton">
+                    <property name="minimumSize">
+                     <size>
+                      <width>120</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>120</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Изменить</string>
+                    </property>
+                    <property name="buttonRole" stdset="0">
+                     <string>secondary</string>
+                    </property>
+                    <property name="buttonIcon" stdset="0">
+                     <string>edit</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="deleteRightButton">
+                    <property name="minimumSize">
+                     <size>
+                      <width>120</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>120</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Удалить</string>
+                    </property>
+                    <property name="buttonRole" stdset="0">
+                     <string>danger</string>
+                    </property>
+                    <property name="buttonIcon" stdset="0">
+                     <string>delete</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
              </widget>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="rightButtonsLayout">
-              <item>
-               <widget class="QPushButton" name="addRightButton">
-                <property name="text">
-                 <string>Добавить</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="editRightButton">
-                <property name="text">
-                 <string>Изменить</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="deleteRightButton">
-                <property name="text">
-                 <string>Удалить</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
             </item>
            </layout>
           </widget>
@@ -182,71 +555,269 @@
       </attribute>
       <layout class="QVBoxLayout" name="employeesTabLayout">
        <item>
-        <widget class="QTableView" name="employeesTableView">
-         <property name="editTriggers">
-          <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+        <widget class="QFrame" name="employeeCard">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
          </property>
-         <property name="alternatingRowColors">
+         <property name="frameShape">
+          <enum>QFrame::Shape::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Shadow::Raised</enum>
+         </property>
+         <property name="card" stdset="0">
           <bool>true</bool>
          </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
-         </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
-         </property>
-         <attribute name="horizontalHeaderStretchLastSection">
-          <bool>false</bool>
-         </attribute>
-         <attribute name="verticalHeaderVisible">
-          <bool>false</bool>
-         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="employeeCardTitle" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>42</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>42</height>
+             </size>
+            </property>
+            <property name="cardHeader" stdset="0">
+             <bool>true</bool>
+            </property>
+            <layout class="QHBoxLayout" name="employeeCardTitleLayout">
+             <property name="spacing">
+              <number>14</number>
+             </property>
+             <property name="leftMargin">
+              <number>12</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>12</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="employeeCardTitleLabel">
+               <property name="text">
+                <string>Представители предприятия</string>
+               </property>
+               <property name="cardHeaderTitle" stdset="0">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="employeeCardBody" native="true">
+            <layout class="QVBoxLayout" name="employeeCardBodyLayout">
+             <property name="spacing">
+              <number>8</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QTableView" name="employeesTableView">
+               <property name="editTriggers">
+                <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+               </property>
+               <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
+               <property name="selectionMode">
+                <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>false</bool>
+               </attribute>
+               <attribute name="verticalHeaderVisible">
+                <bool>false</bool>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QWidget" name="employeeButtonsWidget" native="true">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <layout class="QHBoxLayout" name="employeeButtonsWidgetLayout">
+                <property name="spacing">
+                 <number>8</number>
+                </property>
+                <property name="leftMargin">
+                 <number>8</number>
+                </property>
+                <property name="topMargin">
+                 <number>8</number>
+                </property>
+                <property name="rightMargin">
+                 <number>8</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>8</number>
+                </property>
+                <item>
+                 <spacer name="horizontalSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Orientation::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="addEmployeeButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>150</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>150</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Добавить</string>
+                  </property>
+                  <property name="buttonRole" stdset="0">
+                   <string>primary</string>
+                  </property>
+                  <property name="buttonIcon" stdset="0">
+                   <string>add-white</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="editEmployeeButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>145</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>145</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Изменить</string>
+                  </property>
+                  <property name="buttonRole" stdset="0">
+                   <string>secondary</string>
+                  </property>
+                  <property name="buttonIcon" stdset="0">
+                   <string>edit</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="toggleEmployeeButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>145</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>145</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Уволить</string>
+                  </property>
+                  <property name="buttonDismiss" stdset="0">
+                   <bool>false</bool>
+                  </property>
+                  <property name="buttonReinstate" stdset="0">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="deleteEmployeeButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>145</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>145</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Удалить</string>
+                  </property>
+                  <property name="buttonRole" stdset="0">
+                   <string>danger</string>
+                  </property>
+                  <property name="buttonIcon" stdset="0">
+                   <string>delete</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
         </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="employyesTabButtonLayout">
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Orientation::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="addEmployeeButton">
-           <property name="text">
-            <string>Добавить</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="editEmployeeButton">
-           <property name="text">
-            <string>Изменить</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="toggleEmployeeButton">
-           <property name="text">
-            <string>Уволить</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="deleteEmployeeButton">
-           <property name="text">
-            <string>Удалить</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </item>
       </layout>
      </widget>

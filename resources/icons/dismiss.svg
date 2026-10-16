@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+
+    <!-- Голова -->
+    <circle cx="9" cy="7" r="3" stroke="#D97706" stroke-width="1.7"></circle>
+
+    <!-- Сотрудник -->
+    <path d="M3.5 18.5
+             C3.5 14.9 5.8 12.5 9 12.5
+             C10.7 12.5 12.1 13.1 13.1 14" stroke="#D97706" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+
+    <!-- Крестик -->
+    <path d="M16 15L21 20
+             M21 15L16 20" stroke="#D97706" stroke-width="1.8" stroke-linecap="round"></path>
+
+</svg>

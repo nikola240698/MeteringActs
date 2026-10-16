@@ -22,11 +22,10 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // Создем модель отображения данных
+    // Создаем модель отображения данных
     m_model = new QSqlQueryModel(this);
     ui->actsTableView->setModel(m_model);
-    // Скрываем столбец ID
-    ui->actsTableView->hideColumn(0);
+
     // Выбираем сразу всю строку
     ui->actsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     // Активный выбор только на одной строке
@@ -151,6 +150,29 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
     connect(ui->deleteActButton, &QPushButton::clicked, this,
         &ArchiveWidget::deleteSelectedAct);
 
+    // Скрываем столбец ID
+    ui->actsTableView->hideColumn(0);
+
+    // Отключаем все кнопки
+    ui->openActButton->setEnabled(false);
+    ui->editActButton->setEnabled(false);
+    ui->generateDocxButton->setEnabled(false);
+    ui->deleteActButton->setEnabled(false);
+
+    // Подключаем слот активации кнопок при выборе акта
+    connect(ui->actsTableView->selectionModel(),
+        &QItemSelectionModel::selectionChanged, this,
+        [this]()
+        {
+            const bool hasSelected =
+                ui->actsTableView->selectionModel()->hasSelection();
+
+            ui->openActButton->setEnabled(hasSelected);
+            ui->editActButton->setEnabled(hasSelected);
+            ui->generateDocxButton->setEnabled(hasSelected);
+            ui->deleteActButton->setEnabled(hasSelected);
+        }
+        );
 }
 
 ArchiveWidget::~ArchiveWidget()
@@ -170,14 +192,12 @@ void ArchiveWidget::loadActs(
     const QDate &dateFrom,
     const QDate &dateTo)
 {
-
-
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
         "SELECT "
         "a.id, "
-        "a.act_date, "
+        "strftime('%d.%m.%Y', a.act_date) AS act_date_display, "
         "at.name AS act_type_name,"
         "s.name AS substation_name, "
         "c.name AS connection_name, "
@@ -244,8 +264,20 @@ void ArchiveWidget::loadActs(
     m_model->setHeaderData(5, Qt::Horizontal, "Напряжение, кВ");
     m_model->setHeaderData(6, Qt::Horizontal, "Представитель");
 
-    // Подгоняем остальные столбцы
-    ui->actsTableView->resizeColumnsToContents();
+    // Настраиваем ширину столбцов
+    auto* header = ui->actsTableView->horizontalHeader();
+
+    header->setStretchLastSection(false);
+
+    header->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(2, QHeaderView::Interactive);
+    header->setSectionResizeMode(3, QHeaderView::Stretch);
+    header->setSectionResizeMode(4, QHeaderView::Stretch);
+    header->setSectionResizeMode(5, QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(6, QHeaderView::ResizeToContents);
+
+    // Стартовая ширина типа акта
+    ui->actsTableView->setColumnWidth(2, 220);
 }
 
 void ArchiveWidget::loadActTypes()

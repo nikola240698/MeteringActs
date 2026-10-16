@@ -382,6 +382,8 @@ QLabel[cardTitle="true"] {
     font-weight: 600;
 }
 
+
+
 QWidget[cardBody="true"] {
     background-color: #FFFFFF;
     border: none;
@@ -476,9 +478,9 @@ QPushButton[buttonRole="danger"] {
     padding: 0 18px;
 
     background-color: #FFFFFF;
-    color: #64748B;
+    color: #DC2626;
 
-    border: 1px solid #CBD5E1;
+    border: 1px solid #FCA5A5;
     border-radius: 6px;
 
     font-weight: 500;
@@ -486,16 +488,16 @@ QPushButton[buttonRole="danger"] {
 
 QPushButton[buttonRole="danger"]:hover {
     background-color: #FEF2F2;
-    border-color: #DC2626;
+    color: #B91C1C;
 
-    border-color: #FCA5A5;
+    border-color: #F87171;
 }
 
 QPushButton[buttonRole="danger"]:pressed {
     background-color: #FEE2E2;
-    border-color: #B91C1C;
+    color: #991B1B;
 
-    border-color: #F87171;
+    border-color: #EF4444;
 }
 
 QPushButton[buttonRole="danger"]:disabled {
@@ -985,13 +987,13 @@ QWidget[cardHeader="true"] {
 
 QCalendarWidget {
     min-width: 300px;
-    min-width: 250px;
+    min-height: 250px;
 
     background-color: #FFFFFF;
     border: 1px solid #D8E2EE;
 }
 
-// Верхняя панель: меясц, год, стрелки
+/* Верхняя панель: меясц, год, стрелки */
 QCalendarWidget QWidget#qt_calendar_navigationbar {
     min-height: 40px;
 
@@ -999,7 +1001,7 @@ QCalendarWidget QWidget#qt_calendar_navigationbar {
     border-bottom: 1px solid #D8E2EE;
 }
 
-// Месяц и год
+/* Месяц и год */
 QCalendarWidget QToolButton {
     min-height: 30px;
 
@@ -1014,11 +1016,37 @@ QCalendarWidget QToolButton {
     font-weight: 600;
 }
 
+/* Кнопки предыдущего и следующего месяца */
+QCalendarWidget QToolButton#qt_calendar_prevmonth,
+QCalendarWidget QToolButton#qt_calendar_nextmonth {
+    min-width: 32px;
+    max-width: 32px;
+    min-height: 32px;
+    max-height: 32px;
+
+    padding: 0;
+
+    background-color: #DCEBFA;
+    border: 1px solid #C7D9EC;
+    border-radius: 6px;
+}
+
+QCalendarWidget QToolButton#qt_calendar_prevmonth:hover,
+QCalendarWidget QToolButton#qt_calendar_nextmonth:hover {
+    background-color: #C9E0F7;
+    border-color: #AFCBE8;
+}
+
+QCalendarWidget QToolButton#qt_calendar_prevmonth:pressed,
+QCalendarWidget QToolButton#qt_calendar_nextmonth:pressed {
+    background-color: #B8D6F3;
+}
+
 QCalendarWidget QToolButton:hover {
     background-color: #DCEBFA;
 }
 
-// Таблица дней
+/* Таблица дней */
 QCalendarWidget QAbstractItemView {
     background-color: #FFFFFF;
     color: #334155;
@@ -1030,7 +1058,7 @@ QCalendarWidget QAbstractItemView {
     selection-color: #FFFFFF;
 }
 
-// Поле редактирования года
+/* Поле редактирования года */
 QCalendarWidget QSpinBox {
     min-height: 30px;
 
@@ -1041,10 +1069,136 @@ QCalendarWidget QSpinBox {
     border-radius: 5px;
 }
 
-// Енопки изменения года
+/* Кнопки изменения года */
 QCalendarWidget QSpinBox::up-button,
 QCalendarWidget QSpinBox::down-button {
     width: 16px;
+}
+
+
+/* ===========================
+    Справочники
+   =========================== */
+
+QPushButton[buttonIcon="add-white"] {
+    qproperty-icon: url(:/icons/add-white.svg);
+    qproperty-iconSize: 18px 18px;
+}
+
+QPushButton[buttonIcon="edit"] {
+    qproperty-icon: url(:/icons/edit.svg);
+    qproperty-iconSize: 18px 18px;
+}
+
+QPushButton[buttonIcon="delete"] {
+    qproperty-icon: url(:/icons/delete.svg);
+    qproperty-iconSize: 18px 18px;
+}
+
+QPushButton[flatNavigation="true"] {
+    qproperty-icon: url(:/icons/arrow-left.svg);
+    qproperty-iconSize: 16px 16px;
+
+    background-color: transparent;
+    border: none;
+    padding: 0 4px 0 0;
+    color: #64748B;
+    font-weight: 500;
+}
+
+QPushButton[flatNavigation="true"]:hover {
+    color: #2563EB;
+}
+
+QPushButton[flatNavigation="true"]:pressed {
+    color: #1D4ED8;
+}
+
+QLabel[cardHeaderTitle="true"] {
+    background: transparent;
+    border: none;
+    color: #0F172A;
+    font-size: 12pt;
+    font-weight: 600;
+}
+
+/* ===========================
+    Сотрудники
+   =========================== */
+
+QPushButton[buttonDismiss="true"] {
+    min-height: 42px;
+    max-height: 42px;
+
+    background-color: #FFFFFF;
+    color: #D97706;
+    border: 1px solid #F59E0B;
+    border-radius: 6px;
+}
+
+QPushButton[buttonDismiss="true"]:hover {
+    background-color: #FFFBEB;
+    border-color: #D97706;
+    color: #B45309;
+}
+
+QPushButton[buttonDismiss="true"]:pressed {
+    background-color: #FEF3C7;
+    border-color: #B45309;
+    color:#92400E;
+}
+
+QPushButton[buttonDismiss="true"]:disabled {
+    background-color: #F8FAFC;
+    border-color: #E2E8F0;
+    color: #94A3B8;
+}
+
+QPushButton[buttonReinstate="true"] {
+    min-height: 42px;
+    max-height: 42px;
+
+    background-color: #FFFFFF;
+    color: #16A34A;
+    border: 1px solid #22C55E;
+    border-radius: 6px;
+}
+
+QPushButton[buttonReinstate="true"]:hover {
+    background-color: #F0FDF4;
+    border-color: #16A34A;
+    color: #15803D;
+}
+
+QPushButton[buttonReinstate="true"]:pressed {
+    background-color: #DCFCE7;
+    border-color: #15803D;
+    color:#166534;
+}
+
+QPushButton[buttonReinstate="true"]:disabled {
+    background-color: #F8FAFC;
+    border-color: #E2E8F0;
+    color: #94A3B8;
+}
+
+/* ===========================
+    Архив актов
+   =========================== */
+
+QPushButton[buttonIcon="open"] {
+    qproperty-icon: url(:/icons/open.svg);
+    qproperty-iconSize: 18px 18px;
+}
+
+QPushButton[buttonIcon="export"] {
+    qproperty-icon: url(:/icons/export.svg);
+    qproperty-iconSize: 18px 18px;
+}
+
+QPushButton[buttonIcon="reset"] {
+    qproperty-icon: url(:/icons/reset.svg);
+    qproperty-iconSize: 18px 18px;
 }
 
 
