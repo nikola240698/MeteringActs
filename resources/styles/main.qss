@@ -82,18 +82,28 @@ QComboBox:disabled {
     border-color: #D7DCE2;
 }
 
-QComboBox {
-    padding-right: 30px;
+QComboBox,
+QDateEdit {
+    padding-right: 36px;
 }
 
-QComboBox::drop-down {
+QComboBox::drop-down,
+QDateEdit::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: top right;
 
-    width: 30px;
+    width: 36px;
 
     border: none;
     background: transparent;
+}
+
+QComboBox::down-arrow,
+QDateEdit::down-arrow {
+    image: url(:/icons/combo-arrow.svg);
+
+    width: 16px;
+    height: 16px;
 }
 
 QComboBox QAbstractItemView {
@@ -107,6 +117,7 @@ QComboBox QAbstractItemView {
 
     outline: 0;
 }
+
 
 /* ===========================
     Кнопки
@@ -1185,6 +1196,8 @@ QPushButton[buttonReinstate="true"]:disabled {
 /* ===========================
     Архив актов
    =========================== */
+
+
 
 QPushButton[buttonIcon="open"] {
     qproperty-icon: url(:/icons/open.svg);

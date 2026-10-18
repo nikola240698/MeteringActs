@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QApplication>
 #include <QSettings>
+#include <QStandardPaths>
 
 #include "settingswidget.h"
 #include "ui_settingswidget.h"
@@ -57,6 +58,17 @@ SettingsWidget::SettingsWidget(
     // Подключаем кнопку восстановления БД
     connect(ui->restoreBackupButton, &QPushButton::clicked,
         this, &SettingsWidget::restoreBackup);
+
+    // Кнопка выбора пути сохранения документов
+    connect(ui->selectDocxPathButton, &QPushButton::clicked,
+        this, &SettingsWidget::selectDocxDirectory);
+
+    // Подключаем чекбокс открытия папки после формирования документа
+    connect(ui->openDocxDirectoryCheckBox, &QCheckBox::toggled, this,
+        [this]()
+        {
+            saveSettings();
+        });
 }
 
 SettingsWidget::~SettingsWidget()
@@ -178,6 +190,24 @@ void SettingsWidget::loadSettings()
     ui->backupIntervalSpinBox->setValue(intervalHour);
 
     ui->backupKeepCountSpinBox->setValue(keepCount);
+
+    // Загружаем по умолчанию путь к сохранению
+    QString docxDirectory = settings.value(
+        "documents/docxDirectory").toString();
+
+    if (docxDirectory.isEmpty())
+    {
+        docxDirectory =
+            QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    }
+
+    ui->docxPathLineEdit->setText(docxDirectory);
+
+    // Сохраняем данные чекбокса об открытии папки после формирования
+    const bool openDirectoryAfterGeneration =
+        settings.value("documents/openDirectoryAfterGeneration", true).toBool();
+
+    ui->openDocxDirectoryCheckBox->setChecked(openDirectoryAfterGeneration);
 }
 
 void SettingsWidget::saveSettings()
@@ -189,12 +219,33 @@ void SettingsWidget::saveSettings()
         ui->automaticBackupCheckBox->isChecked());
 
     settings.setValue(
-        "backup/intervalhours",
+        "backup/intervalHours",
         ui->backupIntervalSpinBox->value());
 
     settings.setValue(
         "backup/keepCount",
         ui->backupKeepCountSpinBox->value());
+
+    settings.setValue(
+        "documents/openDirectoryAfterGeneration",
+        ui->openDocxDirectoryCheckBox->isChecked());
+}
+
+void SettingsWidget::selectDocxDirectory()
+{
+    const QString currentDirectory = ui->docxPathLineEdit->text();
+
+    const QString directory = QFileDialog::getExistingDirectory(
+        this, "Выберите каталог сохранения DOCX", currentDirectory);
+
+    if (directory.isEmpty())
+        return;
+
+    ui->docxPathLineEdit->setText(QDir::toNativeSeparators(directory));
+
+    QSettings settings;
+
+    settings.setValue("documents/docxDirectory", directory);
 }
 
 

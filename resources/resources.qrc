@@ -13,5 +13,6 @@
         <file>icons/open.svg</file>
         <file>icons/export.svg</file>
         <file>icons/reset.svg</file>
+        <file>icons/combo-arrow.svg</file>
     </qresource>
 </RCC>

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>898</width>
+    <width>778</width>
     <height>751</height>
    </rect>
   </property>
@@ -130,6 +130,9 @@
                <horstretch>2</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
+             </property>
+             <property name="placeholderText">
+              <string>Начните вводить любую информацию...</string>
              </property>
              <property name="clearButtonEnabled">
               <bool>true</bool>
@@ -463,7 +466,7 @@
                <string>Сформировать DOCX</string>
               </property>
               <property name="buttonRole" stdset="0">
-               <string>export</string>
+               <string>secondary</string>
               </property>
               <property name="buttonIcon" stdset="0">
                <string>export</string>

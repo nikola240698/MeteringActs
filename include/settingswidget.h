@@ -36,11 +36,13 @@ private:
     QString backupDirectory() const;
 
     void createBackup();
-
     void restoreBackup();
 
     void loadSettings();
     void saveSettings();
+
+    // Каталог для сохранения DOCX
+    void selectDocxDirectory();
 
 
 };

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>688</width>
-    <height>620</height>
+    <height>597</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,6 +44,51 @@
    </item>
    <item>
     <widget class="QLineEdit" name="databasePathLineEdit"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>Каталог сохранения DOCX</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="docxPathLineEdit">
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <widget class="QPushButton" name="selectDocxPathButton">
+       <property name="text">
+        <string>Выбрать...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="openDocxDirectoryCheckBox">
+     <property name="text">
+      <string>Открыть каталог после формирования документа</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QLabel" name="backupPathLabel">

@@ -803,8 +803,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>883</width>
-            <height>482</height>
+            <width>224</width>
+            <height>284</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -1300,8 +1300,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>911</width>
-            <height>510</height>
+            <width>298</width>
+            <height>226</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="measurementScrollAreaContentLayout">
@@ -1925,6 +1925,9 @@
         <property name="buttonRole" stdset="0">
          <string>secondary</string>
         </property>
+        <property name="buttonIcon" stdset="0">
+         <string>reset</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -1959,6 +1962,9 @@
         </property>
         <property name="buttonRole" stdset="0">
          <string>primary</string>
+        </property>
+        <property name="buttonIcon" stdset="0">
+         <string>add-white</string>
         </property>
        </widget>
       </item>

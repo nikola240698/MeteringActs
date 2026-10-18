@@ -8,6 +8,12 @@
 #include <QMessageBox>
 #include <QItemSelectionModel>
 #include <QSignalBlocker>
+#include <QSettings>
+#include <QStandardPaths>
+#include <QDir>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QFileInfo>
 
 #include "archivewidget.h"
 #include "actviewdialog.h"
@@ -349,10 +355,24 @@ void ArchiveWidget::generateSelectedAct()
             .arg(actId)
             .arg(data.date.toString("dd-MM-yyyy"));
 
+    // Загружаем из настроек путь сохранения документа
+    QSettings settings;
+
+    QString docxDirectory  = settings.value("documents/docxDirectory").toString();
+
+    // Если каталог не задан или не существует, то откроем системную папку "Документы"
+    if (docxDirectory.isEmpty() || !QDir(docxDirectory).exists())
+    {
+        docxDirectory =
+            QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    }
+
+    const QString suggestedPath = QDir(docxDirectory).filePath(suggestedFileName);
+
     // Выбираем путь сохранения
     QString outputPath =
         QFileDialog::getSaveFileName(
-            this, "Сохранить акт", suggestedFileName, "Документ Word (*.docx)");
+            this, "Сохранить акт", suggestedPath, "Документ Word (*.docx)");
 
     // Если пользователь отменил
     if (outputPath.isEmpty())
@@ -379,6 +399,17 @@ void ArchiveWidget::generateSelectedAct()
 
     QMessageBox::information(this, "Готово",
         "Документ успешно сформирован: " + outputPath);
+
+    const bool openDirectory =
+        settings.value("documents/openDirectoryAfterGeneration", true).toBool();
+
+    if (openDirectory)
+    {
+        const QFileInfo fileInfo(outputPath);
+
+        QDesktopServices::openUrl(
+            QUrl::fromLocalFile(fileInfo.absolutePath()));
+    }
 }
 
 void ArchiveWidget::applyFilters()
