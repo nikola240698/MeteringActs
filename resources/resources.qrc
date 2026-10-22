@@ -14,5 +14,12 @@
         <file>icons/export.svg</file>
         <file>icons/reset.svg</file>
         <file>icons/combo-arrow.svg</file>
+        <file>icons/database.svg</file>
+        <file>icons/document.svg</file>
+        <file>icons/backup.svg</file>
+        <file>icons/restore.svg</file>
+        <file>icons/folder.svg</file>
+        <file>icons/backup-action.svg</file>
+        <file>icons/restore-action.svg</file>
     </qresource>
 </RCC>

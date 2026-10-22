@@ -1215,6 +1215,106 @@ QPushButton[buttonIcon="reset"] {
 }
 
 
+/* ===========================
+    Настройки
+   =========================== */
+
+/* Заголовок страницы */
+SettingsWidget > QLabel#titleLabel {
+    color: #0F1F38;
+    font-size: 16pt;
+    font-weight: 600;
+}
+
+/* Подзаголовок страницы */
+SettingsWidget > QLabel#subtitleLabel {
+    color: #64748B;
+    font-size: 9pt;
+}
+
+/* Основные заголовки карточек */
+SettingsWidget QLabel#dbLabel,
+SettingsWidget QLabel#documentCardTitleLabel,
+SettingsWidget QLabel#backupTitleLabel,
+SettingsWidget QLabel#restoreTitleLabel {
+    color: #0F1F38;
+    font-size: 10pt;
+    font-weight: 600;
+}
+
+/* Описания в заголовках карточек */
+SettingsWodget QLabel#databaseSubtitleLabel,
+SettingsWidget Qlabel#documentCardSubtitleLabel,
+SettingsWidget Qlabel#backupSubtitleLabel,
+SettingsWidget QLabel#restoreSubtitleLabel {
+    color: #64748B;
+    font-size: 8.5pt;
+    font-weight: 400;
+}
+
+/* Пояснение автоматического резервного копирования */
+SettingsWidget Qlabel#backupInformationLabel {
+    color: #64748B;
+    font-size: 8.5pt;
+}
+
+/* Инофрмация о аоследней резервной копии */
+SettingsWidget Qlabel#lastBackupLabel {
+    color: #64748B;
+}
+
+/* Read-only пути */
+SettingsWidget QLineEdit[readOnly="true"] {
+    background-color: #F8FAFC;
+    color: #475569;
+}
+
+/* Информационное сообщение восстановления */
+SettingsWidget QLabel#restoreInformationLabel {
+    padding: 10px 12px;
+
+    background-color: #EFF6FF;
+    color: #475569;
+
+    border: 1px solid #DBEAFE;
+    border-radius: 6px;
+}
+
+/* ===========================
+    Header'ы на старнице настройки
+   =========================== */
+
+SettingsWidget QFrame#databaseIconFrame {
+    background-color: #DCE8FF;
+    border: none;
+    border-radius: 22px;
+}
+
+SettingsWidget QFrame#documentIconFrame {
+    background-color: #D7EEF8;
+    border: none;
+    border-radius: 22px;
+}
+
+SettingsWidget QFrame#backupIconFrame {
+    background-color: #D7F2E7;
+    border: none;
+    border-radius: 22px;
+}
+
+SettingsWidget QFrame#restoreIconFrame {
+    background-color: #E2E2FF;
+    border: none;
+    border-radius: 22px;
+}
+
+SettingsWidget Qlabel#databaseIconLabel,
+SettingsWidget QLabel#documentIconLabel,
+SettingsWidget QLabel#backupIconLabel,
+SettingsWidget Qlabel#restoreIconLabel {
+    background: transparent;
+    border: none;
+}
 
 
 

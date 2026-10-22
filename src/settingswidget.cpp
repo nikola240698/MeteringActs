@@ -50,7 +50,7 @@ SettingsWidget::SettingsWidget(
 
     ui->backupPathLineEdit->setText(backupDirectory());
 
-    ui->lastbackupLabel->setText("-");
+    ui->lastBackupLabel->setText("-");
 
     connect(ui->createBackupButton, &QPushButton::clicked,
         this, &SettingsWidget::createBackup);
@@ -102,7 +102,7 @@ void SettingsWidget::createBackup()
 
     const QFileInfo backupInfo(createdBackupPath);
 
-    ui->lastbackupLabel->setText(backupInfo.fileName());
+    ui->lastBackupLabel->setText(backupInfo.fileName());
 
     QMessageBox::information(this, "Резервная копия создана",
         "Резервная копия базы данных успешно создана:\n\n"
@@ -198,7 +198,7 @@ void SettingsWidget::loadSettings()
     if (docxDirectory.isEmpty())
     {
         docxDirectory =
-            QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+            QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     }
 
     ui->docxPathLineEdit->setText(docxDirectory);
