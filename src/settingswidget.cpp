@@ -69,6 +69,10 @@ SettingsWidget::SettingsWidget(
         {
             saveSettings();
         });
+
+    // Подключаем кнопку изменения пути к БД
+    connect(ui->selectDatabaseButton, &QPushButton::clicked,
+        this, &SettingsWidget::selectDatabase);
 }
 
 SettingsWidget::~SettingsWidget()
@@ -247,5 +251,72 @@ void SettingsWidget::selectDocxDirectory()
 
     settings.setValue("documents/docxDirectory", directory);
 }
+
+void SettingsWidget::selectDatabase()
+{
+    const QFileInfo currentDatabase(m_database.databasePath());
+
+    const QString filePath =
+        QFileDialog::getOpenFileName(this, "Выберите базу данных",
+            currentDatabase.absolutePath(),
+            "SQLite database (*.db);;Все файлы (*.*)");
+
+    if (filePath.isEmpty())
+        return;
+
+    // Не имеет смысла повторно выбирать текущую БД
+    if (QFileInfo(filePath).canonicalFilePath() ==
+        currentDatabase.canonicalFilePath())
+    {
+        QMessageBox::information(this, "База данных",
+            "Выбранная база данных уже используется приложением.");
+
+        return;
+    }
+
+    // Используем существующую проверку БД
+    if (!m_backupManager.validateBackup(filePath))
+    {
+        QMessageBox::critical(this, "Некорректная база данных",
+            m_backupManager.lastError());
+
+        return;
+    }
+
+    const QFileInfo selectedDatabase(filePath);
+
+    const auto answer = QMessageBox::question(
+        this,
+        "Смена базы данных",
+        "Использовать выбранную базу данных?\n\n"
+        "Файл:\n"
+        + selectedDatabase.fileName()
+        + "\n\n"
+          "Для подключения новой базы данных приложение будет закрыто.\n"
+          "После этого запустите его снова.",
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+
+    if (answer != QMessageBox::Yes)
+        return;
+
+    QSettings settings;
+
+    settings.setValue("database/path", selectedDatabase.absoluteFilePath());
+
+    QMessageBox::information(this, "База данных изменена",
+        "Новая база данных выбрана.\n\n"
+        "Приложение сейчас будет закрыто.\n"
+        "При следующем запуске будет использована выбранная база данных.");
+
+    QApplication::quit();
+}
+
+
+
+
+
+
+
 
 

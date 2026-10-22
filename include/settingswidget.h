@@ -44,6 +44,9 @@ private:
     // Каталог для сохранения DOCX
     void selectDocxDirectory();
 
+    // Выбор рабочей базы данных
+    void selectDatabase();
+
 
 };
 

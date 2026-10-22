@@ -1,5 +1,6 @@
 
 #include <QSqlQuery>
+#include <QSettings>
 
 #include "database.h"
 
@@ -105,6 +106,16 @@ QString Database::lastError() const
 // метод получения пути к БД
 QString Database::getDatabasePath() const
 {
+    QSettings settings;
+
+    const QString savedPath =
+        settings.value("database/path").toString();
+
+    if (!savedPath.isEmpty())
+    {
+        return savedPath;
+    }
+
     return QDir(QStringLiteral(PROJECT_ROOT)).filePath("db/meteringacts.db");
 }
 
