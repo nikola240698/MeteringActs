@@ -1,12 +1,8 @@
 
 #include <QSqlQueryModel>
-#include <QSqlQuery>
-#include <QSqlError>
-#include <QHeaderView>
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QItemSelectionModel>
 #include <QSignalBlocker>
 #include <QSettings>
 #include <QStandardPaths>
@@ -21,6 +17,7 @@
 #include "docxgenerator.h"
 #include "ui_archivewidget.h"
 #include "editactdialog.h"
+#include "docxservice.h"
 
 
 ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
@@ -318,9 +315,11 @@ void ArchiveWidget::loadActTypes()
 
 void ArchiveWidget::generateSelectedAct()
 {
+    // Получаем выбранную строку
     const QModelIndexList selectedRows =
         ui->actsTableView->selectionModel()->selectedRows();
 
+    // Предупреждаем, если не выбрали ни одну строку
     if (selectedRows.isEmpty())
     {
         QMessageBox::warning(this, "Акт не выбран",
@@ -328,12 +327,16 @@ void ArchiveWidget::generateSelectedAct()
         return;
     }
 
+    // Получаем индекс строки
     const int row = selectedRows.first().row();
 
+    // Получаем указатель на нашу модель таблицы
     const QAbstractItemModel* model = ui->actsTableView->model();
 
+    // Получаем id выбранного акта
     const int actId = model->index(row, 0).data().toInt();
 
+    // Выводим сообщение о id выбранного акта
     qDebug() << "Selected act ID: " << actId;
 
     // Загружаем полные данные акта
@@ -349,67 +352,8 @@ void ArchiveWidget::generateSelectedAct()
         return;
     }
 
-    // Предлагаем имя файла
-    QString suggestedFileName =
-        QString("Акт_%1_%2.docx")
-            .arg(actId)
-            .arg(data.date.toString("dd-MM-yyyy"));
-
-    // Загружаем из настроек путь сохранения документа
-    QSettings settings;
-
-    QString docxDirectory  = settings.value("documents/docxDirectory").toString();
-
-    // Если каталог не задан или не существует, то откроем системную папку "Документы"
-    if (docxDirectory.isEmpty() || !QDir(docxDirectory).exists())
-    {
-        docxDirectory =
-            QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    }
-
-    const QString suggestedPath = QDir(docxDirectory).filePath(suggestedFileName);
-
-    // Выбираем путь сохранения
-    QString outputPath =
-        QFileDialog::getSaveFileName(
-            this, "Сохранить акт", suggestedPath, "Документ Word (*.docx)");
-
-    // Если пользователь отменил
-    if (outputPath.isEmpty())
-    {
-        return;
-    }
-
-    // Проверяем, что в конце файла указано расширение
-    if (!outputPath.endsWith(".docx", Qt::CaseInsensitive))
-    {
-        outputPath += ".docx";
-    }
-
-    // Формируем DOCX
-    DocxGenerator generator;
-
-    if (!generator.generate(data, outputPath))
-    {
-        QMessageBox::critical(this, "Ошибка формирования DOCX",
-            generator.lastError());
-
-        return;
-    }
-
-    QMessageBox::information(this, "Готово",
-        "Документ успешно сформирован: " + outputPath);
-
-    const bool openDirectory =
-        settings.value("documents/openDirectoryAfterGeneration", true).toBool();
-
-    if (openDirectory)
-    {
-        const QFileInfo fileInfo(outputPath);
-
-        QDesktopServices::openUrl(
-            QUrl::fromLocalFile(fileInfo.absolutePath()));
-    }
+    // Вызываем метод генерации docx файла
+    DocxService::generate(data, this);
 }
 
 void ArchiveWidget::applyFilters()

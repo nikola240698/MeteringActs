@@ -114,7 +114,7 @@ private:
 
     // методы сохранения акта
     // главный метод сохранения
-    bool saveAct();
+    bool saveAct(bool generateDocument = false);
     // Главный метод обновления существующего акта
     bool updateAct();
     // обновление основной записи acts

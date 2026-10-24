@@ -30,6 +30,7 @@ add_executable(MeteringActs
         settingswidget.cpp
         currenttransformerphasewidget.cpp
         currenttransformerphasepanel.cpp
+        docxservice.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -58,6 +59,7 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/settingswidget.h
         ${MY_INCLUDE_DIR}/currenttransformerphasewidget.h
         ${MY_INCLUDE_DIR}/currenttransformerphasepanel.h
+        ${MY_INCLUDE_DIR}/docxservice.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui

@@ -305,13 +305,14 @@ QTabBar {
 }
 
 QTabBar::tab {
-    min-width: 120px;
+    min-width: 100px;
     min-height: 42px;
 
-    padding: 0 14px;
+    padding: 0 12px;
+    margin-right: 8px;
 
     background-color: transparent;
-    color: #6B7280;
+    color: #64748B;
 
     border: none;
     border-bottom: 3px solid transparent;
@@ -322,11 +323,11 @@ QTabBar::tab {
 
 QTabBar::tab:hover {
     color: #2563EB;
-    background-color: #EEF3F8;
+    background-color: #F1F5F9;
 }
 
 QTabBar::tab:selected {
-    color: #1D4ED8;
+    color: #2563EB;
     background-color: transparent;
 
     border-bottom: 3px solid #2563EB;
@@ -1316,6 +1317,10 @@ SettingsWidget Qlabel#restoreIconLabel {
     border: none;
 }
 
+QPushButton[buttonIcon="document-add"] {
+    qproperty-icon: url(:/icons/document-add.svg);
+    qproperty-iconSize: 18px 18px;
+}
 
 
 

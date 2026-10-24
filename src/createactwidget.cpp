@@ -6,6 +6,8 @@
 #include "actrepository.h"
 #include "currenttransformerphasewidget.h"
 #include "currenttransformerphasepanel.h"
+#include "actrepository.h"
+#include "docxservice.h"
 
 
 CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
@@ -167,6 +169,16 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
             }
         });
 
+    // Подключаем кнопку создания акта и DOCX
+    connect(ui->createAbdDocxButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            if (m_mode == Mode::Create)
+            {
+                saveAct(true);
+            }
+        });
+
     // кнопка очистки формы
     connect(ui->clearButton, &QPushButton::clicked, this, &CreateActWidget::clearForm);
 
@@ -191,6 +203,8 @@ CreateActWidget::CreateActWidget(Database &database, int actId, QWidget *parent)
     m_editActId = actId;
 
     ui->createButton->setText("Сохранить изменения");
+    // Прячем кнопку сохранения и формирования DOCX
+    ui->createAbdDocxButton->hide();
 
     loadActForEditing(actId);
 }
@@ -645,7 +659,7 @@ bool CreateActWidget::validateForm()
 }
 
 // главный метод сохранения акта
-bool CreateActWidget::saveAct()
+bool CreateActWidget::saveAct(bool generateDocument)
 {
     // проверяем, что форма заполнена правильно
     if (!validateForm())
@@ -769,11 +783,34 @@ bool CreateActWidget::saveAct()
         return false;
     }
 
-    QMessageBox::information(this, "Акт сохранен", "Данные акта успешно сохранены");
-    // очищаем форму
-    clearForm();
-
+    // Сообщаем остальным окнам, что появился новый акт
     emit actCreated();
+
+    if (generateDocument)
+    {
+        ActRepository repository(m_database);
+        ActData data;
+
+        if (!repository.loadAct(actId, data))
+        {
+            QMessageBox::warning(this, "Акт сохранён",
+                "Акт успешно сохранён в базе данных, "
+                "но не удалось загрузить его данные для формирования DOCX.\n\n"
+                "Причина: " + repository.lastError());
+        }
+        else
+        {
+            DocxService::generate(data, this);
+        }
+    }
+    else
+    {
+        QMessageBox::information(this, "Акт сохранен",
+            "Данные акта успешно сохранены");
+    }
+
+    // очищаем форму только после завершения всех действий
+    clearForm();
 
     return true;
 }

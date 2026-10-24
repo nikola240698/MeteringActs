@@ -673,7 +673,7 @@
                  <widget class="QWidget" name="workScheduleWidget" native="true">
                   <layout class="QHBoxLayout" name="horizontalLayout_2">
                    <property name="spacing">
-                    <number>0</number>
+                    <number>20</number>
                    </property>
                    <property name="leftMargin">
                     <number>0</number>
@@ -803,8 +803,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>224</width>
-            <height>284</height>
+            <width>883</width>
+            <height>482</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -1300,8 +1300,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>298</width>
-            <height>226</height>
+            <width>911</width>
+            <height>510</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="measurementScrollAreaContentLayout">
@@ -1942,6 +1942,31 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="createAbdDocxButton">
+        <property name="minimumSize">
+         <size>
+          <width>170</width>
+          <height>42</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>42</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Создать акт и DOCX</string>
+        </property>
+        <property name="buttonRole" stdset="0">
+         <string>secondary</string>
+        </property>
+        <property name="buttonIcon" stdset="0">
+         <string>document-add</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="createButton">

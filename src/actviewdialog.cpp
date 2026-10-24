@@ -1,11 +1,6 @@
 
 
-#include <QStringList>
-#include <QGridLayout>
-#include <QLabel>
-#include <QVBoxLayout>
 #include <algorithm>
-#include <QFileDialog>
 #include <QMessageBox>
 
 #include "actviewdialog.h"
@@ -13,7 +8,7 @@
 #include "actrepository.h"
 #include "database.h"
 #include "actcalculator.h"
-#include "docxgenerator.h"
+#include "docxservice.h"
 
 
 ActViewDialog::ActViewDialog(
@@ -886,37 +881,7 @@ void ActViewDialog::addSignatureRow(const QString &title, const QString &name, i
 
 void ActViewDialog::generateDocx()
 {
-    QString suggestedFileName =
-        QString("Акт_%1_%2.docx")
-            .arg(m_data.id)
-            .arg(m_data.date.toString("dd-MM-yyyy"));
-
-    QString outputPath =
-        QFileDialog::getSaveFileName(this, "Сохранить акт",
-            suggestedFileName, "Документ Word (*.docx)");
-
-    // Пользователь нажал "Отмена"
-    if (outputPath.isEmpty())
-    {
-        return;
-    }
-
-    // На случай если пользователь вручную удалил расширение
-    if (!outputPath.endsWith(".docx", Qt::CaseInsensitive))
-    {
-        outputPath += ".docx";
-    }
-
-    DocxGenerator generator;
-
-    if (!generator.generate(m_data, outputPath))
-    {
-        QMessageBox::critical(this, "Ошибка формирования DOCX", generator.lastError());
-        return;
-    }
-
-    QMessageBox::information(this, "Готово",
-        "Документ успешно сформирован: " + outputPath);
+    DocxService::generate(m_data, this);
 }
 
 QString ActViewDialog::workScheduleText() const
