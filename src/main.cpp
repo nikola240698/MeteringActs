@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
     // Для сохраненных настроек, чтобы было понятно откуда брать
     QCoreApplication::setOrganizationName("MRET");
     QCoreApplication::setApplicationName("MeteringActs");
+    // Получаем версию программы из CMake
+    QCoreApplication::setApplicationVersion(APP_VERSION);
 
     Database db;
 

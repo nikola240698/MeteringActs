@@ -788,7 +788,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="backupIntervalSpinBox">
+                <widget class="NoWheelSpinBox" name="backupIntervalSpinBox">
                  <property name="suffix">
                   <string> ч</string>
                  </property>
@@ -828,7 +828,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="backupKeepCountSpinBox">
+                <widget class="NoWheelSpinBox" name="backupKeepCountSpinBox">
                  <property name="suffix">
                   <string> коп.</string>
                  </property>
@@ -1111,6 +1111,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NoWheelSpinBox</class>
+   <extends>QSpinBox</extends>
+   <header>nowheelspinbox.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>createBackupButton</tabstop>
   <tabstop>backupIntervalSpinBox</tabstop>

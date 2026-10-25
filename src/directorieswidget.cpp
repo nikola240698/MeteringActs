@@ -23,6 +23,10 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
     // Вкладка "Объекты"
     // -------------------------------------------
 
+    // Настраиваем кнопку "Назад"
+    ui->backButton->setText("");
+    ui->backButton->setIcon(QIcon(":/icons/arrow-left.svg"));
+    ui->backButton->setIconSize(QSize(18, 18));
     // Скрываем по умолчания кнопку "Назад"
     ui->backButton->setVisible(false);
 
@@ -54,6 +58,8 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
             {
                 loadConnections(id);
             }
+
+            updateObjectButtons();
         });
 
     clearSubstations();
@@ -713,6 +719,13 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
             emit employeesChanged();
         });
 
+    // Подключаем клик по строке правой таблицы
+    connect(ui->rightTableView, &QTableView::clicked, this,
+        [this](const QModelIndex)
+        {
+            updateObjectButtons();
+        });
+
 
 }
 
@@ -774,6 +787,16 @@ void DirectoriesWidget::loadSubstations(int areaId)
     ui->rightTableView->hideColumn(0);
     // Растягиваем последний столбец согласно ширине содержимого
     ui->rightTableView->horizontalHeader()->setStretchLastSection(true);
+
+    if (m_rightModel->rowCount() == 0)
+    {
+        showRightEmptyState(
+            "Для выбранного участка подстанции отсутствуют");
+    }
+    else
+    {
+        showRightTable();
+    }
 }
 
 void DirectoriesWidget::clearSubstations()
@@ -792,6 +815,16 @@ void DirectoriesWidget::clearSubstations()
     // Растягиваем последний столбец согласно его содержимого
     ui->rightTableView->horizontalHeader()->setStretchLastSection(true);
 
+    // Сбрасываем старый currentIndex() при очистке таблицы
+    ui->rightTableView->clearSelection();
+    ui->rightTableView->setCurrentIndex(QModelIndex());
+
+    updateObjectButtons();
+
+    // Отображаем надпись-подсказку
+    showRightEmptyState(
+        "Выберите участок, чтобы посмотреть список подстанций");
+
 }
 
 void DirectoriesWidget::showAreasLevel()
@@ -806,6 +839,7 @@ void DirectoriesWidget::showAreasLevel()
 
     loadAreas();
     clearSubstations();
+    updateObjectButtons();
 }
 
 void DirectoriesWidget::showSubstationsLevel(int areaId)
@@ -843,6 +877,7 @@ void DirectoriesWidget::showSubstationsLevel(int areaId)
     ui->leftTableView->hideColumn(0);
 
     clearConnections();
+    updateObjectButtons();
 }
 
 
@@ -869,6 +904,16 @@ void DirectoriesWidget::loadConnections(int substationId)
     m_rightModel->setQuery(std::move(query));
 
     setupConnectionsTable();
+
+    if (m_rightModel->rowCount() == 0)
+    {
+        showRightEmptyState(
+            "Для выбранной подстанции присоединения отсутствуют");
+    }
+    else
+    {
+        showRightTable();
+    }
 }
 
 void DirectoriesWidget::clearConnections()
@@ -879,7 +924,16 @@ void DirectoriesWidget::clearConnections()
         "WHERE 0;",
         m_database.getDatabase());
 
-   setupConnectionsTable();
+    setupConnectionsTable();
+
+    // Сбрасываем старый currentIndex() при очистке таблицы
+    ui->rightTableView->clearSelection();
+    ui->rightTableView->setCurrentIndex(QModelIndex());
+
+    updateObjectButtons();
+
+    showRightEmptyState(
+        "Выберите подстанцию, чтобы посмотреть список присоединений");
 }
 
 void DirectoriesWidget::setupConnectionsTable()
@@ -1098,6 +1152,17 @@ void DirectoriesWidget::loadEmployees()
 
     m_employeesModel->setQuery(std::move(query));
 
+    if (m_employeesModel->rowCount() == 0)
+    {
+        ui->employeesTableView->hide();
+        ui->employeeEmptyLabel->show();
+    }
+    else
+    {
+        ui->employeeEmptyLabel->hide();
+        ui->employeesTableView->show();
+    }
+
     m_employeesModel->setHeaderData(1, Qt::Horizontal, "Ф.И.О.");
     m_employeesModel->setHeaderData(2, Qt::Horizontal, "Должность");
     m_employeesModel->setHeaderData(3, Qt::Horizontal, "Статус");
@@ -1178,6 +1243,41 @@ void DirectoriesWidget::updateEmployeeButtons()
     ui->toggleEmployeeButton->style()->unpolish(ui->toggleEmployeeButton);
     ui->toggleEmployeeButton->style()->polish(ui->toggleEmployeeButton);
     ui->toggleEmployeeButton->update();
+}
+
+void DirectoriesWidget::showRightEmptyState(const QString &text)
+{
+    ui->rightEmptyLabel->setText(text);
+
+    ui->rightTableView->hide();
+    ui->rightEmptyLabel->show();
+}
+
+void DirectoriesWidget::showRightTable()
+{
+    ui->rightEmptyLabel->hide();
+    ui->rightTableView->show();
+}
+
+void DirectoriesWidget::updateObjectButtons()
+{
+    const bool leftSelected =
+        ui->leftTableView->currentIndex().isValid();
+
+    const bool rightSelected =
+        ui->rightTableView->currentIndex().isValid();
+
+    // Левая панель
+    ui->addLeftButton->setEnabled(true);
+    ui->editLeftButton->setEnabled(leftSelected);
+    ui->deleteLeftButton->setEnabled(leftSelected);
+
+    // Правая панель
+    ui->addRightButton->setEnabled(leftSelected);
+    ui->editRightButton->setEnabled(
+        leftSelected && rightSelected);
+    ui->deleteRightButton->setEnabled(
+        leftSelected && rightSelected);
 }
 
 

@@ -935,6 +935,18 @@ QTableCornerButton::section {
     padding-right: 16px;
 }
 
+#historyEmptyLabel {
+    background-color: #FFFFFF;
+    color: #64748B;
+
+    border: none;
+
+    font-size: 9pt;
+    font-weight: 400;
+
+    padding: 24px;
+}
+
 /* ===========================
     История трансформаторов тока
    =========================== */
@@ -1134,6 +1146,30 @@ QLabel[cardHeaderTitle="true"] {
     font-weight: 600;
 }
 
+#rightEmptyLabel {
+    background-color: #FFFFFF;
+    color: #64748B;
+    border: none;
+    font-size: 9pt;
+    font-weight: 400;
+    padding: 24px;
+}
+
+#backButton {
+    background-color: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 0px;
+}
+
+#backButton:hover {
+    background-color: #E2EAF3;
+}
+
+#backButton:pressed {
+    background-color: #D6E2EE;
+}
+
 /* ===========================
     Сотрудники
    =========================== */
@@ -1194,11 +1230,18 @@ QPushButton[buttonReinstate="true"]:disabled {
     color: #94A3B8;
 }
 
+#employeeEmptyLabel {
+    background-color: #FFFFFF;
+    color: #64748B;
+    border: none;
+    font-size: 9pt;
+    font-weight: 400;
+    padding: 24px;
+}
+
 /* ===========================
     Архив актов
    =========================== */
-
-
 
 QPushButton[buttonIcon="open"] {
     qproperty-icon: url(:/icons/open.svg);
@@ -1215,6 +1258,14 @@ QPushButton[buttonIcon="reset"] {
     qproperty-iconSize: 18px 18px;
 }
 
+#archiveEmptyLabel {
+    background-color: #FFFFFF;
+    color: #64748B;
+    border: none;
+    font-size: 9pt;
+    font-weight: 400;
+    padding: 24px;
+}
 
 /* ===========================
     Настройки
@@ -1317,12 +1368,74 @@ SettingsWidget Qlabel#restoreIconLabel {
     border: none;
 }
 
+
 QPushButton[buttonIcon="document-add"] {
     qproperty-icon: url(:/icons/document-add.svg);
     qproperty-iconSize: 18px 18px;
 }
 
+/* ===========================
+    О программе
+   =========================== */
 
+AboutDialog QDialog {
+    background-color: #F4F6F8;
+}
+
+AboutDialog #appTitleLabel {
+    color: #0F2744;
+    font-size: 24pt;
+    font-weight: 700;
+}
+
+AboutDialog #appSubtitleLabel {
+    color: #334155;
+    font-size: 12pt;
+    font-weight: 500;
+}
+
+#versionLabel {
+    color: #64748B;
+    font-size: 9pt;
+}
+
+#descriptionLabel {
+    color: #475569;
+    font-size: 10pt;
+}
+
+#developerTitleLabel {
+    color: #64748B;
+    font-size: 9pt;
+}
+
+#developerNameLabel {
+    color: #0F2744;
+    font-size: 10pt;
+    font-weight: 600;
+}
+
+#closeButton {
+    min-width: 110px;
+    min-height: 36px;
+
+    background-color: #FFFFFF;
+    color: #334155;
+
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+
+    padding: 0 18px;
+}
+
+#closeButton:hover {
+    background-color: #F1F5F9;
+    border-color: #94A3B8;
+}
+
+#closeButton:pressed {
+    background-color: #E2E8F0;
+}
 
 
 

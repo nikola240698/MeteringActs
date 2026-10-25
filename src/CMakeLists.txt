@@ -31,6 +31,8 @@ add_executable(MeteringActs
         currenttransformerphasewidget.cpp
         currenttransformerphasepanel.cpp
         docxservice.cpp
+        nowheelspinbox.cpp
+        aboutdialog.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -60,6 +62,8 @@ add_executable(MeteringActs
         ${MY_INCLUDE_DIR}/currenttransformerphasewidget.h
         ${MY_INCLUDE_DIR}/currenttransformerphasepanel.h
         ${MY_INCLUDE_DIR}/docxservice.h
+        ${MY_INCLUDE_DIR}/nowheelspinbox.h
+        ${MY_INCLUDE_DIR}/aboutdialog.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui
@@ -81,6 +85,7 @@ add_executable(MeteringActs
         ${MY_UI_DIR}/equipmentwidget.ui
         ${MY_UI_DIR}/settingswidget.ui
         ${MY_UI_DIR}/currenttransformerphasewidget.ui
+        ${MY_UI_DIR}/aboutdialog.ui
 
 
         ${CMAKE_SOURCE_DIR}/resources/resources.qrc
@@ -94,7 +99,10 @@ target_include_directories(MeteringActs PRIVATE
 
 target_compile_definitions(MeteringActs PRIVATE
         PROJECT_ROOT="${CMAKE_SOURCE_DIR}"
+)
 
+target_compile_definitions(MeteringActs PRIVATE
+        APP_VERSION="${PROJECT_VERSION}"
 )
 
 target_link_libraries(MeteringActs PRIVATE

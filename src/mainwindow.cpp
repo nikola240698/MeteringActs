@@ -10,6 +10,9 @@
 #include "meterswidget.h"
 #include "currenttransformerswidget.h"
 #include "settingswidget.h"
+#include "aboutdialog.h"
+
+#include <QIcon>
 
 
 MainWindow::MainWindow(Database &database, QWidget *parent)
@@ -99,10 +102,21 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
         [this](int id)
             {
                 ui->stackedWidget->setCurrentIndex(id);
+            updateNavigationIcons(id);
             });
     // выбираем начальные условия создания окна
     ui->createActButton->setChecked(true);
     ui->stackedWidget->setCurrentIndex(0);
+
+    // Подключаем кнопку "О программе"
+    connect(ui->aboutButton, &QPushButton::clicked, this,
+        [this]()
+        {
+            AboutDialog dialog(this);
+            dialog.exec();
+        });
+
+    updateNavigationIcons(0);
 }
 
 
@@ -110,6 +124,34 @@ MainWindow::MainWindow(Database &database, QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::updateNavigationIcons(int activeId)
+{
+    ui->createActButton->setIcon(QIcon(
+        activeId == 0
+            ? ":/icons/create-act-active.svg"
+             : ":/icons/create-act.svg"));
+
+    ui->metersButton->setIcon(QIcon(
+        activeId == 1
+            ? ":/icons/equipment-active.svg"
+             : ":/icons/equipment.svg"));
+
+    ui->archiveButton->setIcon(QIcon(
+        activeId == 2
+            ? ":/icons/archive-active.svg"
+             : ":/icons/archive.svg"));
+
+    ui->directoriesButton->setIcon(QIcon(
+        activeId == 3
+            ? ":/icons/directories-active.svg"
+             : ":/icons/directories.svg"));
+
+    ui->settingsButton->setIcon(QIcon(
+        activeId == 4
+            ? ":/icons/settings-active.svg"
+             : ":/icons/settings.svg"));
 }
 
 

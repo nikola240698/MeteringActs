@@ -55,7 +55,7 @@ private:
     // Метод очистки истории (не браузера)))
     void clearMeterHistory();
     // Настройка таблицы истории прибора
-    void setupHistoryTale();
+    void setupHistoryTable();
     // Метод открытия акта
     void openSelectedHistoryAct();
 };

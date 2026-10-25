@@ -22,5 +22,20 @@
         <file>icons/backup-action.svg</file>
         <file>icons/restore-action.svg</file>
         <file>icons/document-add.svg</file>
+        <file>icons/search.svg</file>
+        <file>icons/create-act.svg</file>
+        <file>icons/equipment.svg</file>
+        <file>icons/archive.svg</file>
+        <file>icons/directories.svg</file>
+        <file>icons/settings.svg</file>
+        <file>icons/create-act-active.svg</file>
+        <file>icons/equipment-active.svg</file>
+        <file>icons/archive-active.svg</file>
+        <file>icons/directories-active.svg</file>
+        <file>icons/settings-active.svg</file>
+        <file>icons/about.svg</file>
+
+        <file>images/logo.png</file>
+
     </qresource>
 </RCC>

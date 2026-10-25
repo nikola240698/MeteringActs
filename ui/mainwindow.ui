@@ -105,6 +105,16 @@
              <property name="text">
               <string>Создать акт</string>
              </property>
+             <property name="icon">
+              <iconset resource="../resources/resources.qrc">
+               <normaloff>:/icons/create-act.svg</normaloff>:/icons/create-act.svg</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
+             </property>
              <property name="checkable">
               <bool>true</bool>
              </property>
@@ -114,6 +124,16 @@
             <widget class="QPushButton" name="metersButton">
              <property name="text">
               <string>Оборудование</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../resources/resources.qrc">
+               <normaloff>:/icons/equipment.svg</normaloff>:/icons/equipment.svg</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
              </property>
              <property name="checkable">
               <bool>true</bool>
@@ -125,6 +145,16 @@
              <property name="text">
               <string>Архив актов</string>
              </property>
+             <property name="icon">
+              <iconset resource="../resources/resources.qrc">
+               <normaloff>:/icons/archive.svg</normaloff>:/icons/archive.svg</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
+             </property>
              <property name="checkable">
               <bool>true</bool>
              </property>
@@ -135,6 +165,16 @@
              <property name="text">
               <string>Справочники</string>
              </property>
+             <property name="icon">
+              <iconset resource="../resources/resources.qrc">
+               <normaloff>:/icons/directories.svg</normaloff>:/icons/directories.svg</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
+             </property>
              <property name="checkable">
               <bool>true</bool>
              </property>
@@ -144,6 +184,16 @@
             <widget class="QPushButton" name="settingsButton">
              <property name="text">
               <string>Настройки</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../resources/resources.qrc">
+               <normaloff>:/icons/settings.svg</normaloff>:/icons/settings.svg</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
              </property>
              <property name="checkable">
               <bool>true</bool>
@@ -168,6 +218,16 @@
              <property name="text">
               <string>О программе</string>
              </property>
+             <property name="icon">
+              <iconset resource="../resources/resources.qrc">
+               <normaloff>:/icons/about.svg</normaloff>:/icons/about.svg</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
+             </property>
             </widget>
            </item>
           </layout>
@@ -189,6 +249,8 @@
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources/resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

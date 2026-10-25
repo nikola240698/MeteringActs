@@ -32,6 +32,9 @@ private:
 
     Database &m_database;
 
+    // Метод для смены картинки кнопок левой панели
+    void updateNavigationIcons(int activeId);
+
 };
 
 

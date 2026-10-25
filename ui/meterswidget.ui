@@ -277,8 +277,27 @@
         <property name="text">
          <string>История использования</string>
         </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
         <property name="cardTitle" stdset="0">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="historyEmptyLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Выберите прибор учета, чтобы посмотреть итсторию его использования</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>

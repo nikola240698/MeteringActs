@@ -113,8 +113,11 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="toolTip">
+                  <string>Вернуться к участкам</string>
+                 </property>
                  <property name="text">
-                  <string>Участки</string>
+                  <string>Назад</string>
                  </property>
                  <property name="flatNavigation" stdset="0">
                   <bool>true</bool>
@@ -425,6 +428,25 @@
                 </widget>
                </item>
                <item>
+                <widget class="QLabel" name="rightEmptyLabel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Выберите участок, чтобы посмотреть список подстанций</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <widget class="QWidget" name="rightButtonsWidget" native="true">
                  <property name="minimumSize">
                   <size>
@@ -671,6 +693,25 @@
                <attribute name="verticalHeaderVisible">
                 <bool>false</bool>
                </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="employeeEmptyLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>В справочнике пока нет сотрудников</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+               <property name="wordWrap">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
              <item>

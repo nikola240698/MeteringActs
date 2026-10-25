@@ -164,7 +164,6 @@
       </item>
       <item>
        <layout class="QHBoxLayout" name="buttonsLayout">
-
         <property name="topMargin">
          <number>0</number>
         </property>
@@ -274,6 +273,22 @@
         </property>
         <property name="cardTitle" stdset="0">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="historyEmptyLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Выберите трансформатор тока, чтобы посмотреть историю его использования</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>

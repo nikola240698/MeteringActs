@@ -25,6 +25,9 @@ CurrentTransformersWidget::CurrentTransformersWidget(
 
     ui->ctHistoryTableView->setModel(m_historyModel);
 
+    // Добавляем иконку к строке поиска
+    ui->searchLineEdit->addAction(
+        QIcon(":/icons/search.svg"), QLineEdit::LeadingPosition);
 
     setupHistoryTable();
 
@@ -274,6 +277,17 @@ void CurrentTransformersWidget::loadHistory(int currentTransformerId)
 
     m_historyModel->setQuery(std::move(query));
 
+    if (m_historyModel->rowCount() == 0)
+    {
+        ui->historyEmptyLabel->setText(
+            "История использования выбранного трансформатора тока отсутствует");
+
+        ui->ctHistoryTableView->hide();
+        ui->historyEmptyLabel->show();
+
+        return;
+    }
+
     m_historyModel->setHeaderData(0, Qt::Horizontal, "ID");
     m_historyModel->setHeaderData(1, Qt::Horizontal, "Дата");
     m_historyModel->setHeaderData(2, Qt::Horizontal, "Тип акта");
@@ -285,12 +299,21 @@ void CurrentTransformersWidget::loadHistory(int currentTransformerId)
 
     ui->ctHistoryTableView->hideColumn(0);
 
+    ui->historyEmptyLabel->hide();
+    ui->ctHistoryTableView->show();
+
     setupHistoryColumns();
 }
 
 void CurrentTransformersWidget::clearHistory()
 {
     m_historyModel->setQuery(QSqlQuery());
+
+    ui->historyEmptyLabel->setText(
+        "Выберите трансформатор тока, чтобы посмотреть историю его использования");
+
+    ui->ctHistoryTableView->hide();
+    ui->historyEmptyLabel->show();
 }
 
 void CurrentTransformersWidget::setupHistoryTable()

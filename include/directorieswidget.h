@@ -85,6 +85,13 @@ private:
     void setupEmployeesTable();
     // Метод обновления активности персонала для кнопки
     void updateEmployeeButtons();
+
+    // Методы для скрытия/показа таблиц или надписи подсказки на их месте
+    void showRightEmptyState(const QString &text);
+    void showRightTable();
+
+    // Метод активации/отключения кнопок в зависимости от выбора
+    void updateObjectButtons();
 };
 
 

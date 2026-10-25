@@ -29,6 +29,10 @@ MetersWidget::MetersWidget(Database &database, QWidget *parent)
     // Добавляем кнопку очистки для поля поиска
     ui->searchLineEdit->setClearButtonEnabled(true);
 
+    // Добавляем иконку к строке поиска
+    ui->searchLineEdit->addAction(
+        QIcon(":/icons/search.svg"), QLineEdit::LeadingPosition);
+
     loadMeters();
 
     // Подключаем строку для поиска
@@ -400,6 +404,17 @@ void MetersWidget::loadMeterHistory(int meterId)
 
     m_historyModel->setQuery(std::move(query));
 
+    if (m_historyModel->rowCount() == 0)
+    {
+        ui->historyEmptyLabel->setText(
+            "История использования выбранного прибора отсутствует");
+
+        ui->historyEmptyLabel->show();
+        ui->historytableView->hide();
+
+        return;
+    }
+
     m_historyModel->setHeaderData(1, Qt::Horizontal, "Дата");
     m_historyModel->setHeaderData(2, Qt::Horizontal, "Тип акта");
     m_historyModel->setHeaderData(3, Qt::Horizontal, "Участок");
@@ -409,15 +424,26 @@ void MetersWidget::loadMeterHistory(int meterId)
 
     ui->historytableView->hideColumn(0);
 
-    setupHistoryTale();
+    ui->historyEmptyLabel->hide();
+    ui->historytableView->show();
+
+    setupHistoryTable();
+
+
 }
 
 void MetersWidget::clearMeterHistory()
 {
     m_historyModel->clear();
+
+    ui->historyEmptyLabel->setText(
+        "Выберите прибор учёта, чтобы посмотреть историю его использования");
+
+    ui->historyEmptyLabel->show();
+    ui->historytableView->hide();
 }
 
-void MetersWidget::setupHistoryTale()
+void MetersWidget::setupHistoryTable()
 {
     QHeaderView* header =
         ui->historytableView->horizontalHeader();
@@ -428,6 +454,7 @@ void MetersWidget::setupHistoryTale()
     header->setSectionResizeMode(4, QHeaderView::Stretch);
     header->setSectionResizeMode(5, QHeaderView::Stretch);
     header->setSectionResizeMode(6, QHeaderView::ResizeToContents);
+
 }
 
 void MetersWidget::openSelectedHistoryAct()

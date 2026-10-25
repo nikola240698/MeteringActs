@@ -66,6 +66,9 @@ private:
     // Метод удаления акта
     void deleteSelectedAct();
 
+    // Метод определения, что фильтры введены или выбраны
+    bool hasActiveFilters() const;
+
 
 };
 

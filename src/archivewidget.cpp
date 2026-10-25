@@ -40,6 +40,10 @@ ArchiveWidget::ArchiveWidget(Database &database, QWidget *parent) :
     // Последний столбец занимает свободное место
     ui->actsTableView->horizontalHeader()->setStretchLastSection(true);
 
+    // Вставляем иконку в строку поиска
+    ui->searchLineEdit->addAction(
+        QIcon(":/icons/search.svg"), QLineEdit::LeadingPosition);
+
 
     // Выставляем дату по умолчанию в QDateEdit
     const QDate today = QDate::currentDate();
@@ -258,6 +262,28 @@ void ArchiveWidget::loadActs(
     }
 
     m_model->setQuery(std::move(query));
+
+    if (m_model->rowCount() == 0)
+    {
+        if (hasActiveFilters())
+        {
+            ui->archiveEmptyLabel->setText(
+                "По заданным условиям акты не найдены");
+        }
+        else
+        {
+            ui->archiveEmptyLabel->setText(
+                "В архиве пока нет актов");
+        }
+
+        ui->actsTableView->hide();
+        ui->archiveEmptyLabel->show();
+    }
+    else
+    {
+        ui->archiveEmptyLabel->hide();
+        ui->actsTableView->show();
+    }
 
     m_model->setHeaderData(0, Qt::Horizontal, "ID");
     m_model->setHeaderData(1, Qt::Horizontal, "Дата");
@@ -502,6 +528,13 @@ void ArchiveWidget::deleteSelectedAct()
 
     QMessageBox::information(this, "Акт удалён",
         "Акт успешно удалён.");
+}
+
+bool ArchiveWidget::hasActiveFilters() const
+{
+    return !ui->searchLineEdit->text().trimmed().isEmpty() ||
+        ui->actTypeComboBox->currentIndex() > 0 ||
+        ui->dateFilterCheckBox->isChecked();
 }
 
 
