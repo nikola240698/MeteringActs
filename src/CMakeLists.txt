@@ -105,6 +105,14 @@ target_compile_definitions(MeteringActs PRIVATE
         APP_VERSION="${PROJECT_VERSION}"
 )
 
+if (WIN32)
+
+
+    target_sources(MeteringActs PRIVATE
+            ${CMAKE_SOURCE_DIR}/resources/windows/app.rc
+    )
+endif()
+
 target_link_libraries(MeteringActs PRIVATE
         Qt6::Core
         Qt6::Gui
@@ -113,3 +121,4 @@ target_link_libraries(MeteringActs PRIVATE
         Qt6::Xml
         QuaZip::QuaZip
 )
+

@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QDebug>
+#include <QIcon>
 
 #include "database.h"
 #include "mainwindow.h"
@@ -37,6 +38,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("MeteringActs");
     // Получаем версию программы из CMake
     QCoreApplication::setApplicationVersion(APP_VERSION);
+
+    // Устанавливаем иконку приложения
+    a.setWindowIcon(QIcon(":/images/app-icon.png"));
 
     Database db;
 

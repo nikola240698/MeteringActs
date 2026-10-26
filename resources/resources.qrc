@@ -36,6 +36,7 @@
         <file>icons/about.svg</file>
 
         <file>images/logo.png</file>
+        <file>images/app-icon.png</file>
 
     </qresource>
 </RCC>
