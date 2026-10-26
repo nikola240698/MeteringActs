@@ -547,14 +547,6 @@ QScrollBar::sub-page:vertical {
     background: transparent;
 }
 
-QScrollArea#externalRepresentativesScrollArea {
-    background: transparent;
-    border: none;
-}
-
-QScrollArea#externalRepresentativesScrollArea > QWidget > QWidget {
-    background: transparent;
-}
 
 QPushButton[buttonRole="add"] {
     min-height: 34px;
@@ -839,8 +831,13 @@ QWidget#workScheduleWidget {
    Область сторонних представителей
    =========================== */
 
+QScrollArea#externalRepresentativesScrollArea {
+    background: transparent;
+    border: none;
+}
 
 QScrollArea#externalRepresentativesScrollArea > QWidget,
+QScrollArea#externalRepresentativesScrollArea > QWidget > QWidget,
 QWidget#externalRepresentativesScrollContents,
 QWidget#externalRepresentativesContainer {
     background: transparent;
@@ -1026,7 +1023,7 @@ QCalendarWidget {
     border: 1px solid #D8E2EE;
 }
 
-/* Верхняя панель: меясц, год, стрелки */
+/* Верхняя панель: месяц, год, стрелки */
 QCalendarWidget QWidget#qt_calendar_navigationbar {
     min-height: 40px;
 
@@ -1326,7 +1323,7 @@ SettingsWidget QLabel#backupInformationLabel {
     font-size: 8.5pt;
 }
 
-/* Инофрмация о аоследней резервной копии */
+/* Информация о последней резервной копии */
 SettingsWidget QLabel#lastBackupLabel {
     color: #64748B;
 }

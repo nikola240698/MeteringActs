@@ -4,6 +4,7 @@
 # CMake build directories
 cmake-build-*/
 build/
+release/
 
 # CMake generated files
 CMakeFiles/

@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     }
 
     MainWindow w(db);
-    w.show();
+    w.showMaximized();
 
     return QApplication::exec();
 }
