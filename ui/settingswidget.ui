@@ -459,7 +459,7 @@
               <number>14</number>
              </property>
              <item>
-              <widget class="QLabel" name="documentGeneartorPath">
+              <widget class="QLabel" name="documentGeneratorPath">
                <property name="text">
                 <string>Каталог сохранения DOCX</string>
                </property>
@@ -640,7 +640,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="buckupSubtitleLabel">
+                <widget class="QLabel" name="backupSubtitleLabel">
                  <property name="text">
                   <string>Создание автоматических резервных копий базы данных</string>
                  </property>
@@ -687,7 +687,7 @@
               </widget>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="bakupNuttonLayout">
+              <layout class="QHBoxLayout" name="bakupButtonLayout">
                <item>
                 <widget class="QPushButton" name="createBackupButton">
                  <property name="text">
@@ -726,7 +726,7 @@
              <item>
               <layout class="QHBoxLayout" name="backupLastLayout">
                <item>
-                <widget class="QLabel" name="lsatBackupTitle">
+                <widget class="QLabel" name="lastBackupTitle">
                  <property name="text">
                   <string>Последняя резервная копия:</string>
                  </property>
@@ -1002,7 +1002,7 @@
               </widget>
              </item>
              <item>
-              <layout class="QVBoxLayout" name="restoreTitleLyaout">
+              <layout class="QVBoxLayout" name="restoreTitleLayout">
                <property name="spacing">
                 <number>2</number>
                </property>

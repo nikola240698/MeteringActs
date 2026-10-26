@@ -53,7 +53,7 @@ QComboBox {
     border-radius: 6px;
 
     selection-background-color: #2563EB;
-    selection-color: #FFFFFF
+    selection-color: #FFFFFF;
 }
 
 QLineEdit:hover,
@@ -406,7 +406,7 @@ QWidget[cardBody="true"] {
    =========================== */
 
 #meterContainerWidget,
-#seccondMeterContainerWidget,
+#secondMeterContainerWidget,
 #MeterActWidget {
     background-color: transparent;
 }
@@ -547,12 +547,12 @@ QScrollBar::sub-page:vertical {
     background: transparent;
 }
 
-#externalRepresentativesScrollArea {
+QScrollArea#externalRepresentativesScrollArea {
     background: transparent;
     border: none;
 }
 
-#externalRepresentativesScrollArea > QWidget > QWidget {
+QScrollArea#externalRepresentativesScrollArea > QWidget > QWidget {
     background: transparent;
 }
 
@@ -691,6 +691,8 @@ QPushButton#addExternalRepresentativeButton {
     background-color: transparent;
 }
 
+
+
 /* ===========================
     Кнопки карточки ТТ
    =========================== */
@@ -773,10 +775,21 @@ QPushButton#addExternalRepresentativeButton {
     background-color: #F1F5F9;
 }
 
-#CurrentTrnaformerPhaseWidget #findButton {
+#CurrentTransformerPhaseWidget #findButton {
     min-height: 30px;
     max-height: 30px;
     padding: 0 10px;
+}
+
+#CurrentTransformerDialog #saveButton,
+#CurrentTransformerDialog #cancelButton {
+    min-width: 110px;
+    max-width: 110px;
+
+    min-height: 40px;
+    max-height: 40px;
+
+    padding: 0;
 }
 
 /* ===========================
@@ -826,12 +839,8 @@ QWidget#workScheduleWidget {
    Область сторонних представителей
    =========================== */
 
-QScrollArea#externalRepresentativesScrollArea {
-    background: transparent;
-    border: none;
-}
 
-QScrollArea#externalRepresntativesScrollArea > QWidget,
+QScrollArea#externalRepresentativesScrollArea > QWidget,
 QWidget#externalRepresentativesScrollContents,
 QWidget#externalRepresentativesContainer {
     background: transparent;
@@ -1104,6 +1113,13 @@ QCalendarWidget QSpinBox::down-button {
     Справочники
    =========================== */
 
+/* Заголовок страницы */
+DirectoriesWidget > QLabel#titleLabel {
+    color: #0F1F38;
+    font-size: 16pt;
+    font-weight: 600;
+}
+
 QPushButton[buttonIcon="add-white"] {
     qproperty-icon: url(:/icons/add-white.svg);
     qproperty-iconSize: 18px 18px;
@@ -1295,9 +1311,9 @@ SettingsWidget QLabel#restoreTitleLabel {
 }
 
 /* Описания в заголовках карточек */
-SettingsWodget QLabel#databaseSubtitleLabel,
-SettingsWidget Qlabel#documentCardSubtitleLabel,
-SettingsWidget Qlabel#backupSubtitleLabel,
+SettingsWidget QLabel#databaseSubtitleLabel,
+SettingsWidget QLabel#documentCardSubtitleLabel,
+SettingsWidget QLabel#backupSubtitleLabel,
 SettingsWidget QLabel#restoreSubtitleLabel {
     color: #64748B;
     font-size: 8.5pt;
@@ -1305,13 +1321,13 @@ SettingsWidget QLabel#restoreSubtitleLabel {
 }
 
 /* Пояснение автоматического резервного копирования */
-SettingsWidget Qlabel#backupInformationLabel {
+SettingsWidget QLabel#backupInformationLabel {
     color: #64748B;
     font-size: 8.5pt;
 }
 
 /* Инофрмация о аоследней резервной копии */
-SettingsWidget Qlabel#lastBackupLabel {
+SettingsWidget QLabel#lastBackupLabel {
     color: #64748B;
 }
 
@@ -1360,10 +1376,10 @@ SettingsWidget QFrame#restoreIconFrame {
     border-radius: 22px;
 }
 
-SettingsWidget Qlabel#databaseIconLabel,
+SettingsWidget QLabel#databaseIconLabel,
 SettingsWidget QLabel#documentIconLabel,
 SettingsWidget QLabel#backupIconLabel,
-SettingsWidget Qlabel#restoreIconLabel {
+SettingsWidget QLabel#restoreIconLabel {
     background: transparent;
     border: none;
 }
@@ -1378,44 +1394,42 @@ QPushButton[buttonIcon="document-add"] {
     О программе
    =========================== */
 
-AboutDialog QDialog {
-    background-color: #F4F6F8;
-}
 
-AboutDialog #appTitleLabel {
+
+#AboutDialog #appTitleLabel {
     color: #0F2744;
     font-size: 24pt;
     font-weight: 700;
 }
 
-AboutDialog #appSubtitleLabel {
+#AboutDialog #appSubtitleLabel {
     color: #334155;
     font-size: 12pt;
     font-weight: 500;
 }
 
-#versionLabel {
+#AboutDialog #versionLabel {
     color: #64748B;
     font-size: 9pt;
 }
 
-#descriptionLabel {
+#AboutDialog #descriptionLabel {
     color: #475569;
     font-size: 10pt;
 }
 
-#developerTitleLabel {
+#AboutDialog #developerTitleLabel {
     color: #64748B;
     font-size: 9pt;
 }
 
-#developerNameLabel {
+#AboutDialog #developerNameLabel {
     color: #0F2744;
     font-size: 10pt;
     font-weight: 600;
 }
 
-#closeButton {
+#AboutDialog #closeButton {
     min-width: 110px;
     min-height: 36px;
 
@@ -1428,12 +1442,12 @@ AboutDialog #appSubtitleLabel {
     padding: 0 18px;
 }
 
-#closeButton:hover {
+#AboutDialog #closeButton:hover {
     background-color: #F1F5F9;
     border-color: #94A3B8;
 }
 
-#closeButton:pressed {
+#AboutDialog #closeButton:pressed {
     background-color: #E2E8F0;
 }
 

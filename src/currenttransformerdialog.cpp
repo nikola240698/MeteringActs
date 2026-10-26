@@ -56,7 +56,7 @@ CurrentTransformerDialog::CurrentTransformerDialog(
         });
 
     connect(ui->cancelButton, &QPushButton::clicked,
-        this, &QDialog::rejected);
+        this, &QDialog::reject);
 }
 
 CurrentTransformerDialog::~CurrentTransformerDialog()
