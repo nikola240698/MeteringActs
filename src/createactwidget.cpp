@@ -1028,6 +1028,33 @@ bool CreateActWidget::updateActMainData()
     const QString employeePosition =
         employeeQuery.value("position").toString();
 
+    // Перед сохранением акта проверим, изменилось ли присоединение
+    // которое выбрано сейчас, и которе мы выбрали
+    QSqlQuery oldConnectionQuery(m_database.getDatabase());
+
+    oldConnectionQuery.prepare(
+        "SELECT connection_id "
+        "FROM acts "
+        "WHERE id = :actId;");
+
+    oldConnectionQuery.bindValue(":actId", m_editActId);
+
+    if (!oldConnectionQuery.exec() || !oldConnectionQuery.next())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось получить текущее присоединение акта: "
+            + oldConnectionQuery.lastError().text());
+
+        return false;
+    }
+
+    const int oldConnectionId =
+        oldConnectionQuery.value("connection_id").toInt();
+
+    const bool connectionChanged =
+        oldConnectionId != connectionId;
+
+    // Обновляем наш акт
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
@@ -1069,6 +1096,75 @@ bool CreateActWidget::updateActMainData()
             "Не удалось обновить акт: " + query.lastError().text());
 
         return false;
+    }
+
+    // В случае изменения присоединения в акте так же меняем
+    // данные в снапшоте БД
+    if (connectionChanged)
+    {
+        QSqlQuery connectionQuery(m_database.getDatabase());
+
+        connectionQuery.prepare(
+            "SELECT "
+            "ar.name AS area_name, "
+            "s.name AS substation_name, "
+            "c.name AS connection_name, "
+            "c.voltage_kv, "
+            "c.ct_ratio "
+            "FROM connections c "
+            "JOIN substations s "
+                "ON s.id = c.substation_id "
+            "JOIN areas ar "
+                "ON ar.id = s.area_id "
+            "WHERE c.id = :connectionId;");
+
+        connectionQuery.bindValue(":connectionId", connectionId);
+
+        if (!connectionQuery.exec() || !connectionQuery.next())
+        {
+            QMessageBox::critical(this, "Ошибка базы данных",
+                "Не удалось получить данные нового присоединения: "
+                + connectionQuery.lastError().text());
+
+            return false;
+        }
+
+        QSqlQuery snapshotQuery(m_database.getDatabase());
+
+        snapshotQuery.prepare(
+            "UPDATE acts SET "
+            "area_name = :areaName, "
+            "substation_name = :substationName, "
+            "connection_name = :connectionName, "
+            "connection_voltage_kv = :connectionVoltage, "
+            "connection_ct_ratio = :connectionCtRatio "
+            "WHERE id = :actId;");
+
+        snapshotQuery.bindValue(
+            ":areaName", connectionQuery.value("area_name"));
+
+        snapshotQuery.bindValue(
+            ":substationName", connectionQuery.value("substation_name"));
+
+        snapshotQuery.bindValue(
+            ":connectionName", connectionQuery.value("connection_name"));
+
+        snapshotQuery.bindValue(
+            ":connectionVoltage", connectionQuery.value("voltage_kv"));
+
+        snapshotQuery.bindValue(
+            ":connectionCtRatio", connectionQuery.value("ct_ratio"));
+
+        snapshotQuery.bindValue(":actId", m_editActId);
+
+        if (!snapshotQuery.exec())
+        {
+            QMessageBox::critical(this, "Ошибка базы данных",
+                "Не удалось обновить список присоединений: "
+                + snapshotQuery.lastError().text());
+
+            return false;
+        }
     }
 
     emit actUpdated();
@@ -1214,6 +1310,50 @@ int CreateActWidget::insertAct()
     QString employeeName = employeeQuery.value("short_name").toString();
     QString employeePosition = employeeQuery.value("position").toString();
 
+    // Получаем данные места проведения работ для исторического снимка
+    QSqlQuery connectionQuery(m_database.getDatabase());
+
+    connectionQuery.prepare(
+        "SELECT "
+        "ar.name AS area_name, "
+        "s.name AS substation_name, "
+        "c.name AS connection_name, "
+        "c.voltage_kv, "
+        "c.ct_ratio "
+        "FROM connections c "
+        "JOIN substations s "
+            "ON s.id = c.substation_id "
+        "JOIN areas ar "
+            "ON ar.id = s.area_id "
+        "WHERE c.id = :connectionId;"
+    );
+
+    connectionQuery.bindValue(":connectionId", connectionId);
+
+    if (!connectionQuery.exec() || !connectionQuery.next())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось получить данные присоединения: "
+            + connectionQuery.lastError().text());
+
+        return -1;
+    }
+
+    const QString areaName =
+        connectionQuery.value("area_name").toString();
+
+    const QString substationName =
+        connectionQuery.value("substation_name").toString();
+
+    const QString connectionName =
+        connectionQuery.value("connection_name").toString();
+
+    const QVariant connectionVoltage =
+        connectionQuery.value("voltage_kv");
+
+    const QString connectionCtRatio =
+        connectionQuery.value("ct_ratio").toString();
+
     // вносим данные в базу данных
     QSqlQuery query(m_database.getDatabase());
 
@@ -1222,6 +1362,11 @@ int CreateActWidget::insertAct()
         "act_type_id, "
         "act_date, "
         "connection_id, "
+        "area_name, "
+        "substation_name, "
+        "connection_name, "
+        "connection_voltage_kv, "
+        "connection_ct_ratio, "
         "employee_id, "
         "employee_name, "
         "employee_position, "
@@ -1235,6 +1380,11 @@ int CreateActWidget::insertAct()
         ":actTypeId, "
         ":actDate, "
         ":connectionId, "
+        ":areaName, "
+        ":substationName, "
+        ":connectionName, "
+        ":connectionVoltage, "
+        ":connectionCtRatio, "
         ":employeeId, "
         ":employeeName, "
         ":employeePosition, "
@@ -1248,6 +1398,14 @@ int CreateActWidget::insertAct()
     query.bindValue(":actTypeId", actTypeId);
     query.bindValue(":actDate", actDate);
     query.bindValue(":connectionId", connectionId);
+
+    query.bindValue(":areaName", areaName);
+    query.bindValue(":substationName", substationName);
+    query.bindValue(":connectionName", connectionName);
+    query.bindValue(":connectionVoltage", connectionVoltage);
+    query.bindValue(":connectionCtRatio", connectionCtRatio);
+
+
     query.bindValue(":employeeId", employeeId);
     query.bindValue(":employeeName", employeeName);
     query.bindValue(":employeePosition", employeePosition);

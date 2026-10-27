@@ -130,6 +130,15 @@ CREATE TABLE acts
 
     connection_id           INTEGER NOT NULL,
 
+    -- Исторический снимок места проведеня работ.
+    -- Значения фиксируются на момент сохдания/редактирвоания акта
+    -- и используются при просмотре архива и повторной генерации DOCX
+    area_name               TEXT NOT NULL,
+    substation_name         TEXT NOT NULL,
+    connection_name         TEXT NOT NULL,
+    connection_voltage_kv   REAL,
+    connection_ct_ratio     TEXT,
+
     -- Представитель предприятия.
     -- employee_id указывает на текущий справочник сотрудников.
     employee_id             INTEGER,

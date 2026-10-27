@@ -63,15 +63,15 @@ bool ActRepository::loadMainData(int actId, ActData &data)
         "a.act_date, "
 
         "ar.id AS area_id, "
-        "ar.name AS area_name, "
+        "a.area_name, "
 
         "s.id AS substation_id, "
-        "s.name AS substation_name,"
+        "a.substation_name,"
 
         "c.id AS connection_id, "
-        "c.name AS connection_name, "
-        "c.voltage_kv, "
-        "c.ct_ratio, "
+        "a.connection_name, "
+        "a.connection_voltage_kv, "
+        "a.connection_ct_ratio, "
 
         "a.employee_id, "
         "a.employee_name, "
@@ -141,8 +141,8 @@ bool ActRepository::loadMainData(int actId, ActData &data)
     data.connectionId = query.value("connection_id").toInt();
     data.connectionName = query.value("connection_name").toString();
 
-    data.voltage = query.value("voltage_kv").toString();
-    data.ctRatio = query.value("ct_ratio").toString();
+    data.voltage = query.value("connection_voltage_kv").toString();
+    data.ctRatio = query.value("connection_ct_ratio").toString();
 
     data.employeeId = query.value("employee_id").toInt();
     data.employeeName = query.value("employee_name").toString();
