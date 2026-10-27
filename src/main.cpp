@@ -68,12 +68,10 @@ int main(int argc, char *argv[])
 
         const QFileInfo databaseInfo(db.databasePath());
 
-        QDir projectDirectory = databaseInfo.dir();
-
-        projectDirectory.cdUp();
+        const QDir databaseDirectory = databaseInfo.dir();
 
         const QString backupDirectory =
-            projectDirectory.filePath("backups");
+            databaseDirectory.filePath("backups");
 
         const QDateTime lastBackup =
             backupManager.lastAutomaticBackupTime(backupDirectory);

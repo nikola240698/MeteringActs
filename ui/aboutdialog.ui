@@ -153,14 +153,20 @@
    <item>
     <widget class="QLabel" name="developerTitleLabel">
      <property name="text">
-      <string>Разработчик</string>
+      <string>Разработата на энтузиазме работников ССРЗА при поддержке ChatGPT</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QLabel" name="developerNameLabel">
      <property name="text">
-      <string>АНА</string>
+      <string>Вопросы и предложения присылать на nikola240698@gmail.com</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

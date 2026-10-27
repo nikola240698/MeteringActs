@@ -10,6 +10,7 @@
 #include <quazip.h>
 #include <quazipfile.h>
 #include <QDirIterator>
+#include <QCoreApplication>
 
 #include "docxgenerator.h"
 #include "actcalculator.h"
@@ -524,7 +525,10 @@ QString DocxGenerator::templatePathForActType(int actTypeId) const
             return {};
     }
 
-    return QDir(QStringLiteral(PROJECT_ROOT))
+    const QString applicationDirectory =
+        QCoreApplication::applicationDirPath();
+
+    return QDir(applicationDirectory)
         .filePath("templates/" + fileName);
 }
 

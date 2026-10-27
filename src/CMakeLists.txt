@@ -2,7 +2,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-add_executable(MeteringActs
+add_executable(MeteringActs WIN32
         main.cpp
         database.cpp
         mainwindow.cpp
@@ -89,6 +89,15 @@ add_executable(MeteringActs
 
 
         ${CMAKE_SOURCE_DIR}/resources/resources.qrc
+)
+
+# Добавляем перенос шаблонов DOCX в папку релиза
+add_custom_command(
+        TARGET MeteringActs POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/templates"
+        "$<TARGET_FILE_DIR:MeteringActs>/templates"
+        COMMENT "Copying DOCX templates"
 )
 
 target_include_directories(MeteringActs PRIVATE

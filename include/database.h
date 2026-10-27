@@ -37,6 +37,9 @@ public:
     // метод получения ошибки
     QString lastError() const;
 
+    // Метод создания БД из скрипта
+    bool createDatabase(const QString &path);
+
 private:
     // Создаем БД
     QSqlDatabase db;

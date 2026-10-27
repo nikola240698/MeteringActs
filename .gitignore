@@ -28,3 +28,6 @@ cmake_install.cmake
 /docx_test/
 generated_act.docx
 /backups/
+installer/images/
+installer/output/
+db/backups/
