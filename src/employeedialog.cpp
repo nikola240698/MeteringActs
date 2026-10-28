@@ -6,6 +6,7 @@
 #include "employeedialog.h"
 #include "ui_employeedialog.h"
 #include "database.h"
+#include "uuidutils.h"
 
 
 EmployeeDialog::EmployeeDialog(Database &database, QWidget *parent)
@@ -131,8 +132,12 @@ bool EmployeeDialog::insertEmployee()
 
     query.prepare(
         "INSERT INTO employees "
-        "(short_name, position) "
-        "VALUES (:shortName, :position);");
+        "(uuid, version_uuid, short_name, position) "
+        "VALUES (:uuid, :versionUuid, :shortName, :position);");
+
+    query.bindValue(":uuid", UuidUtils::generate());
+
+    query.bindValue(":versionUuid", UuidUtils::generate());
 
     query.bindValue(":shortName",
         ui->shortNameLineEdit->text().trimmed());
@@ -159,8 +164,14 @@ bool EmployeeDialog::updateEmployee()
     query.prepare(
         "UPDATE employees "
         "SET short_name = :shortName, "
-        "position = :position "
-        "WHERE id = :id;");
+            "position = :position, "
+            "version_uuid = :versionUuid "
+        "WHERE id = :id "
+            "AND ("
+                "short_name IS NOT :shortName "
+                "OR position IS NOT :position);");
+
+    query.bindValue(":versionUuid", UuidUtils::generate());
 
     query.bindValue(":shortName",
         ui->shortNameLineEdit->text().trimmed());

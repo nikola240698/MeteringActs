@@ -3,6 +3,7 @@
 
 #include "../include/currenttransformerdialog.h"
 #include "ui_currenttransformerdialog.h"
+#include "uuidutils.h"
 
 
 CurrentTransformerDialog::CurrentTransformerDialog(
@@ -138,6 +139,8 @@ bool CurrentTransformerDialog::saveCurrentTransformer()
     QSqlQuery query(m_database.getDatabase());
     query.prepare(
         "INSERT INTO current_transformers ("
+        "uuid, "
+        "version_uuid, "
         "name, "
         "serial_number, "
         "transformation_ratio, "
@@ -147,6 +150,8 @@ bool CurrentTransformerDialog::saveCurrentTransformer()
         "note"
         ")"
         "VALUES ("
+        ":uuid, "
+        ":versionUuid, "
         ":name, "
         ":serialNumber, "
         ":transformationRatio, "
@@ -156,6 +161,8 @@ bool CurrentTransformerDialog::saveCurrentTransformer()
         ":note"
         ");");
 
+    query.bindValue(":uuid", UuidUtils::generate());
+    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":name", name);
     query.bindValue(":serialNumber", serialNumber);
     query.bindValue(":transformationRatio", transformationRatio);
@@ -305,16 +312,26 @@ bool CurrentTransformerDialog::updateCurrentTransformer()
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
-        "UPDATE current_transformers SET "
-        "name = :name, "
-        "serial_number = :serialNumber, "
-        "transformation_ratio = :transformationRatio, "
-        "accuracy_class = :accuracyClass, "
-        "manufacturer = :manufacturer, "
-        "manufacture_year = :manufactureYear, "
-        "note = :note "
-        "WHERE id = :id;");
+        "UPDATE current_transformers "
+        "SET name = :name, "
+            "serial_number = :serialNumber, "
+            "transformation_ratio = :transformationRatio, "
+            "accuracy_class = :accuracyClass, "
+            "manufacturer = :manufacturer, "
+            "manufacture_year = :manufactureYear, "
+            "note = :note, "
+            "version_uuid = :versionUuid "
+        "WHERE id = :id "
+            "AND ("
+                "name IS NOT :name "
+                "OR serial_number IS NOT :serialNumber "
+                "OR transformation_ratio IS NOT :transformationRatio "
+                "OR accuracy_class IS NOT :accuracyClass "
+                "OR manufacturer IS NOT :manufacturer "
+                "OR manufacture_year IS NOT :manufactureYear "
+                "OR note IS NOT :note);");
 
+    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":name", name);
     query.bindValue(":serialNumber", serialNumber);
     query.bindValue(":transformationRatio", transformationRatio);

@@ -64,6 +64,7 @@ add_executable(MeteringActs WIN32
         ${MY_INCLUDE_DIR}/docxservice.h
         ${MY_INCLUDE_DIR}/nowheelspinbox.h
         ${MY_INCLUDE_DIR}/aboutdialog.h
+        ${MY_INCLUDE_DIR}/uuidutils.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui

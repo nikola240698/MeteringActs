@@ -5,6 +5,7 @@
 
 #include "connectiondialog.h"
 #include "ui_connectiondialog.h"
+#include "uuidutils.h"
 
 
 ConnectionDialog::ConnectionDialog(
@@ -130,10 +131,12 @@ bool ConnectionDialog::insertConnection()
 
     query.prepare(
         "INSERT INTO connections "
-        "(substation_id, name, voltage_kv, ct_ratio) "
+        "(uuid, version_uuid, substation_id, name, voltage_kv, ct_ratio) "
         "VALUES "
-        "(:substationId, :name, :voltage, :ctRatio);");
+        "(:uuid, :versionUuid, :substationId, :name, :voltage, :ctRatio);");
 
+    query.bindValue(":uuid", UuidUtils::generate());
+    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":substationId", m_substationId);
     query.bindValue(":name", name);
     query.bindValue(":voltage", voltage);
@@ -216,10 +219,16 @@ bool ConnectionDialog::updateConnection()
         "UPDATE connections "
         "SET name = :name, "
             "voltage_kv = :voltage, "
-            "ct_ratio = :ctRatio "
+            "ct_ratio = :ctRatio, "
+            "version_uuid = :versionUuid "
         "WHERE id = :connectionId "
-        "AND substation_id = :substationId;");
+            "AND substation_id = :substationId "
+            "AND ("
+                "name IS NOT :name "
+                "OR voltage_kv IS NOT :voltage "
+                "OR ct_ratio IS NOT :ctRatio);");
 
+    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":name", name);
     query.bindValue(":voltage", voltage);
 

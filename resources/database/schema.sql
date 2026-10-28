@@ -7,8 +7,12 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE areas
 (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT NOT NULL UNIQUE
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    uuid            TEXT NOT NULL UNIQUE,
+    version_uuid    TEXT NOT NULL,
+
+    name            TEXT NOT NULL UNIQUE
 );
 
 
@@ -18,9 +22,13 @@ CREATE TABLE areas
 
 CREATE TABLE substations
 (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    area_id     INTEGER NOT NULL,
-    name        TEXT NOT NULL,
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    uuid            TEXT NOT NULL UNIQUE,
+    version_uuid    TEXT NOT NULL,
+
+    area_id         INTEGER NOT NULL,
+    name            TEXT NOT NULL,
 
     FOREIGN KEY (area_id)
         REFERENCES areas(id)
@@ -38,6 +46,10 @@ CREATE TABLE substations
 CREATE TABLE connections
 (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    uuid                TEXT NOT NULL UNIQUE,
+    version_uuid        TEXT NOT NULL,
+
     substation_id       INTEGER NOT NULL,
 
     name                TEXT NOT NULL,
@@ -61,6 +73,9 @@ CREATE TABLE employees
 (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
 
+    uuid            TEXT NOT NULL UNIQUE,
+    version_uuid    TEXT NOT NULL,
+
     short_name      TEXT NOT NULL,       -- Иванов И.И.
     position        TEXT NOT NULL,       -- текущая должность
 
@@ -76,6 +91,9 @@ CREATE TABLE employees
 CREATE TABLE meters
 (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    uuid                TEXT NOT NULL UNIQUE,
+    version_uuid        TEXT NOT NULL,
 
     name                TEXT NOT NULL,       -- СЭТ-4ТМ.03М
     serial_number       TEXT NOT NULL UNIQUE,
@@ -122,6 +140,9 @@ INSERT INTO act_types (id, name) VALUES
 CREATE TABLE acts
 (
     id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    uuid                    TEXT NOT NULL UNIQUE,
+    version_uuid            TEXT NOT NULL,
 
     act_number              TEXT,
 
@@ -374,6 +395,9 @@ CREATE TABLE external_representatives
 CREATE TABLE current_transformers
 (
     id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    uuid                    TEXT NOT NULL UNIQUE,
+    version_uuid            TEXT NOT NULL,
 
     name                    TEXT NOT NULL,
     serial_number           TEXT NOT NULL UNIQUE,

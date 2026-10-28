@@ -12,6 +12,8 @@
 #include "substationdialog.h"
 #include "connectiondialog.h"
 #include "employeedialog.h"
+#include "uuidutils.h"
+#include "uuidutils.h"
 
 
 DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
@@ -611,10 +613,13 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
 
             query.prepare(
                 "UPDATE employees "
-                "SET is_active = :isActive "
-                "WHERE id = :employeeId;");
+                "SET is_active = :isActive, "
+                    "version_uuid = :versionUuid "
+                "WHERE id = :employeeId"
+                    "AND is_active IS NOT :isActive;");
 
             query.bindValue(":isActive", isActive ? 0 : 1);
+            query.bindValue(":versionUuid", UuidUtils::generate());
             query.bindValue(":employeeId", employeeId);
 
             if (!query.exec())

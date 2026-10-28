@@ -5,6 +5,7 @@
 #include <QSqlError>
 
 #include "substationdialog.h"
+#include "uuidutils.h"
 
 #include <QPushButton>
 
@@ -78,9 +79,11 @@ bool SubstationDialog::insertSubstation()
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
-        "INSERT INTO substations (area_id, name) "
-        "VALUES (:areaId, :name);");
+        "INSERT INTO substations (uuid, version_uuid, area_id, name) "
+        "VALUES (:uuid, :versionUuid, :areaId, :name);");
 
+    query.bindValue(":uuid", UuidUtils::generate());
+    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":areaId", m_areaId);
     query.bindValue(":name", name);
 
@@ -105,11 +108,14 @@ bool SubstationDialog::updateSubstation()
 
     query.prepare(
         "UPDATE substations "
-        "SET name = :name "
+        "SET name = :name, "
+            "version_uuid = :versionUuid "
         "WHERE id = :substationId "
-        "AND area_id = :areaId");
+            "AND area_id = :areaId "
+            "AND name IS NOT :name;");
 
     query.bindValue(":name", name);
+    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":substationId", m_substationId);
     query.bindValue(":areaId", m_areaId);
 

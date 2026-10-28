@@ -5,6 +5,7 @@
 
 #include "areadialog.h"
 #include "ui_areadialog.h"
+#include "uuidutils.h"
 
 
 AreaDialog::AreaDialog(Database &database, QWidget *parent)
@@ -67,8 +68,12 @@ bool AreaDialog::insertArea()
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
-        "INSERT INTO areas (name) "
-        "VALUES (:name);");
+        "INSERT INTO areas (uuid, version_uuid, name) "
+        "VALUES (:uuid, :versionUuid, :name);");
+
+    query.bindValue(":uuid", UuidUtils::generate());
+
+    query.bindValue(":versionUuid", UuidUtils::generate());
 
     query.bindValue(":name", name);
 
@@ -91,10 +96,13 @@ bool AreaDialog::updateArea()
 
     query.prepare(
         "UPDATE areas "
-        "SET name = :name "
-        "WHERE id = :areaId;");
+        "SET name = :name, "
+            "version_uuid = :versionUuid "
+        "WHERE id = :areaId "
+            "AND name IS NOT :name;");
 
     query.bindValue(":name", name);
+    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":areaId", m_areaId);
 
     if (!query.exec())

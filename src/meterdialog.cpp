@@ -1,6 +1,7 @@
 
 #include "meterdialog.h"
 #include "ui_meterdialog.h"
+#include "uuidutils.h"
 
 
 MeterDialog::MeterDialog(Database &database, const QString &serial, QWidget *parent)
@@ -175,6 +176,8 @@ bool MeterDialog::insertMeter()
     query.prepare(
         "INSERT INTO meters "
         "("
+        "uuid, "
+        "version_uuid, "
         "name, "
         "serial_number, "
         "accuracy_class, "
@@ -185,6 +188,8 @@ bool MeterDialog::insertMeter()
         ") "
         "VALUES "
         "("
+        ":uuid,"
+        ":versionUuid, "
         ":name, "
         ":serial, "
         ":accuracy, "
@@ -194,6 +199,8 @@ bool MeterDialog::insertMeter()
         ":note"
         ");");
     // биндим значения в запрос
+    query.bindValue(":uuid", UuidUtils::generate());
+    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":name", name);
     query.bindValue(":serial", serial);
     query.bindValue(":accuracy", ui->accuracyLineEdit->text().trimmed());
@@ -233,9 +240,19 @@ bool MeterDialog::updateMeter()
             "verification_year = :verificationYear, "
             "manufacturer = :manufacturer, "
             "manufacture_year = :manufactureYear, "
-            "note = :note "
-        "WHERE id = :meterId;");
+            "note = :note,"
+            "version_uuid = :versionUuid "
+        "WHERE id = :meterId "
+            "AND ("
+                "name IS NOT :name "
+                "OR serial_number IS NOT :serial "
+                "OR accuracy_class IS NOT :accuracy "
+                "OR verification_year IS NOT :verificationYear "
+                "OR manufacturer IS NOT :manufacturer "
+                "OR manufacture_year IS NOT :manufactureYear "
+                "OR note IS NOT :note);");
 
+    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":name", ui->nameLineEdit->text().trimmed());
     query.bindValue(":serial", ui->serialLineEdit->text().trimmed());
     query.bindValue(":accuracy", ui->accuracyLineEdit->text().trimmed());

@@ -8,6 +8,7 @@
 #include "currenttransformerphasepanel.h"
 #include "actrepository.h"
 #include "docxservice.h"
+#include "uuidutils.h"
 
 
 CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
@@ -1059,6 +1060,7 @@ bool CreateActWidget::updateActMainData()
 
     query.prepare(
         "UPDATE acts SET "
+        "version_uuid = :versionUuid, "
         "act_type_id = :actTypeId, "
         "act_date = :actDate, "
         "connection_id = :connectionId, "
@@ -1071,6 +1073,8 @@ bool CreateActWidget::updateActMainData()
         "replacement_duration_minutes = :replacementDuration, "
         "work_schedule_type = :workScheduleType "
         "WHERE id = :actId;");
+
+    query.bindValue(":versionUuid", UuidUtils::generate());
 
     query.bindValue(":actTypeId", actTypeId);
     query.bindValue(":actDate", actDate);
@@ -1359,6 +1363,8 @@ int CreateActWidget::insertAct()
 
     query.prepare(
         "INSERT INTO acts ("
+        "uuid, "
+        "version_uuid, "
         "act_type_id, "
         "act_date, "
         "connection_id, "
@@ -1377,6 +1383,8 @@ int CreateActWidget::insertAct()
         "work_schedule_type"
         ") "
         "VALUES ("
+        ":uuid, "
+        ":versionUuid, "
         ":actTypeId, "
         ":actDate, "
         ":connectionId, "
@@ -1394,6 +1402,9 @@ int CreateActWidget::insertAct()
         ":replacementDuration, "
         ":workScheduleType"
         ");");
+
+    query.bindValue(":uuid", UuidUtils::generate());
+    query.bindValue(":versionUuid", UuidUtils::generate());
 
     query.bindValue(":actTypeId", actTypeId);
     query.bindValue(":actDate", actDate);
@@ -1522,11 +1533,13 @@ bool CreateActWidget::updateMeterVerificationYear(MeterActWidget* meterWidget)
 
     query.prepare(
         "UPDATE meters "
-        "SET verification_year = :verificationYear "
-        "WHERE id = :meterId;");
+        "SET verification_year = :verificationYear, "
+            "version_uuid = :versionUuid "
+        "WHERE id = :meterId "
+            "AND verification_year IS NOT :verificationYear;");
 
     query.bindValue(":verificationYear", verificationYear);
-
+    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":meterId", meterWidget->meterId());
 
     if (!query.exec())
