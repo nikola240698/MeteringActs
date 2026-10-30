@@ -578,7 +578,7 @@ bool CreateActWidget::validateForm()
     }
 
     // 13. Проверяем правильно введенную пломбу
-    if (ui->sealWidget->isVisible() &&
+    if (actTypeId != 4 &&
         ui->sealLineEdit->text().trimmed().isEmpty())
     {
         // переключаемся на нужную вкладку
@@ -829,6 +829,24 @@ bool CreateActWidget::updateAct()
     if (!validateForm())
         return false;
 
+    ActRepository repository(m_database);
+    ActData original;
+
+    if (!repository.loadAct(m_editActId, original))
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось загрузить акт для сравнения:\n" +
+            repository.lastError());
+
+        return false;
+    }
+
+    const ActData current = collectActData();
+
+    const bool changed = hasActChanges(original, current);
+
+    qDebug() << "Act changed: " << changed;
+
     if (!m_database.transaction())
     {
         QMessageBox::critical(this, "Ошибка базы данных",
@@ -992,7 +1010,7 @@ bool CreateActWidget::updateActMainData()
 
     QVariant sealNumber;
 
-    if (ui->sealWidget->isVisible())
+    if (actTypeId != 4)
     {
         sealNumber = ui->sealLineEdit->text().trimmed();
     }
@@ -1281,7 +1299,7 @@ int CreateActWidget::insertAct()
     const QString reason = ui->reasonPlainTextEdit->toPlainText().trimmed();
     const QString result = ui->resultPlainTextEdit->toPlainText().trimmed();
     QString sealNumber;
-    if (ui->sealWidget->isVisible())
+    if (actTypeId != 4)
     {
         sealNumber = ui->sealLineEdit->text().trimmed();
     }
@@ -2263,6 +2281,315 @@ const ActMeterData * CreateActWidget::meterByRole(const ActData &data, int role)
     }
 
     return nullptr;
+}
+
+ActData CreateActWidget::collectActData() const
+{
+    ActData data;
+
+    data.id = m_editActId;
+
+    // Основные данные акта
+    data.actTypeId =
+        ui->actTypeComboBox->currentData().toInt();
+
+    data.date = ui->actDateEdit->date();
+
+    data.areaId =
+        ui->areaComboBox->currentData().toInt();
+
+    data.substationId =
+        ui->substationComboBox->currentData().toInt();
+
+    data.connectionId =
+        ui->connectionComboBox->currentData().toInt();
+
+    data.employeeId =
+        ui->employeeComboBox->currentData().toInt();
+
+    // Характер работ
+    if (data.actTypeId == 1 ||
+        data.actTypeId == 2 ||
+        data.actTypeId == 7)
+    {
+        data.workScheduleType =
+            ui->workScheduleComboBox->currentData().toInt();
+    }
+
+    // Заключение
+    data.reason =
+        ui->reasonPlainTextEdit->toPlainText().trimmed();
+
+    data.result =
+        ui->resultPlainTextEdit->toPlainText().trimmed();
+
+    if (data.actTypeId != 4)
+    {
+        data.sealNumber =
+            ui->sealLineEdit->text().trimmed();
+    }
+
+    // Длительность замены
+    if (data.actTypeId == 2 &&
+        ui->hasVectorDiagramCheckBox->isChecked())
+    {
+        data.replacementDurationMinutes =
+            ui->replacementDurationSpinBox->value();
+    }
+
+    // Сторонние представители
+    for (const ExternalRepresentativeWidget* widget :
+        m_externalRepresentativeWidgets)
+    {
+        ExternalRepresentativeData representative;
+
+        representative.organization = widget->organization();
+        representative.shortName = widget->shortName();
+        representative.position = widget->position();
+
+        data.externalRepresentatives.append(representative);
+    }
+
+    // Собираем прибор и его показания
+    auto collectMeter = [](const MeterActWidget* widget, int role)
+    {
+        ActMeterData meter;
+
+        meter.meterId = widget->meterId();
+        meter.role = role;
+
+        meter.name = widget->meterName();
+        meter.serialNumber = widget->serialNumber();
+        meter.accuracyClass = widget->accuracyClass();
+        meter.verificationYear = widget->verificationYear();
+
+        for (const auto& reading : widget->readings())
+        {
+            ActMeterReadingData value;
+
+            value.typeId = reading.typeId;
+            value.value = reading.value;
+
+            meter.readings.append(value);
+        }
+
+        return meter;
+    };
+
+    // Основной прибор
+    data.meters.append(
+        collectMeter(m_primaryMeterWidget, primaryMeterRole()));
+
+    // Второй прибор при замене
+    if (data.actTypeId == 2)
+    {
+        data.meters.append(
+            collectMeter(m_secondaryMeterWidget, InstalledMeter));
+    }
+
+    // Трансформаторы тока
+    if (data.actTypeId == 6 || data.actTypeId == 7)
+    {
+        if (data.actTypeId == 7)
+        {
+            data.currentTransformers.append(
+                m_removedCtPhasePanel->data(RemovedCurrentTransformer));
+        }
+
+        data.currentTransformers.append(
+            m_installedCtPhasePanel->data(InstalledCurrentTransformer));
+    }
+
+    // Добавляем векторную диаграмму
+    const bool supportsVectorDiagram =
+        data.actTypeId == 1 ||
+        data.actTypeId == 2 ||
+        data.actTypeId == 5 ||
+        data.actTypeId == 6 ||
+        data.actTypeId == 7;
+
+    if (supportsVectorDiagram &&
+        ui->hasVectorDiagramCheckBox->isChecked())
+    {
+        auto& vector = data.vectorDiagram;
+
+        vector.exists = true;
+
+        vector.ia = m_vectorDiagramWidget->currentA();
+        vector.ib = m_vectorDiagramWidget->currentB();
+        vector.ic = m_vectorDiagramWidget->currentC();
+
+        vector.angleA = m_vectorDiagramWidget->angleA();
+        vector.angleB = m_vectorDiagramWidget->angleB();
+        vector.angleC = m_vectorDiagramWidget->angleC();
+
+        vector.angleAType = m_vectorDiagramWidget->angleAType();
+        vector.angleBType = m_vectorDiagramWidget->angleBType();
+        vector.angleCType = m_vectorDiagramWidget->angleCType();
+
+        vector.uab = m_vectorDiagramWidget->uab();
+        vector.ubc = m_vectorDiagramWidget->ubc();
+        vector.uca = m_vectorDiagramWidget->uca();
+    }
+
+    return data;
+}
+
+bool CreateActWidget::hasActChanges(const ActData &original, const ActData &current) const
+{
+    // 1. Основные данные
+    if (original.actTypeId != current.actTypeId ||
+        original.date != current.date ||
+        original.connectionId != current.connectionId ||
+        original.employeeId != current.employeeId ||
+        original.workScheduleType != current.workScheduleType ||
+        original.reason != current.reason ||
+        original.result != current.result ||
+        original.sealNumber != current.sealNumber ||
+        original.replacementDurationMinutes !=
+            current.replacementDurationMinutes)
+    {
+        return true;
+    }
+
+    // 2. Сторонние представители.
+    if (original.externalRepresentatives.size() !=
+        current.externalRepresentatives.size())
+    {
+        return true;
+    }
+
+    for (qsizetype i = 0; i < original.externalRepresentatives.size(); ++i)
+    {
+        const auto &a = original.externalRepresentatives[i];
+        const auto &b = current.externalRepresentatives[i];
+
+        if (a.organization != b.organization ||
+            a.shortName != b.shortName ||
+            a.position != b.position)
+        {
+            return true;
+        }
+    }
+
+    // 3. Приборы учёта.
+    if (original.meters.size() != current.meters.size())
+        return true;
+
+    auto findMeter = [](const QList<ActMeterData> &meters,
+        int role) -> const ActMeterData*
+    {
+        for (const auto &meter : meters)
+        {
+            if (meter.role == role)
+                return &meter;
+        }
+
+        return nullptr;
+    };
+
+    for (const auto &a : original.meters)
+    {
+        const auto *b = findMeter(current.meters, a.role);
+
+        if (!b)
+            return true;
+
+        if (a.meterId != b->meterId ||
+            a.name != b->name ||
+            a.serialNumber != b->serialNumber ||
+            a.accuracyClass != b->accuracyClass ||
+            a.verificationYear != b->verificationYear)
+        {
+            return true;
+        }
+
+        if (a.readings.size() != b->readings.size())
+            return true;
+
+        for (const auto &readingA : a.readings)
+        {
+            bool found = false;
+
+            for (const auto &readingB : b->readings)
+            {
+                if (readingA.typeId == readingB.typeId)
+                {
+                    if (readingA.value != readingB.value)
+                        return true;
+
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                return true;
+        }
+    }
+
+
+    // 4. Трансформаторы тока
+    if (original.currentTransformers.size() !=
+        current.currentTransformers.size())
+    {
+        return true;
+    }
+
+    auto normalizeTransformers =
+        [](const QList<ActCurrentTransformerData> &items)
+        {
+            QStringList result;
+
+            for (const auto &ct : items)
+            {
+                result.append(
+                    QString::number(ct.role) + "|" +
+                    ct.phase + "|" +
+                    QString::number(ct.currentTransformerId) + "|" +
+                    ct.name + "|" +
+                    ct.serialNumber + "|" +
+                    ct.transformationRatio + "|" +
+                    ct.accuracyClass);
+            }
+
+            result.sort();
+            return result;
+        };
+
+    if (normalizeTransformers(original.currentTransformers) !=
+        normalizeTransformers(current.currentTransformers))
+    {
+        return true;
+    }
+
+    // 5. Векторная диаграмма
+    const auto &a = original.vectorDiagram;
+    const auto &b = current.vectorDiagram;
+
+    if (a.exists != b.exists)
+        return true;
+
+    if (a.exists)
+    {
+        if (a.ia != b.ia ||
+            a.ib != b.ib ||
+            a.ic != b.ic ||
+            a.angleA != b.angleA ||
+            a.angleB != b.angleB ||
+            a.angleC != b.angleC ||
+            a.angleAType != b.angleAType ||
+            a.angleBType != b.angleBType ||
+            a.angleCType != b.angleCType ||
+            a.uab != b.uab ||
+            a.ubc != b.ubc ||
+            a.uca != b.uca)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 

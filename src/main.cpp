@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QDebug>
 #include <QIcon>
+#include <QTranslator>
 
 #include "database.h"
 #include "mainwindow.h"
@@ -17,6 +18,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
 
     // Подключаем добавленные ресурсы и настройки
     QFile styleFile(":/styles/main.qss");
@@ -31,6 +33,19 @@ int main(int argc, char *argv[])
     else
     {
         qDebug() << "Error in load style file.";
+    }
+
+    // Русский перевод страничных диалогов Qt
+    QTranslator qtTranslator;
+
+    if (qtTranslator.load(":/translations/qtbase_ru.qm"))
+    {
+        a.installTranslator(&qtTranslator);
+        qDebug() << "Qt Russian translation loaded.";
+    }
+    else
+    {
+        qWarning() << "Failed to load Qt Russian translation.";
     }
 
     // Для сохраненных настроек, чтобы было понятно откуда брать

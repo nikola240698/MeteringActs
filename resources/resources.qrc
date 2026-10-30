@@ -40,5 +40,7 @@
 
         <file>database/schema.sql</file>
 
+        <file>translations/qtbase_ru.qm</file>
+
     </qresource>
 </RCC>

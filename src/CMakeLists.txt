@@ -2,7 +2,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-add_executable(MeteringActs WIN32
+add_executable(MeteringActs # WIN32
         main.cpp
         database.cpp
         mainwindow.cpp

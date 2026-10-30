@@ -170,6 +170,12 @@ private:
     // Загружаем данные прибора учета по роли
     const ActMeterData* meterByRole(const ActData &data, int role) const;
 
+    // Собирает текущее содержимое формы в структуру ActData
+    ActData collectActData() const;
+
+    // Проверяем, что акт реально изменился
+    bool hasActChanges(const ActData &original, const ActData &current) const;
+
 };
 
 
