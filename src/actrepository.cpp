@@ -58,6 +58,7 @@ bool ActRepository::loadMainData(int actId, ActData &data)
     if (!query.prepare(
         "SELECT "
         "a.id, "
+        "a.version_uuid, "
         "a.act_type_id, "
         "at.name AS act_type_name, "
         "a.act_date, "
@@ -127,6 +128,7 @@ bool ActRepository::loadMainData(int actId, ActData &data)
 
     // получаем значения из запроса
     data.id = query.value("id").toInt();
+    data.versionUUid = query.value("version_uuid").toString();
     data.actTypeId = query.value("act_type_id").toInt();
     data.actTypeName = query.value("act_type_name").toString();
 

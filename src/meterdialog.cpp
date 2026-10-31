@@ -56,7 +56,8 @@ void MeterDialog::loadMeter()
             "verification_year, "
             "manufacturer, "
             "manufacture_year, "
-            "note "
+            "note, "
+            "version_uuid "
         "FROM meters "
         "WHERE id = :meterId;");
 
@@ -102,6 +103,10 @@ void MeterDialog::loadMeter()
 
     ui->notePlainTextEdit->setPlainText(
         query.value("note").toString());
+
+    m_originalVersionUuid = query.value("version_uuid").toString();
+
+    qDebug() << "Original meter version UUID: " << m_originalVersionUuid;
 
 
 
@@ -230,6 +235,94 @@ bool MeterDialog::insertMeter()
 
 bool MeterDialog::updateMeter()
 {
+    const QString name = ui->nameLineEdit->text().trimmed();
+    const QString serial = ui->serialLineEdit->text().trimmed();
+    const QString accuracy = ui->accuracyLineEdit->text().trimmed();
+    const int verificationYear = ui->verificationYearSpinBox->value();
+    const QString manufacturer = ui->manufacturerLineEdit->text().trimmed();
+    const QVariant manufacturerYear =
+        ui->manufactureYearSpinBox->value() == 1900 ?
+            QVariant() : QVariant(ui->manufactureYearSpinBox->value());
+    const QString note = ui->notePlainTextEdit->toPlainText().trimmed();
+
+    // Проверяем текущую версию записи
+    QSqlQuery currentQuery(m_database.getDatabase());
+
+    currentQuery.prepare(
+        "SELECT name, serial_number, accuracy_class, verification_year, "
+        "manufacturer, manufacture_year, note, version_uuid "
+        "FROM meters "
+        "WHERE id = :meterId;");
+
+    currentQuery.bindValue(":meterId", m_meterId);
+
+    if (!currentQuery.exec())
+    {
+        QMessageBox::critical(this, "Ошибка",
+            "Не удалось проверить прибор учёта:\n\n"
+            + currentQuery.lastError().text());
+
+        return false;
+    }
+
+    if (!currentQuery.next())
+    {
+        QMessageBox::warning(this, "Ошибка",
+            "Прибор учёта больше не существует.");
+
+        return false;
+    }
+
+    if (currentQuery.value("version_uuid").toString() !=
+        m_originalVersionUuid)
+    {
+        QMessageBox::warning(this, "Конфликт изменений",
+            "Прибор учёта был изменен после открытия окна.\n"
+            "Ваши изменения не сохранены.");
+
+        return false;
+    }
+
+    // Проверяем, изменилось ли хотя бы одно поле
+    const bool hasChanges =
+        currentQuery.value("name").toString() != name ||
+        currentQuery.value("serial_number").toString() != serial ||
+        currentQuery.value("accuracy_class").toString() != accuracy ||
+        currentQuery.value("verification_year").toInt() != verificationYear ||
+        currentQuery.value("manufacturer").toString() != manufacturer ||
+        (
+            currentQuery.value("manufacture_year").isNull() !=
+                manufacturerYear.isNull() ||
+            (manufacturerYear.isNull() &&
+                currentQuery.value("manufacture_year").toInt() !=
+                    manufacturerYear.toInt())
+        ) ||
+        currentQuery.value("note").toString() != note;
+
+    if (!hasChanges)
+        return true;
+
+    // Проверяем обязательные поля
+    if (name.isEmpty() || serial.isEmpty() || accuracy.isEmpty() ||
+        verificationYear == 1900)
+    {
+        QMessageBox::warning(this, "Проверка данных",
+            "Заполните название, заводской номер, класс точности "
+            "и год поверки.");
+
+        return false;
+    }
+
+    // Проверяем уникальность заводского номера
+    if (serialNumberExists(serial))
+    {
+        QMessageBox::warning(this, "Ошибка заполнения",
+            "Прибор учёта с таким заводским номером уже существует.");
+
+        return false;
+    }
+
+    // Обновляем запись с проверкой исходной версии
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
@@ -243,6 +336,7 @@ bool MeterDialog::updateMeter()
             "note = :note,"
             "version_uuid = :versionUuid "
         "WHERE id = :meterId "
+            "AND version_uuid = :originalVersionUuid "
             "AND ("
                 "name IS NOT :name "
                 "OR serial_number IS NOT :serial "
@@ -252,31 +346,33 @@ bool MeterDialog::updateMeter()
                 "OR manufacture_year IS NOT :manufactureYear "
                 "OR note IS NOT :note);");
 
+    query.bindValue(":name", name);
+    query.bindValue(":serial", serial);
+    query.bindValue(":accuracy", accuracy);
+    query.bindValue(":verificationYear", verificationYear);
+    query.bindValue(":manufacturer", manufacturer);
+    query.bindValue(":manufactureYear", manufacturerYear);
+    query.bindValue(":note", note);
     query.bindValue(":versionUuid", UuidUtils::generate());
-    query.bindValue(":name", ui->nameLineEdit->text().trimmed());
-    query.bindValue(":serial", ui->serialLineEdit->text().trimmed());
-    query.bindValue(":accuracy", ui->accuracyLineEdit->text().trimmed());
-    query.bindValue(":verificationYear", ui->verificationYearSpinBox->value());
-    query.bindValue(":manufacturer", ui->manufacturerLineEdit->text().trimmed());
-    if (ui->manufactureYearSpinBox->value() == 1900)
-    {
-        query.bindValue(":manufactureYear", QVariant());
-    }
-    else
-    {
-        query.bindValue(
-            ":manufactureYear", ui->manufactureYearSpinBox->value());
-    }
-
-    query.bindValue(":note", ui->notePlainTextEdit->toPlainText().trimmed());
-
     query.bindValue(":meterId", m_meterId);
+    query.bindValue(":originalVersionUuid", m_originalVersionUuid);
 
     if (!query.exec())
     {
         QMessageBox::critical(this, "Ошибка базы данных",
             "Не удалось изменить прибор учёта:\n" +
             query.lastError().text());
+
+        return false;
+    }
+
+    // Проверяем успешность
+    if (query.numRowsAffected() != 1)
+    {
+        QMessageBox::warning(this, "Конфликт изменений",
+            "Не удалось сохранить прибор учёта.\n\n"
+            "Возможно, запись была изменена или удалена "
+            "другим пользователем.");
 
         return false;
     }

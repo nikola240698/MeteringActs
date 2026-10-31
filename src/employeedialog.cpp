@@ -94,7 +94,7 @@ void EmployeeDialog::loadEmployee()
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
-        "SELECT short_name, position "
+        "SELECT short_name, position, version_uuid "
         "FROM employees "
         "WHERE id = :id;");
 
@@ -124,6 +124,10 @@ void EmployeeDialog::loadEmployee()
 
     ui->positionLineEdit->setText(
         query.value("position").toString());
+
+    m_originalVersionUuid = query.value("version_uuid").toString();
+
+    qDebug() << "Original employee version UUID: " << m_originalVersionUuid;
 }
 
 bool EmployeeDialog::insertEmployee()
@@ -159,6 +163,56 @@ bool EmployeeDialog::insertEmployee()
 
 bool EmployeeDialog::updateEmployee()
 {
+    // Проверяем что изменения были внесены
+    const QString shortName =
+        ui->shortNameLineEdit->text().trimmed();
+
+    const QString position =
+        ui->positionLineEdit->text().trimmed();
+
+    QSqlQuery currentQuery(m_database.getDatabase());
+
+    currentQuery.prepare(
+        "SELECT short_name, position, version_uuid "
+        "FROM employees "
+        "WHERE id = :id;");
+
+    currentQuery.bindValue(":id", m_employeeId);
+
+    if (!currentQuery.exec())
+    {
+        QMessageBox::critical(this, "Ошибка",
+            "Не удалось проверить сотрудника.\n\n"
+            + currentQuery.lastError().text());
+
+        return false;
+    }
+
+    if (!currentQuery.next())
+    {
+        QMessageBox::warning(this, "Ошибка",
+            "Сотрудник больше не существует.");
+
+        return false;
+    }
+
+    if (currentQuery.value("version_uuid").toString() !=
+        m_originalVersionUuid)
+    {
+        QMessageBox::warning(this, "Конфликт изменений",
+            "Данные сотрудника были изменены после открытия окна.\n"
+            "Ваши изменения не сохранены.");
+
+        return false;
+    }
+
+    // Если данные не изменились, обновлять запись не нужно
+    if (currentQuery.value("short_name").toString() == shortName &&
+        currentQuery.value("position").toString() == position)
+    {
+        return true;
+    }
+
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
@@ -167,6 +221,7 @@ bool EmployeeDialog::updateEmployee()
             "position = :position, "
             "version_uuid = :versionUuid "
         "WHERE id = :id "
+            "AND version_uuid = :originalVersionUuid "
             "AND ("
                 "short_name IS NOT :shortName "
                 "OR position IS NOT :position);");
@@ -181,11 +236,24 @@ bool EmployeeDialog::updateEmployee()
 
     query.bindValue(":id", m_employeeId);
 
+    query.bindValue(":originalVersionUuid", m_originalVersionUuid);
+
     if (!query.exec())
     {
         QMessageBox::critical(this, "Ошибка",
             "Не удалось изменить сотрудника:\n" +
             query.lastError().text());
+
+        return false;
+    }
+
+    // Проверяем успешность
+    if (query.numRowsAffected() != 1)
+    {
+        QMessageBox::warning(this, "Конфликт изменений",
+            "Не удалось сохранить изменение сотрудника.\n\n"
+            "Возможно, запись была изменена или удалена "
+            "другим пользователем.");
 
         return false;
     }

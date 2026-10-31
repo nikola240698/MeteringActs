@@ -829,6 +829,11 @@ bool CreateActWidget::updateAct()
     if (!validateForm())
         return false;
 
+    // Проверяем, не изменился ли акт после открытия
+    if (!checkActVersion())
+        return false;
+
+    // Получаем данные акта для сохранения
     ActRepository repository(m_database);
     ActData original;
 
@@ -841,11 +846,23 @@ bool CreateActWidget::updateAct()
         return false;
     }
 
+    // Получаем данные текущего акта
     const ActData current = collectActData();
-
+    // Проверяем, изменился ли акт по сравнению с записей в БД
     const bool changed = hasActChanges(original, current);
 
     qDebug() << "Act changed: " << changed;
+
+    // В случае отсутствия изменений пропускаем обновление БД
+    if (!changed)
+    {
+        qDebug() << "Act has no changes. Skipping database update.";
+
+        // Отправляем сигнал о завершении обновления
+        emit actUpdated();
+        return true;
+    }
+
 
     if (!m_database.transaction())
     {
@@ -977,8 +994,12 @@ bool CreateActWidget::updateAct()
         return false;
     }
 
+    // Транзакция успешно завершена
     QMessageBox::information(this, "Акт обновлён",
         "Изменения успешно сохранены.");
+
+    // Уведомляем остальные окна только после успешного сохранения
+    emit actUpdated();
 
     return true;
 }
@@ -1090,7 +1111,8 @@ bool CreateActWidget::updateActMainData()
         "seal_number = :sealNumber, "
         "replacement_duration_minutes = :replacementDuration, "
         "work_schedule_type = :workScheduleType "
-        "WHERE id = :actId;");
+        "WHERE id = :actId "
+        "AND version_uuid = :originalVersionUuid;");
 
     query.bindValue(":versionUuid", UuidUtils::generate());
 
@@ -1111,11 +1133,22 @@ bool CreateActWidget::updateActMainData()
     query.bindValue(":workScheduleType", workScheduleType);
 
     query.bindValue(":actId", m_editActId);
+    query.bindValue(":originalVersionUuid", m_originalVersionUuid);
 
     if (!query.exec())
     {
         QMessageBox::critical(this, "Ошибка базы данных",
             "Не удалось обновить акт: " + query.lastError().text());
+
+        return false;
+    }
+
+    // Проверяем, что акт не был изменен кем-то во время наших изменений
+    if (query.numRowsAffected() != 1)
+    {
+        QMessageBox::warning(this, "Конфликт версий",
+            "Акт был изменён или удалён другим экземпляром программы.\n\n"
+            "Сохранение отменено. Закройте окно и откройте акт заново.");
 
         return false;
     }
@@ -1188,8 +1221,6 @@ bool CreateActWidget::updateActMainData()
             return false;
         }
     }
-
-    emit actUpdated();
 
     return true;
 }
@@ -2138,6 +2169,9 @@ void CreateActWidget::loadActForEditing(int actId)
 
     qDebug() << "Editing act: " << data.id;
 
+    m_originalVersionUuid = data.versionUUid;
+    qDebug() << "Original act version UUID: " << m_originalVersionUuid;
+
     // Загружаем тип акта
     const int actTypeIndex =
         ui->actTypeComboBox->findData(data.actTypeId);
@@ -2590,6 +2624,51 @@ bool CreateActWidget::hasActChanges(const ActData &original, const ActData &curr
     }
 
     return false;
+}
+
+bool CreateActWidget::checkActVersion()
+{
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "SELECT version_uuid "
+        "FROM acts "
+        "WHERE id = :actId;");
+
+    query.bindValue(":actId", m_editActId);
+
+    if (!query.exec())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось проверить версию акта:\n"
+            + query.lastError().text());
+
+        return false;
+    }
+
+    if (!query.next())
+    {
+        QMessageBox::warning(this, "Акт не найден",
+            "Акт был удален из базы данных.");
+
+        return false;
+    }
+
+    const QString currentVersionUuid =
+        query.value("version_uuid").toString();
+
+    if (currentVersionUuid != m_originalVersionUuid)
+    {
+        QMessageBox::warning(this, "Конфликт версий",
+            "Этот акт был изменён после открытия окна редактирования.\n\n"
+            "Чтобы избежать потери данных, сохранение отменено.\n"
+            "Закройте окно и откройте акт заново.");
+
+        return false;
+    }
+
+
+    return true;
 }
 
 

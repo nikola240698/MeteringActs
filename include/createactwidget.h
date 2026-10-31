@@ -92,6 +92,7 @@ private:
     // Поля для работы акта в режиме создания
     Mode m_mode = Mode::Create;
     int m_editActId = -1;
+    QString m_originalVersionUuid;
 
     // Коллекция для сторонних представителей
     QList<ExternalRepresentativeWidget *> m_externalRepresentativeWidgets;
@@ -175,6 +176,9 @@ private:
 
     // Проверяем, что акт реально изменился
     bool hasActChanges(const ActData &original, const ActData &current) const;
+
+    // Проверка, совпадает ли версия акта с исходной
+    bool checkActVersion();
 
 };
 

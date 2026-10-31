@@ -167,6 +167,55 @@ bool ConnectionDialog::updateConnection()
     const QString name =
         ui->nameLineEdit->text().trimmed();
 
+    // Проверяем что присоединение существует и не изменился
+    const double voltage = ui->voltageDoubleSpinBox->value();
+    const QString ctRatio = ui->ctRatioLineEdit->text().trimmed();
+
+    QSqlQuery currentQuery(m_database.getDatabase());
+
+    currentQuery.prepare(
+        "SELECT name, voltage_kv, ct_ratio, version_uuid "
+        "FROM connections "
+        "WHERE id = :connectionId "
+        "AND substation_id = :substationId;");
+
+    currentQuery.bindValue(":connectionId", m_connectionId);
+    currentQuery.bindValue(":substationId", m_substationId);
+
+    if (!currentQuery.exec())
+    {
+        QMessageBox::critical(this, "Ошибка",
+            "Не удалось проверить присоединение.\n\n"
+            + currentQuery.lastError().text());
+
+        return false;
+    }
+
+    if (!currentQuery.next())
+    {
+        QMessageBox::warning(this, "Ошибка",
+            "Присоединения больше не существует.");
+
+        return false;
+    }
+
+    if (currentQuery.value("version_uuid").toString() !=
+        m_originalVersionUuid)
+    {
+        QMessageBox::warning(this, "Конфликт изменений",
+            "Присоединение было изменено после открытия окна.\n"
+            "Ваши изменения не сохранены.");
+
+        return false;
+    }
+
+    if (currentQuery.value("name").toString() == name &&
+        currentQuery.value("voltage_kv").toDouble() == voltage &&
+        currentQuery.value("ct_ratio").toString() == ctRatio)
+    {
+        return true;
+    }
+
     // Проверяем, что измененное имя не встречается уже в БД
     QSqlQuery checkQuery(m_database.getDatabase());
 
@@ -205,14 +254,7 @@ bool ConnectionDialog::updateConnection()
         return false;
     }
 
-
-
-    const double voltage =
-        ui->voltageDoubleSpinBox->value();
-
-    const QString ctRatio =
-        ui->ctRatioLineEdit->text().trimmed();
-
+    // Обновляем данные в БД
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
@@ -223,6 +265,7 @@ bool ConnectionDialog::updateConnection()
             "version_uuid = :versionUuid "
         "WHERE id = :connectionId "
             "AND substation_id = :substationId "
+            "AND version_uuid = :originalVersionUuid "
             "AND ("
                 "name IS NOT :name "
                 "OR voltage_kv IS NOT :voltage "
@@ -239,12 +282,24 @@ bool ConnectionDialog::updateConnection()
 
     query.bindValue(":connectionId", m_connectionId);
     query.bindValue(":substationId", m_substationId);
+    query.bindValue(":originalVersionUuid", m_originalVersionUuid);
 
     if (!query.exec())
     {
         QMessageBox::critical(this, "Ошибка",
             "Не удалось изменить присоединение.\n\n" +
             query.lastError().text());
+
+        return false;
+    }
+
+    // Проверяем успешность
+    if (query.numRowsAffected() != 1)
+    {
+        QMessageBox::warning(this, "Конфликт изменений",
+            "Не удалось сохранить присоединение.\n\n"
+            "Возможно, оно было изменено или удалено "
+            "другим пользователем.");
 
         return false;
     }
@@ -257,7 +312,7 @@ void ConnectionDialog::loadConnection()
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
-        "SELECT name, voltage_kv, ct_ratio "
+        "SELECT name, voltage_kv, ct_ratio, version_uuid "
         "FROM connections "
         "WHERE id = :connectionId "
         "AND substation_id = :substationId");
@@ -294,6 +349,11 @@ void ConnectionDialog::loadConnection()
 
     ui->ctRatioLineEdit->setText(
         query.value("ct_ratio").toString());
+
+    // Получаем текущую UUID
+    m_originalVersionUuid = query.value("version_uuid").toString();
+
+    qDebug() << "Original connection version UUID: " << m_originalVersionUuid;
 }
 
 

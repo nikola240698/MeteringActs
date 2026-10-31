@@ -85,6 +85,9 @@ enum WorkScheduleType
 struct ActData
 {
     int id = -1;
+
+    QString versionUUid;
+
     int actTypeId = -1;
 
     QString actTypeName;

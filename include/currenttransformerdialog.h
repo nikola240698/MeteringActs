@@ -44,6 +44,9 @@ private:
     int m_currentTransformerId = -1;
     int m_editCurrentTransformerId = -1;
 
+    // Запоминаем текущий UUID
+    QString m_originalVersionUuid;
+
     bool validateForm();
     bool saveCurrentTransformer();
 

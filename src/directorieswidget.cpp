@@ -13,7 +13,7 @@
 #include "connectiondialog.h"
 #include "employeedialog.h"
 #include "uuidutils.h"
-#include "uuidutils.h"
+
 
 
 DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
@@ -594,6 +594,9 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
             const bool isActive =
                 m_employeesModel->index(row, 4).data().toBool();
 
+            const QString originalVersionUuid =
+                m_employeesModel->index(row, 5).data().toString();
+
             const QString question = isActive
                 ? QString("Перевести сотрудника \"%1\" в неактивные?")
                     .arg(employeeName)
@@ -615,12 +618,14 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
                 "UPDATE employees "
                 "SET is_active = :isActive, "
                     "version_uuid = :versionUuid "
-                "WHERE id = :employeeId"
+                "WHERE id = :employeeId "
+                    "AND version_uuid = :originalVersionUuid "
                     "AND is_active IS NOT :isActive;");
 
             query.bindValue(":isActive", isActive ? 0 : 1);
             query.bindValue(":versionUuid", UuidUtils::generate());
             query.bindValue(":employeeId", employeeId);
+            query.bindValue(":originalVersionUuid", originalVersionUuid);
 
             if (!query.exec())
             {
@@ -628,6 +633,18 @@ DirectoriesWidget::DirectoriesWidget(Database &database, QWidget *parent)
                     "Не удалось изменить статус сотрудника.\n\n" +
                     query.lastError().text());
 
+                return;
+            }
+
+            // Проверяем успешность
+            if (query.numRowsAffected() != 1)
+            {
+                QMessageBox::warning(this, "Конфликт изменений",
+                    "Статус сотрудника не изменён.\n\n"
+                    "Возможно, данные сотрудника были изменены "
+                    "после занпзуки списка.");
+
+                loadEmployees();
                 return;
             }
 
@@ -1143,7 +1160,8 @@ void DirectoriesWidget::loadEmployees()
                 "WHEN is_active = 1 THEN 'Работает' "
                 "ELSE 'Не работает' "
             "END AS status, "
-            "is_active "
+            "is_active, "
+            "version_uuid "
         "FROM employees "
         "ORDER BY is_active DESC, short_name;");
     if (!query.exec())
@@ -1174,6 +1192,7 @@ void DirectoriesWidget::loadEmployees()
 
     ui->employeesTableView->hideColumn(0);
     ui->employeesTableView->hideColumn(4);
+    ui->employeesTableView->hideColumn(5);
 
     ui->employeesTableView->clearSelection();
     ui->employeesTableView->setCurrentIndex(QModelIndex());

@@ -39,6 +39,9 @@ private:
     int m_substationId = -1;
     int m_connectionId = -1;
 
+    // Строка для запоминания версии uuid
+    QString m_originalVersionUuid;
+
     bool save();
     bool insertConnection();
     bool updateConnection();

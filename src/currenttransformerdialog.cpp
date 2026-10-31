@@ -228,7 +228,8 @@ bool CurrentTransformerDialog::loadCurrentTransformer()
         "accuracy_class, "
         "manufacturer, "
         "manufacture_year, "
-        "note "
+        "note, "
+        "version_uuid "
         "FROM current_transformers "
         "WHERE id = :id;");
 
@@ -265,6 +266,11 @@ bool CurrentTransformerDialog::loadCurrentTransformer()
     ui->notePlainTextEdit->setPlainText(
         query.value("note").toString());
 
+    m_originalVersionUuid = query.value("version_uuid").toString();
+
+    qDebug() << "Original current transformer version UUID:" <<
+        m_originalVersionUuid;
+
     m_currentTransformerId = m_editCurrentTransformerId;
 
     return true;
@@ -275,31 +281,87 @@ bool CurrentTransformerDialog::updateCurrentTransformer()
     if (!validateForm())
         return false;
 
-    const QString name =
-        ui->nameLineEdit->text().trimmed();
-
-    const QString serialNumber =
-        ui->serialLineEdit->text().trimmed();
-
+    const QString name = ui->nameLineEdit->text().trimmed();
+    const QString serialNumber = ui->serialLineEdit->text().trimmed();
     const QString transformationRatio =
         ui->tranformationRatioLineEdit->text().trimmed();
+    const QString accuracyClass = ui->accuracyClassLineEdit->text().trimmed();
+    const QString manufacturer = ui->manufacturerLineEdit->text().trimmed();
 
-    const QString accuracyClass =
-        ui->accuracyClassLineEdit->text().trimmed();
-
-    const QString manufacturer =
-        ui->manufacturerLineEdit->text().trimmed();
-
-    const int manufactureYear =
-        ui->manufactureYearSpinBox->value();
+    const QVariant manufactureYear =
+        ui->manufactureYearSpinBox->value() == 1900 ?
+            QVariant() : QVariant(ui->manufactureYearSpinBox->value());
 
     const QString note =
         ui->notePlainTextEdit->toPlainText().trimmed();
 
+    // Получаем текущую запись
+    QSqlQuery currentQuery(m_database.getDatabase());
+
+    currentQuery.prepare(
+        "SELECT name, serial_number, transformation_ratio, "
+        "accuracy_class, manufacturer, manufacture_year, "
+        "note, version_uuid "
+        "FROM current_transformers "
+        "WHERE id = :id;");
+
+    currentQuery.bindValue(":id", m_editCurrentTransformerId);
+
+    if (!currentQuery.exec())
+    {
+        QMessageBox::critical(this, "Ошибка",
+            "Не удалось проверить трансформатор тока:\n\n"
+            + currentQuery.lastError().text());
+
+        return false;
+    }
+
+    if (!currentQuery.next())
+    {
+        QMessageBox::warning(this, "Ошибка",
+            "Nрансформатор тока больше не существует.");
+
+        return false;
+    }
+
+    // Проверяем исхоодную версию
+    if (currentQuery.value("version_uuid").toString() !=
+        m_originalVersionUuid)
+    {
+        QMessageBox::warning(this, "Конфликт изменений",
+            "Трансформатор тока был изменён после открытия окна.\n"
+            "Ваши изменения не сохранены.");
+
+        return false;
+    }
+
+    // Сравниваем год выпуска с учётом NULL
+    const QVariant storedYear =
+        currentQuery.value("manufacture_year");
+
+    const bool yearChanged =
+        storedYear.isNull() != manufactureYear.isNull() ||
+        (!manufactureYear.isNull() &&
+        storedYear.toInt() != manufactureYear.toInt());
+
+    // Проверяем реальные изменения
+    const bool hasChanged =
+        currentQuery.value("name").toString() != name ||
+        currentQuery.value("serial_number").toString() != serialNumber ||
+        currentQuery.value("transformation_ratio").toString() !=
+            transformationRatio ||
+        currentQuery.value("accuracy_class").toString() != accuracyClass ||
+        currentQuery.value("manufacturer").toString() != manufacturer ||
+        currentQuery.value("note").toString() != note;
+
+    if (!hasChanged)
+        return true;
+
+    // Проверка уникальности заводского номера
     if (serialNumberExists(serialNumber, m_editCurrentTransformerId))
     {
         QMessageBox::warning(this, "Ошибка заполнения",
-            "Трансформатор тока с заводским нмоером "
+            "Трансформатор тока с заводским номером "
             + serialNumber +
             " уже существует.");
 
@@ -309,6 +371,7 @@ bool CurrentTransformerDialog::updateCurrentTransformer()
         return false;
     }
 
+    // ОБновляем только исходную версию записи
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
@@ -322,6 +385,7 @@ bool CurrentTransformerDialog::updateCurrentTransformer()
             "note = :note, "
             "version_uuid = :versionUuid "
         "WHERE id = :id "
+            "AND version_uuid = :originalVersionUuid "
             "AND ("
                 "name IS NOT :name "
                 "OR serial_number IS NOT :serialNumber "
@@ -331,31 +395,33 @@ bool CurrentTransformerDialog::updateCurrentTransformer()
                 "OR manufacture_year IS NOT :manufactureYear "
                 "OR note IS NOT :note);");
 
-    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":name", name);
     query.bindValue(":serialNumber", serialNumber);
     query.bindValue(":transformationRatio", transformationRatio);
     query.bindValue(":accuracyClass", accuracyClass);
     query.bindValue(":manufacturer", manufacturer);
-
-    if (manufactureYear == 1900)
-    {
-        query.bindValue(":manufactureYear", QVariant());
-    }
-    else
-    {
-        query.bindValue(":manufactureYear", manufactureYear);
-    }
-
+    query.bindValue(":manufactureYear", manufactureYear);
     query.bindValue(":note", note);
-
+    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":id", m_editCurrentTransformerId);
+    query.bindValue(":originalVersionUuid", m_originalVersionUuid);
 
     if (!query.exec())
     {
         QMessageBox::critical(this, "Ошибка базы данных",
             "Не удалось изменить трансформаторы тока: "
             + query.lastError().text());
+
+        return false;
+    }
+
+    // Проверяем успешность
+    if (query.numRowsAffected() != 1)
+    {
+        QMessageBox::warning(this, "Конфликт изменений",
+            "Не удалось сохранить трансформатор тока.\n\n"
+            "Возможно, запись была изменена или удалена "
+            "другим пользователем.");
 
         return false;
     }

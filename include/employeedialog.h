@@ -42,6 +42,9 @@ private:
     int m_employeeId = -1;
     bool m_editMode = false;
 
+    // Запоминаем наш текущий UUID
+    QString m_originalVersionUuid;
+
     // метод подключения кнопок
     void setupConnections();
     void loadEmployee();

@@ -92,6 +92,49 @@ bool AreaDialog::updateArea()
 {
     const QString name = ui->nameLineEdit->text().trimmed();
 
+    // Проверяем, что изменения были внесены
+    QSqlQuery checkQuery(m_database.getDatabase());
+
+    checkQuery.prepare(
+        "SELECT name, version_uuid "
+        "FROM areas "
+        "WHERE id = :areaId;");
+
+    checkQuery.bindValue(":areaId", m_areaId);
+
+    if (!checkQuery.exec())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось проверить участок:\n "
+            + checkQuery.lastError().text());
+
+        return false;
+    }
+
+    if (!checkQuery.next())
+    {
+        QMessageBox::warning(this, "Участок не найден",
+            "Участок был удален");
+
+        return false;
+    }
+
+    if (checkQuery.value("version_uuid").toString() !=
+        m_originalVersionUuid)
+    {
+        QMessageBox::warning(this, "Конфликт версий",
+            "Участок был изменен после открытия окна.\n"
+            "Закройте окно и откройте участок заново.");
+
+        return false;
+    }
+
+    if (checkQuery.value("name").toString() == name)
+    {
+        return true;
+    }
+
+    // Если изменения есть, то одновляем данные
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
@@ -99,11 +142,13 @@ bool AreaDialog::updateArea()
         "SET name = :name, "
             "version_uuid = :versionUuid "
         "WHERE id = :areaId "
+            "AND version_uuid = :originalVersionUuid "
             "AND name IS NOT :name;");
 
     query.bindValue(":name", name);
     query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":areaId", m_areaId);
+    query.bindValue(":originalVersionUuid", m_originalVersionUuid);
 
     if (!query.exec())
     {
@@ -113,7 +158,24 @@ bool AreaDialog::updateArea()
         return false;
     }
 
-    return true;
+    if (query.numRowsAffected() == 1)
+    {
+        return true;
+    }
+
+    if (query.numRowsAffected() == 0)
+    {
+        QMessageBox::warning(this, "Конфликт версий",
+            "Участок был изменён или удалён другим экземпляром программы.\n\n"
+            "Сохранение отменено. Закройте окно и откройте участок заново.");
+
+        return false;
+    }
+
+    QMessageBox::critical(this, "Ошибка",
+        "Неожиданное количество обновленных записей.");
+
+    return false;
 }
 
 void AreaDialog::loadArea()
@@ -121,7 +183,7 @@ void AreaDialog::loadArea()
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
-        "SELECT name "
+        "SELECT name, version_uuid "
         "FROM areas "
         "WHERE id = :areaId;");
 
@@ -143,6 +205,10 @@ void AreaDialog::loadArea()
     }
 
     ui->nameLineEdit->setText(query.value("name").toString());
+
+    m_originalVersionUuid = query.value("version_uuid").toString();
+
+    qDebug() << "Original area version UUID: " << m_originalVersionUuid;
 }
 
 

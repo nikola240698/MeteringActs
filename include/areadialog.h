@@ -34,6 +34,9 @@ private:
 
     int m_areaId = -1;
 
+    // Строка для запоминания uuid
+    QString m_originalVersionUuid;
+
     bool save();
     bool insertArea();
     bool updateArea();

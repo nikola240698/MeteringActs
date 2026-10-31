@@ -39,6 +39,9 @@ private:
 
     int m_meterId = -1;
 
+    // Сохраняем текущий UUID
+    QString m_originalVersionUuid;
+
     void loadMeter();
 
 
