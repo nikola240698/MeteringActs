@@ -221,8 +221,20 @@ void MeterActWidget::setData(const ActMeterData &data)
 
     for (const ActMeterReadingData &reading : data.readings)
     {
-        const QString value =
-            locale.toString(reading.value, 'f', 2);
+        QString value = locale.toString(reading.value, 'f', 3);
+
+        // Убираем незначащие нули после запятой,
+        // сохраняя точность до трёх знаков
+        while (value.contains(',') && value.endsWith('0'))
+        {
+            value.chop(1);
+        }
+
+        if (value.endsWith(','))
+        {
+            value.chop(1);
+        }
+
 
         switch (reading.typeId)
         {
@@ -323,6 +335,9 @@ void MeterActWidget::findMeterBySerial()
         ui->meterNameLineEdit->setText(query.value("name").toString());
         ui->accuracyClassLineEdit->setText(query.value("accuracy_class").toString());
         ui->verificationYearLineEdit->setText(query.value("verification_year").toString());
+
+        emit meterSelected();
+
         return;
     }
     // если прибор не найден
@@ -344,6 +359,7 @@ void MeterActWidget::findMeterBySerial()
             loadMeterData(m_meterId);
 
             emit meterCreated();
+            emit meterSelected();
         }
     }
 }

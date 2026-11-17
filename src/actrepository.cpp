@@ -89,14 +89,17 @@ bool ActRepository::loadMainData(int actId, ActData &data)
         "JOIN act_types at "
         "ON at.id = a.act_type_id "
 
-        "JOIN connections c "
-        "ON c.id = a.connection_id "
-
+        // Подстанцию получаем непосредственно из акта,
+        // поскольку у группового акта нет общего присоединения
         "JOIN substations s "
-        "ON s.id = c.substation_id "
+        "ON s.id = a.substation_id "
 
         "JOIN areas ar "
         "ON ar.id = s.area_id "
+
+        // Присоединение необязательно для группового акта
+        "LEFT JOIN connections c "
+        "ON c.id = a.connection_id "
 
         "WHERE a.id = :actId;"
     ))
@@ -140,7 +143,10 @@ bool ActRepository::loadMainData(int actId, ActData &data)
     data.substationId = query.value("substation_id").toInt();
     data.substationName = query.value("substation_name").toString();
 
-    data.connectionId = query.value("connection_id").toInt();
+    // У группового акта общее присоединение отсутствует
+    data.connectionId = query.value("connection_id").isNull()
+        ? -1
+        : query.value("connection_id").toInt();
     data.connectionName = query.value("connection_name").toString();
 
     data.voltage = query.value("connection_voltage_kv").toString();
@@ -176,6 +182,7 @@ bool ActRepository::loadExternalRepresentatives(int actId, ActData &data)
     QSqlQuery query(m_database.getDatabase());
     if (!query.prepare(
         "SELECT "
+        "id, "
         "organization, "
         "short_name, "
         "position "
@@ -209,6 +216,9 @@ bool ActRepository::loadExternalRepresentatives(int actId, ActData &data)
     {
         // создаем структуру представителей
         ExternalRepresentativeData representative;
+
+        representative.id = query.value("id").toInt();
+
         // получаем значения из запроса
         representative.organization = query.value("organization").toString();
         representative.shortName = query.value("short_name").toString();
@@ -230,6 +240,10 @@ bool ActRepository::loadMeters(int actId, ActData &data)
         "id, "
         "meter_id, "
         "role, "
+        "connection_id, "
+        "connection_name, "
+        "connection_voltage_kv, "
+        "connection_ct_ratio, "
         "meter_name, "
         "serial_number, "
         "accuracy_class, "
@@ -265,8 +279,17 @@ bool ActRepository::loadMeters(int actId, ActData &data)
         ActMeterData meter;
         // получаем данные из запроса
         const int actMeterId = query.value("id").toInt();
+        // Сохраняем ID записи прибора в конкретном акте
+        meter.id = actMeterId;
         meter.meterId = query.value("meter_id").toInt();
         meter.role = query.value("role").toInt();
+
+        // Восстанавливаем присоединение и его исторические параметры
+        meter.connectionId = query.value("connection_id").toInt();
+        meter.connectionName = query.value("connection_name").toString();
+        meter.connectionVoltage = query.value("connection_voltage_kv").toString();
+        meter.connectionCtRatio = query.value("connection_ct_ratio").toString();
+
         meter.name = query.value("meter_name").toString();
         meter.serialNumber = query.value("serial_number").toString();
         meter.accuracyClass = query.value("accuracy_class").toString();
@@ -291,6 +314,7 @@ bool ActRepository::loadMeterReadings(int actMeterId, ActMeterData &meter)
     QSqlQuery query(m_database.getDatabase());
     if (!query.prepare(
         "SELECT "
+        "mr.id, "
         "mr.reading_type_id, "
         "rt.code, "
         "mr.value "
@@ -326,6 +350,8 @@ bool ActRepository::loadMeterReadings(int actMeterId, ActMeterData &meter)
     {
         // Создаем нашу структуру
         ActMeterReadingData reading;
+        // Сохраняем ID конкретной записи показания
+        reading.id = query.value("id").toInt();
         // получаем данные из запроса
         reading.typeId = query.value("reading_type_id").toInt();
         reading.code = query.value("code").toString();

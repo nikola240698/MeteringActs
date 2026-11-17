@@ -909,17 +909,35 @@ void DirectoriesWidget::loadConnections(int substationId)
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
-        "SELECT id, name, voltage_kv, ct_ratio "
+        "SELECT "
+        "id, "
+        "CASE connection_type "
+            "WHEN 1 THEN "
+                "'яч.' || printf('%g', voltage_kv) || "
+                "'кВ №' || cell_number || ' \"' || name || '\"' "
+            "WHEN 2 THEN "
+                "'ВЛ-' || printf('%g', voltage_kv) || "
+                "'кВ \"' || name || '\"' "
+            "ELSE name "
+        "END AS display_name, "
+        "voltage_kv, "
+        "CASE "
+            "WHEN ct_secondary_current = 0 THEN 'Прямое включение' "
+            "ELSE CAST(ct_primary_current AS TEXT) || '/' || "
+                 "CAST(ct_secondary_current AS TEXT) "
+        "END AS ct_ratio "
         "FROM connections "
         "WHERE substation_id = :substationId "
-        "ORDER BY name;");
+        "ORDER BY connection_type ASC, "
+        "voltage_kv DESC, cell_number ASC, "
+        "name COLLATE NOCASE ASC;");
 
     query.bindValue(":substationId", substationId);
 
     if (!query.exec())
     {
-        qDebug() << "loadConnections error: " << query.lastError().text();
-
+        qDebug() << "loadConnections error:"
+                 << query.lastError().text();
         return;
     }
 
@@ -941,10 +959,11 @@ void DirectoriesWidget::loadConnections(int substationId)
 void DirectoriesWidget::clearConnections()
 {
     m_rightModel->setQuery(
-        "SELECT id, name, voltage_kv, ct_ratio "
-        "FROM connections "
-        "WHERE 0;",
-        m_database.getDatabase());
+         "SELECT id, name AS display_name, voltage_kv, "
+         "CAST(NULL AS TEXT) AS ct_ratio "
+         "FROM connections "
+         "WHERE 0;",
+     m_database.getDatabase());
 
     setupConnectionsTable();
 

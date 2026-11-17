@@ -45,6 +45,11 @@ private:
     QSqlDatabase db;
     // получаем путь к БД
     QString getDatabasePath() const;
+
+    // Метод управления обновлением версии
+    bool applyMigrations();
+    // Проверяет что база действительно рабочая
+    bool validateLegacySchema();
 };
 
 

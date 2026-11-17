@@ -10,6 +10,9 @@
 // структура показаний прибора учета
 struct ActMeterReadingData
 {
+    // ID записи показания в meter_readings
+    int id = -1;
+
     int typeId = -1;
     QString code;
     double value = 0.0;
@@ -18,8 +21,19 @@ struct ActMeterReadingData
 // структура приборов учета
 struct ActMeterData
 {
+    // ID записи прибора в act_meters
+    int id = -1;
+
     int meterId =-1;
     int role = -1;
+
+    // Присоединение, к которому относится прибор
+    int connectionId = -1;
+
+    // Исторические сведения о присоединении
+    QString connectionName;
+    QString connectionVoltage;
+    QString connectionCtRatio;
 
     QString name;
     QString serialNumber;
@@ -46,6 +60,10 @@ struct ActCurrentTransformerData
 // структура сторонних представителей
 struct ExternalRepresentativeData
 {
+    // ID записи в external_representatives.
+    // -1 означает нового представителя.
+    int id = -1;
+
     QString organization;
     QString shortName;
     QString position;

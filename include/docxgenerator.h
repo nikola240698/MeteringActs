@@ -47,6 +47,11 @@ private:
     bool generateActType1(const ActData &data);
     bool generateActType2(const ActData &data);
     bool generateActType3(const ActData &data);
+
+    // Формирует повторяемые блоки присоединений и приборов учета
+    // для акта снятия показаний
+    bool replaceReadingMeters(const ActData &data);
+
     bool generateActType4(const ActData &data);
     bool generateActType5(const ActData &data);
     bool generateActType6(const ActData &data);

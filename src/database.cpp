@@ -2,8 +2,11 @@
 #include <QSqlQuery>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QDateTime>
+#include <QSet>
 
 #include "database.h"
+#include "databasebackupmanager.h"
 
 // конструктор класса
 Database::Database()
@@ -52,6 +55,15 @@ bool Database::open()
     {
         qDebug() << "Failed to enable foreign keys:";
         qDebug() << query.lastError().text();
+
+        db.close();
+        return false;
+    }
+
+    // Подключаем миграцию при открытии базы
+    if (!applyMigrations())
+    {
+        qCritical() << "Failed to apply database migrations.";
 
         db.close();
         return false;
@@ -227,6 +239,19 @@ bool Database::createDatabase(const QString &path)
         return false;
     }
 
+    // Устанавливаем версию для новой базы
+    if (!query.exec("PRAGMA user_version = 1;"))
+    {
+        qCritical() << "Failed to set database schema version: " <<
+            query.lastError().text();
+
+        db.rollback();
+        db.close();
+
+        QFile::remove(path);
+        return false;
+    }
+
     if (!db.commit())
     {
         qDebug() << "Failed to commit database schema:"
@@ -263,6 +288,209 @@ QString Database::getDatabasePath() const
             QStandardPaths::AppLocalDataLocation);
 
     return QDir(dataDirectory).filePath("meteringacts.db");
+}
+
+bool Database::applyMigrations()
+{
+    constexpr int CURRENT_SCHEMA_VERSION = 1;
+
+    QSqlQuery query(db);
+
+    if (!query.exec("PRAGMA user_version;") || !query.next())
+    {
+        qCritical() << "Cannot read database schema version: "
+            << query.lastError().text();
+
+        return false;
+    }
+
+    const int version = query.value(0).toInt();
+
+    qDebug() << "Database schema version: " << version;
+
+    if (version > CURRENT_SCHEMA_VERSION)
+    {
+        qCritical() << "Database is newer than application supports.";
+        return false;
+    }
+
+    if (version == CURRENT_SCHEMA_VERSION)
+    {
+        return true;
+    }
+
+    if (version != 0)
+    {
+        qCritical() << "Unsupported legacy schema version: " << version;
+
+        return false;
+    }
+
+    if (!validateLegacySchema())
+    {
+        qCritical() << "Legacy database schema validation failed.";
+        return false;
+    }
+
+    // Проверяем целостность перед миграцией.
+    QSqlQuery integrityQuery(db);
+
+    if (!integrityQuery.exec("PRAGMA integrity_check;") ||
+        !integrityQuery.next() ||
+        integrityQuery.value(0).toString() != "ok")
+    {
+        qCritical() << "Database integrity check failed.";
+
+        return false;
+    }
+
+    QSqlQuery foreignKeyQuery(db);
+
+    if (!foreignKeyQuery.exec("PRAGMA foreign_key_check;"))
+    {
+        qCritical() << "Foreign key check failed: " <<
+            foreignKeyQuery.lastError().text();
+
+        return false;
+    }
+
+    if (foreignKeyQuery.next())
+    {
+        qCritical() << "Foreign key violations detected.";
+
+        return false;
+    }
+
+    // Завершаем активные SQL-запросы перед VACUUM INTO
+    query.finish();
+    integrityQuery.finish();
+    foreignKeyQuery.finish();
+
+    // Создаем страховочную копию
+    const QFileInfo databaseInfo(databasePath());
+
+    const QString backupDirectory =
+        databaseInfo.dir().filePath("backups");
+
+    DatabaseBackupManager backupManager(*this);
+
+    QString backupPath;
+
+    if (!backupManager.createBackup(
+        backupDirectory,
+        backupPath,
+        DatabaseBackupManager::BackupType::Safety))
+    {
+        qCritical() << "Migration backup failed: " <<
+            backupManager.lastError();
+
+        return false;
+    }
+
+    if (!backupManager.validateBackup(backupPath))
+    {
+        qCritical() << "Migration backup validation failed: " <<
+            backupManager.lastError();
+
+        return false;
+    }
+
+    qDebug() << "Migration safety backup: " << backupPath;
+
+    // Обновляем версию атомарно
+    if (!db.transaction())
+    {
+        qCritical() << "Cannot start migration transaction: " <<
+            db.lastError().text();
+
+        return false;
+    }
+
+    QSqlQuery migrationQuery(db);
+
+    if (!migrationQuery.exec("PRAGMA user_version = 1;"))
+    {
+        qCritical() << "Cannot update schema version: " <<
+            migrationQuery.lastError().text();
+
+        db.rollback();
+        return false;
+    }
+
+    if (!db.commit())
+    {
+        qCritical() << "Cannot commit migration: " <<
+            db.lastError().text();
+
+        db.rollback();
+        return false;
+    }
+
+    qDebug() << "Database schema migrated to version 1.";
+
+    return true;
+}
+
+
+
+bool Database::validateLegacySchema()
+{
+    const QMap<QString, QStringList> requiredColumns = {
+        {"areas", {"id", "uuid", "version_uuid", "name"}},
+        {"substations", {"id", "uuid", "version_uuid",
+                         "area_id", "name"}},
+        {"connections", {"id", "uuid", "version_uuid",
+                         "substation_id", "name"}},
+        {"employees", {"id", "uuid", "version_uuid",
+                       "short_name", "position", "is_active"}},
+        {"meters", {"id", "uuid", "version_uuid",
+                    "name", "serial_number"}},
+        {"current_transformers", {"id", "uuid", "version_uuid",
+                                  "name", "serial_number"}},
+        {"acts", {"id", "uuid", "version_uuid",
+                  "act_type_id", "connection_id"}},
+        {"act_meters", {"id", "act_id", "meter_id"}},
+        {"meter_readings", {"id", "act_meter_id", "reading_type_id"}},
+        {"vector_diagrams", {"id", "act_id"}},
+        {"external_representatives", {"id", "act_id"}},
+        {"act_current_transformers",
+            {"id", "act_id", "current_transformer_id"}},
+        {"act_types", {"id", "name"}},
+        {"reading_types", {"id", "name", "code"}}
+    };
+
+    for (auto it = requiredColumns.cbegin(); it != requiredColumns.cend(); ++it)
+    {
+        QSqlQuery query(db);
+
+        if (!query.exec(
+            QString("PRAGMA table_info(\"%1\");").arg(it.key())))
+        {
+            qCritical() << "Cannot inspect table: " << it.key()
+                << query.lastError().text();
+            return false;
+        }
+
+        QSet<QString> existingColumns;
+
+        while (query.next())
+        {
+            existingColumns.insert((
+                query.value(1).toString()));
+        }
+
+        for (const QString &column : it.value())
+        {
+            if (!existingColumns.contains(column))
+            {
+                qCritical() << "Missing column: " << it.key() << column;
+
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 

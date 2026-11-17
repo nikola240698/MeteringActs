@@ -15,6 +15,7 @@
 #include "meteractwidget.h"
 #include "externalrepresentativewidget.h"
 #include "vectordiagramwidget.h"
+#include "readingconnectionwidget.h"
 
 class CurrentTransformerPhasePanel;
 
@@ -97,6 +98,8 @@ private:
     // Коллекция для сторонних представителей
     QList<ExternalRepresentativeWidget *> m_externalRepresentativeWidgets;
 
+    QList<ReadingConnectionWidget*> m_readingConnectionWidgets;
+
     // метод загрузки типов актов
     void loadActTypes() const;
     // метод загрузки всех ЛПУ
@@ -124,8 +127,26 @@ private:
     bool deleteActDetails();
     // метод сохранения параметров акта
     int insertAct();
-    // метод вставки прибора с привязкой к акту
-    int insertActMeter(int actId, const MeterActWidget* meterWidget, int role);
+
+    // Сохраняет прибор и исторические данные его присоединения
+    int insertActMeter(
+        int actId,
+        const MeterActWidget* meterWidget,
+        int role,
+        int connectionId = -1
+    );
+
+    // Сохраняет приборы и показания всех карточек группового акта
+    bool insertReadingConnections(int actId);
+
+    // Обновляет существующие приборы и показания
+    bool updateReadingConnections(const ActData &original);
+
+    // Обновляет сторонних представителей с учётом исходных данных акта.
+    bool updateExternalRepresentatives(const ActData &original);
+
+    bool validateOriginalReadingConnections(const ActData &original);
+
     // метод вставки показаний с привязкой к прибору
     bool insertReadings(int actMeterId, MeterActWidget* meterWidget);
     // метод обновления актуального года поверки прибора
@@ -179,6 +200,21 @@ private:
 
     // Проверка, совпадает ли версия акта с исходной
     bool checkActVersion();
+
+    // Метод для обновления виджетов при снятии показаний
+    void updateReadingWidgets();
+
+    // Метод удаления виджета снятия показаний
+    void removeReadingWidget(ReadingConnectionWidget *widget);
+
+    void updateAvailableConnections();
+
+    bool validateReadingConnections();
+
+    void scrollToReadingWidget(ReadingConnectionWidget *widget);
+
+    bool validateUniqueMeters();
+
 
 };
 

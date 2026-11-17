@@ -31,6 +31,9 @@ public:
     QString position() const;
     QString shortName() const;
 
+    // Возвращает идентификатор записи представителя в акте.
+    int id() const;
+
     bool validate();
 
     // Загрузка данных для редактирования акта
@@ -42,6 +45,10 @@ signals:
 
 private:
     Ui::ExternalRepresentativeWidget *ui;
+
+    // Идентификатор записи в external_representatives.
+    // Для нового представителя равен -1.
+    int m_id = -1;
 };
 
 

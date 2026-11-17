@@ -347,20 +347,47 @@ bool DocxGenerator::generate(const ActData &data, const QString &outputPath)
     {
         return false;
     }
-    if (!replacePlaceholder(
-        "connection_name", data.connectionName))
+
+    // Для снятия показаний сведения о присоединениях
+    // заполняются отдельно внутри повторяемого блока.
+    // Остальные типы актов обрабатываем как раньше.
+    if (data.actTypeId != 3)
     {
-        return false;
+        if (!replacePlaceholder(
+            "connection_name", data.connectionName))
+            return false;
+
+        if (!replacePlaceholder(
+            "voltage", data.voltage))
+            return false;
+
+        if (!replacePlaceholder(
+            "ct_ratio", data.ctRatio))
+            return false;
     }
-    if (!replacePlaceholder(
-        "voltage", data.voltage))
+    else
     {
-        return false;
-    }
-    if (!replacePlaceholder(
-        "ct_ratio", data.ctRatio))
-    {
-        return false;
+        // Напряжение для снятия показаний указываем один раз
+        // в общей части документа.
+        QString voltage = data.voltage;
+
+        if (voltage.isEmpty())
+        {
+            // Для группового акта используем сохраненное
+            // напряжение первого присоединения.
+            for (const ActMeterData &meter : data.meters)
+            {
+                if (meter.role == 4 &&
+                    !meter.connectionVoltage.isEmpty())
+                {
+                    voltage = meter.connectionVoltage;
+                    break;
+                }
+            }
+        }
+
+        if (!replacePlaceholder("voltage", voltage))
+            return false;
     }
 
     if (!replacePlaceholder(
@@ -606,13 +633,12 @@ bool DocxGenerator::generateActType2(const ActData &data)
 
 bool DocxGenerator::generateActType3(const ActData &data)
 {
-    constexpr int ReadingMeterRole = 4;
-
-    if (!replaceMeterData(data, ReadingMeterRole))
-    {
+    // Формируем блоки присоединений и приборов учета
+    // с сохраненными показаниями для каждого прибора
+    if (!replaceReadingMeters(data))
         return false;
-    }
 
+    // Заполняем номер пломбы в общей части акта
     if (!replacePlaceholder(
         "seal_number", data.sealNumber))
     {
@@ -620,6 +646,214 @@ bool DocxGenerator::generateActType3(const ActData &data)
     }
 
     return true;
+}
+
+bool DocxGenerator::replaceReadingMeters(const ActData &data)
+{
+    constexpr int ReadingMeterRole = 4;
+
+    // Загружаем XML документа Word
+    QDomDocument document;
+
+    if (!loadDocument(document))
+        return false;
+
+    const QString startMarker = "{{#reading_meters}}";
+    const QString endMarker = "{{/reading_meters}}";
+
+    QDomElement startParagraph;
+    QDomElement endParagraph;
+
+    // Находим абзацы с начальным и конечным маркерами
+    const QDomNodeList paragraphs =
+        document.elementsByTagName("w:p");
+
+    for (qsizetype i = 0; i < paragraphs.count(); ++i)
+    {
+        const QDomElement paragraph =
+            paragraphs.at(i).toElement();
+
+        QString text;
+
+        const QDomNodeList textNodes =
+            paragraph.elementsByTagName("w:t");
+
+        for (qsizetype j = 0; j < textNodes.count(); ++j)
+        {
+            text += textNodes.at(j).toElement().text();
+        }
+
+        if (text.contains(startMarker))
+            startParagraph = paragraph;
+
+        if (text.contains(endMarker))
+        {
+            endParagraph = paragraph;
+            break;
+        }
+    }
+
+    // Проверяем наличие обоих маркеров
+    if (startParagraph.isNull() || endParagraph.isNull())
+    {
+        m_lastError =
+            "В DOCX не найден блок reading_meters.";
+        return false;
+    }
+
+    // Маркеры должны находиться на одном уровне XML
+    QDomNode parent = startParagraph.parentNode();
+
+    if (parent.isNull() ||
+        parent != endParagraph.parentNode())
+    {
+        m_lastError =
+            "Маркеры reading_meters находятся "
+            "в разных элементах DOCX.";
+        return false;
+    }
+
+    // Собираем исходные элементы блока:
+    // название присоединения и таблицу прибора учета
+    QList<QDomNode> templateNodes;
+
+    QDomNode current = startParagraph.nextSibling();
+
+    while (!current.isNull() && current != endParagraph)
+    {
+        templateNodes.append(current.cloneNode(true));
+        current = current.nextSibling();
+    }
+
+    if (current.isNull() || templateNodes.isEmpty())
+    {
+        m_lastError =
+            "Блок reading_meters пуст или некорректен.";
+        return false;
+    }
+
+    // Определяем количество приборов для снятия показаний
+    int meterCount = 0;
+
+    for (const ActMeterData &meter : data.meters)
+    {
+        if (meter.role == ReadingMeterRole)
+            ++meterCount;
+    }
+
+    if (meterCount == 0)
+    {
+        m_lastError =
+            "В акте отсутствуют приборы учета "
+            "для снятия показаний.";
+        return false;
+    }
+
+    // Создаем отдельный блок для каждого прибора учета
+    for (const ActMeterData &meter : data.meters)
+    {
+        if (meter.role != ReadingMeterRole)
+            continue;
+
+        // Название присоединения заполняем для каждого прибора
+        const QString connectionName = meter.connectionName;
+
+        // Коэффициент трансформации тока подставляем
+        // без префикса, поскольку он уже есть в шаблоне
+        const QString ctRatio = meter.connectionCtRatio;
+
+        // Копируем все элементы исходного блока
+        for (const QDomNode &templateNode : templateNodes)
+        {
+            QDomNode clonedNode = templateNode.cloneNode(true);
+
+            // Получаем корневой элемент скопированного блока
+            QDomElement clonedElement = clonedNode.toElement();
+
+            // Вспомогательная функция заменяет плейсхолдеры
+            // как в самом абзаце, так и во вложенных абзацах таблицы
+            auto replaceInBlock =
+                [&](const QString &name, const QString &value)
+                {
+                    // Если скопированный элемент сам является абзацем,
+                    // обрабатываем его непосредственно
+                    if (clonedElement.tagName() == "w:p")
+                    {
+                        replacePlaceholderInParagraphAll(
+                            document, clonedElement, name, value);
+                    }
+
+                    // Обрабатываем вложенные абзацы, например внутри таблиц
+                    const QDomNodeList paragraphs =
+                        clonedElement.elementsByTagName("w:p");
+
+                    for (qsizetype i = 0; i < paragraphs.count(); ++i)
+                    {
+                        QDomElement paragraph =
+                            paragraphs.at(i).toElement();
+
+                        replacePlaceholderInParagraphAll(
+                            document, paragraph, name, value);
+                    }
+                };
+            // Сведения о присоединении
+            replaceInBlock("connection_name", connectionName);
+            replaceInBlock("ct_ratio", ctRatio);
+
+            // Характеристики прибора учета
+            replaceInBlock("meter_name", meter.name);
+            replaceInBlock("meter_serial", meter.serialNumber);
+            replaceInBlock("accuracy", meter.accuracyClass);
+
+            // Год поверки
+            const QString verificationYear =
+                meter.verificationYear > 0
+                    ? QString::number(meter.verificationYear)
+                    : QString();
+
+            replaceInBlock("verify", verificationYear);
+
+            // Показания прибора учета
+            replaceInBlock(
+                "reading_a_plus",
+                meterReadingValue(meter, "A+"));
+
+            replaceInBlock(
+                "reading_a_minus",
+                meterReadingValue(meter, "A-"));
+
+            replaceInBlock(
+                "reading_r_plus",
+                meterReadingValue(meter, "R+"));
+
+            replaceInBlock(
+                "reading_r_minus",
+                meterReadingValue(meter, "R-"));
+
+            // Вставляем заполненный элемент перед
+            // начальным маркером исходного блока
+            parent.insertBefore(clonedNode, startParagraph);
+        }
+    }
+
+    // Удаляем исходный шаблонный блок вместе с маркерами
+    current = startParagraph;
+
+    while (!current.isNull())
+    {
+        QDomNode next = current.nextSibling();
+        const bool isEnd = current == endParagraph;
+
+        parent.removeChild(current);
+
+        if (isEnd)
+            break;
+
+        current = next;
+    }
+
+    // Сохраняем обновленный document.xml
+    return saveXmlDocument(document);
 }
 
 bool DocxGenerator::generateActType4(const ActData &data)
@@ -1145,7 +1379,19 @@ QString DocxGenerator::meterReadingValue(const ActMeterData &meter, const QStrin
     {
         if (reading.code == code)
         {
-            return QString::number(reading.value, 'f', 2);
+            QString value = QString::number(reading.value, 'f', 3);
+
+            while (value.contains('.') && value.endsWith('0'))
+            {
+                value.chop(1);
+            }
+
+            if (value.endsWith('.'))
+            {
+                value.chop(1);
+            }
+
+            return value;
         }
     }
 

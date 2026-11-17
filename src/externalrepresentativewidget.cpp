@@ -38,6 +38,11 @@ QString ExternalRepresentativeWidget::shortName() const
     return ui->nameLineEdit->text().trimmed();
 }
 
+int ExternalRepresentativeWidget::id() const
+{
+    return m_id;
+}
+
 bool ExternalRepresentativeWidget::validate()
 {
     if (organization().isEmpty())
@@ -67,8 +72,12 @@ bool ExternalRepresentativeWidget::validate()
     return true;
 }
 
-void ExternalRepresentativeWidget::setData(const ExternalRepresentativeData &data)
+void ExternalRepresentativeWidget::setData(
+    const ExternalRepresentativeData &data)
 {
+    // Сохраняем идентификатор загруженной записи.
+    m_id = data.id;
+
     ui->organizationLineEdit->setText(data.organization);
     ui->nameLineEdit->setText(data.shortName);
     ui->positionLineEdit->setText(data.position);

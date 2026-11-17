@@ -20,6 +20,17 @@ ConnectionDialog::ConnectionDialog(
     setWindowTitle("Добавление присоединения");
     ui->titleLabel->setText("Новое присоединение");
 
+    // Настраиваем отображение элементов
+    ui->typeComboBox->addItem("Ячейка", 1);
+    ui->typeComboBox->addItem("ВЛ", 2);
+    ui->typeComboBox->addItem("Другое", 3);
+
+    ui->ctSecondaryComboBox->addItem("5", 5);
+    ui->ctSecondaryComboBox->addItem("1", 1);
+
+    ui->ctPrimarySpinBox->setValue(100);
+    ui->ctSecondaryComboBox->setCurrentIndex(0);
+
     connect(ui->cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 
     connect(ui->saveButton, &QPushButton::clicked, this,
@@ -28,6 +39,29 @@ ConnectionDialog::ConnectionDialog(
             if (save())
                 accept();
         });
+
+    // Подключаем выбор типа присоединения
+    connect(ui->typeComboBox, &QComboBox::currentIndexChanged, this,
+        [this](int)
+        {
+            const bool isCell = ui->typeComboBox->currentData().toInt() == 1;
+
+            ui->cellNumberLabel->setVisible(isCell);
+            ui->cellNumberSpinBox->setVisible(isCell);
+        });
+
+    // Подключаем чекбокс наличия ТТ
+    connect(ui->directConnectionCheckBox, &QCheckBox::toggled, this,
+        [this](bool checked)
+        {
+            ui->ctPrimarySpinBox->setEnabled(!checked);
+            ui->ctSecondaryComboBox->setEnabled(!checked);
+        });
+
+    // Устанавливаем стандартные данные
+    ui->typeComboBox->setCurrentIndex(0);
+    ui->cellNumberLabel->setVisible(true);
+    ui->cellNumberSpinBox->setVisible(true);
 }
 
 ConnectionDialog::ConnectionDialog(
@@ -73,6 +107,30 @@ bool ConnectionDialog::save()
         return false;
     }
 
+    const int connectionType =
+        ui->typeComboBox->currentData().toInt();
+
+    if (connectionType == 1 &&
+        ui->cellNumberSpinBox->value() <= 0)
+    {
+        QMessageBox::warning(this, "Ошибка",
+                             "Укажите номер ячейки.");
+        ui->cellNumberSpinBox->setFocus();
+        return false;
+    }
+
+    if (!ui->directConnectionCheckBox->isChecked())
+    {
+        if (ui->ctPrimarySpinBox->value() <= 0)
+        {
+            QMessageBox::warning(this, "Ошибка",
+                                 "Укажите первичный ток ТТ.");
+            ui->ctPrimarySpinBox->setFocus();
+            return false;
+        }
+    }
+
+
     if (m_connectionId < 0)
         return insertConnection();
 
@@ -81,10 +139,26 @@ bool ConnectionDialog::save()
 
 bool ConnectionDialog::insertConnection()
 {
-    const QString name =
-        ui->nameLineEdit->text().trimmed();
+    const QString name = ui->nameLineEdit->text().trimmed();
+    const int connectionType = ui->typeComboBox->currentData().toInt();
+    const double voltage = ui->voltageDoubleSpinBox->value();
 
-    // Проверяем на наличие такого же имени в БД
+    const QVariant cellNumber = connectionType == 1
+        ? QVariant(ui->cellNumberSpinBox->value())
+        : QVariant();
+
+    const bool directConnection =
+        ui->directConnectionCheckBox->isChecked();
+
+    const QVariant ctPrimary = directConnection
+        ? QVariant()
+        : QVariant(ui->ctPrimarySpinBox->value());
+
+    const int ctSecondary = directConnection
+        ? 0
+        : ui->ctSecondaryComboBox->currentData().toInt();
+
+    // Проверка уникальности названия в пределах типа и ПС.
     QSqlQuery checkQuery(m_database.getDatabase());
 
     checkQuery.prepare(
@@ -92,70 +166,95 @@ bool ConnectionDialog::insertConnection()
             "SELECT 1 "
             "FROM connections "
             "WHERE substation_id = :substationId "
-            "AND name =:name"
-        ");");
+            "AND connection_type = :connectionType "
+            "AND connection_type IN (2, 3) "
+            "AND name = :name COLLATE NOCASE"
+        ");"
+    );
 
     checkQuery.bindValue(":substationId", m_substationId);
+    checkQuery.bindValue(":connectionType", connectionType);
     checkQuery.bindValue(":name", name);
 
-    // Проверяем, что вообще что-либо нашли
     if (!checkQuery.exec() || !checkQuery.next())
     {
         QMessageBox::critical(this, "Ошибка",
-            "Не удалось проверить наличие присоединения.");
-
+            "Не удалось проверить название присоединения.\n\n"
+            + checkQuery.lastError().text());
         return false;
     }
 
     if (checkQuery.value(0).toBool())
     {
         QMessageBox::warning(this, "Присоединение уже существует",
-            QString(
-                "Присоединение \"%1\" уже существует на этой подстанции.\n\n"
-                "Введите другое название.")
-                .arg(name));
-
+            "Присоединение с таким названием и типом "
+            "уже существует на этой подстанции.");
         ui->nameLineEdit->setFocus();
-        ui->nameLineEdit->selectAll();
-
         return false;
     }
 
-    const double voltage =
-        ui->voltageDoubleSpinBox->value();
+    // Проверка уникальности номера ячейки на всей ПС.
+    if (connectionType == 1)
+    {
+        QSqlQuery cellQuery(m_database.getDatabase());
 
-    const QString ctRatio =
-        ui->ctRatioLineEdit->text().trimmed();
+        cellQuery.prepare(
+            "SELECT EXISTS("
+            "SELECT 1 FROM connections "
+            "WHERE substation_id = :substationId "
+            "AND connection_type = 1 "
+            "AND cell_number = :cellNumber"
+            ");");
+
+        cellQuery.bindValue(":substationId", m_substationId);
+        cellQuery.bindValue(":cellNumber", cellNumber);
+
+        if (!cellQuery.exec() || !cellQuery.next())
+        {
+            QMessageBox::critical(this, "Ошибка",
+                "Не удалось проверить номер ячейки.\n\n"
+                + cellQuery.lastError().text());
+            return false;
+        }
+
+        if (cellQuery.value(0).toBool())
+        {
+            QMessageBox::warning(this, "Ячейка уже существует",
+                QString("Ячейка №%1 уже существует на этой подстанции.")
+                    .arg(cellNumber.toInt()));
+            ui->cellNumberSpinBox->setFocus();
+            return false;
+        }
+    }
 
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
-        "INSERT INTO connections "
-        "(uuid, version_uuid, substation_id, name, voltage_kv, ct_ratio) "
-        "VALUES "
-        "(:uuid, :versionUuid, :substationId, :name, :voltage, :ctRatio);");
+        "INSERT INTO connections ("
+        "uuid, version_uuid, substation_id, "
+        "connection_type, cell_number, name, voltage_kv, "
+        "ct_primary_current, ct_secondary_current"
+        ") VALUES ("
+        ":uuid, :versionUuid, :substationId, "
+        ":connectionType, :cellNumber, :name, :voltage, "
+        ":ctPrimary, :ctSecondary"
+        ");");
 
     query.bindValue(":uuid", UuidUtils::generate());
     query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":substationId", m_substationId);
+    query.bindValue(":connectionType", connectionType);
+    query.bindValue(":cellNumber", cellNumber);
     query.bindValue(":name", name);
     query.bindValue(":voltage", voltage);
-
-    if (ctRatio.isEmpty())
-    {
-        query.bindValue(":ctRatio", QVariant());
-    }
-    else
-    {
-        query.bindValue(":ctRatio", ctRatio);
-    }
+    query.bindValue(":ctPrimary", ctPrimary);
+    query.bindValue(":ctSecondary", ctSecondary);
 
     if (!query.exec())
     {
         QMessageBox::critical(this, "Ошибка",
-            "Не удалось добавить присоединение.\n\n" +
-            query.lastError().text());
-
+            "Не удалось добавить присоединение.\n\n"
+            + query.lastError().text());
         return false;
     }
 
@@ -164,17 +263,32 @@ bool ConnectionDialog::insertConnection()
 
 bool ConnectionDialog::updateConnection()
 {
-    const QString name =
-        ui->nameLineEdit->text().trimmed();
-
-    // Проверяем что присоединение существует и не изменился
+    const QString name = ui->nameLineEdit->text().trimmed();
+    const int connectionType = ui->typeComboBox->currentData().toInt();
     const double voltage = ui->voltageDoubleSpinBox->value();
-    const QString ctRatio = ui->ctRatioLineEdit->text().trimmed();
 
+    const QVariant cellNumber = connectionType == 1
+        ? QVariant(ui->cellNumberSpinBox->value())
+        : QVariant();
+
+    const bool directConnection =
+        ui->directConnectionCheckBox->isChecked();
+
+    const QVariant ctPrimary = directConnection
+        ? QVariant()
+        : QVariant(ui->ctPrimarySpinBox->value());
+
+    const int ctSecondary = directConnection
+        ? 0
+        : ui->ctSecondaryComboBox->currentData().toInt();
+
+    // Получаем актуальные данные и проверяем версию.
     QSqlQuery currentQuery(m_database.getDatabase());
 
     currentQuery.prepare(
-        "SELECT name, voltage_kv, ct_ratio, version_uuid "
+        "SELECT name, connection_type, cell_number, "
+        "voltage_kv, ct_primary_current, "
+        "ct_secondary_current, version_uuid "
         "FROM connections "
         "WHERE id = :connectionId "
         "AND substation_id = :substationId;");
@@ -187,36 +301,48 @@ bool ConnectionDialog::updateConnection()
         QMessageBox::critical(this, "Ошибка",
             "Не удалось проверить присоединение.\n\n"
             + currentQuery.lastError().text());
-
         return false;
     }
 
     if (!currentQuery.next())
     {
         QMessageBox::warning(this, "Ошибка",
-            "Присоединения больше не существует.");
-
+            "Присоединение больше не существует.");
         return false;
     }
 
-    if (currentQuery.value("version_uuid").toString() !=
-        m_originalVersionUuid)
+    if (currentQuery.value("version_uuid").toString()
+        != m_originalVersionUuid)
     {
         QMessageBox::warning(this, "Конфликт изменений",
             "Присоединение было изменено после открытия окна.\n"
             "Ваши изменения не сохранены.");
-
         return false;
     }
 
-    if (currentQuery.value("name").toString() == name &&
-        currentQuery.value("voltage_kv").toDouble() == voltage &&
-        currentQuery.value("ct_ratio").toString() == ctRatio)
-    {
-        return true;
-    }
+    // Проверяем, изменились ли данные.
 
-    // Проверяем, что измененное имя не встречается уже в БД
+    const auto equalNullableInt =
+    [](const QVariant &a, const QVariant &b)
+    {
+        if (a.isNull() || b.isNull())
+            return a.isNull() && b.isNull();
+
+        return a.toInt() == b.toInt();
+    };
+
+    const bool unchanged =
+        currentQuery.value("name").toString() == name &&
+        currentQuery.value("connection_type").toInt() == connectionType &&
+        equalNullableInt(currentQuery.value("cell_number"), cellNumber) &&
+        currentQuery.value("voltage_kv").toDouble() == voltage &&
+        equalNullableInt(currentQuery.value("ct_primary_current"), ctPrimary) &&
+        currentQuery.value("ct_secondary_current").toInt() == ctSecondary;
+
+    if (unchanged)
+        return true;
+
+    // Проверка дублирования названия в пределах типа и ПС.
     QSqlQuery checkQuery(m_database.getDatabase());
 
     checkQuery.prepare(
@@ -224,61 +350,94 @@ bool ConnectionDialog::updateConnection()
             "SELECT 1 "
             "FROM connections "
             "WHERE substation_id = :substationId "
-            "AND name = :name "
+            "AND connection_type = :connectionType "
+            "AND connection_type IN (2, 3) "
+            "AND name = :name COLLATE NOCASE "
             "AND id <> :connectionId"
-        ");");
+        ");"
+    );
 
     checkQuery.bindValue(":substationId", m_substationId);
+    checkQuery.bindValue(":connectionType", connectionType);
     checkQuery.bindValue(":name", name);
     checkQuery.bindValue(":connectionId", m_connectionId);
 
     if (!checkQuery.exec() || !checkQuery.next())
     {
         QMessageBox::critical(this, "Ошибка",
-            "Не удалось проверить название присоединия");
-
+            "Не удалось проверить название присоединения.\n\n"
+            + checkQuery.lastError().text());
         return false;
     }
 
     if (checkQuery.value(0).toBool())
     {
         QMessageBox::warning(this, "Присоединение уже существует",
-            QString(
-                "Присоединение \"%1\" уже существует на этой подстанции.\n\n"
-                "Введите другое название.")
-                .arg(name));
-
+            "Присоединение с таким названием и типом "
+            "уже существует на этой подстанции.");
         ui->nameLineEdit->setFocus();
-        ui->nameLineEdit->selectAll();
-
         return false;
     }
 
-    // Обновляем данные в БД
+    // Проверка уникальности номера ячейки.
+    if (connectionType == 1)
+    {
+        QSqlQuery cellQuery(m_database.getDatabase());
+
+        cellQuery.prepare(
+            "SELECT EXISTS("
+            "SELECT 1 FROM connections "
+            "WHERE substation_id = :substationId "
+            "AND connection_type = 1 "
+            "AND cell_number = :cellNumber "
+            "AND id <> :connectionId"
+            ");");
+
+        cellQuery.bindValue(":substationId", m_substationId);
+        cellQuery.bindValue(":cellNumber", cellNumber);
+        cellQuery.bindValue(":connectionId", m_connectionId);
+
+        if (!cellQuery.exec() || !cellQuery.next())
+        {
+            QMessageBox::critical(this, "Ошибка",
+                "Не удалось проверить номер ячейки.\n\n"
+                + cellQuery.lastError().text());
+            return false;
+        }
+
+        if (cellQuery.value(0).toBool())
+        {
+            QMessageBox::warning(this, "Ячейка уже существует",
+                QString("Ячейка №%1 уже существует на этой подстанции.")
+                    .arg(cellNumber.toInt()));
+            ui->cellNumberSpinBox->setFocus();
+            return false;
+        }
+    }
+
+    // Обновление с защитой от конфликта версий.
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
-        "UPDATE connections "
-        "SET name = :name, "
-            "voltage_kv = :voltage, "
-            "ct_ratio = :ctRatio, "
-            "version_uuid = :versionUuid "
+        "UPDATE connections SET "
+        "name = :name, "
+        "connection_type = :connectionType, "
+        "cell_number = :cellNumber, "
+        "voltage_kv = :voltage, "
+        "ct_primary_current = :ctPrimary, "
+        "ct_secondary_current = :ctSecondary, "
+        "version_uuid = :versionUuid "
         "WHERE id = :connectionId "
-            "AND substation_id = :substationId "
-            "AND version_uuid = :originalVersionUuid "
-            "AND ("
-                "name IS NOT :name "
-                "OR voltage_kv IS NOT :voltage "
-                "OR ct_ratio IS NOT :ctRatio);");
+        "AND substation_id = :substationId "
+        "AND version_uuid = :originalVersionUuid;");
 
-    query.bindValue(":versionUuid", UuidUtils::generate());
     query.bindValue(":name", name);
+    query.bindValue(":connectionType", connectionType);
+    query.bindValue(":cellNumber", cellNumber);
     query.bindValue(":voltage", voltage);
-
-    if (ctRatio.isEmpty())
-        query.bindValue(":ctRatio", QVariant());
-    else
-        query.bindValue(":ctRatio", ctRatio);
+    query.bindValue(":ctPrimary", ctPrimary);
+    query.bindValue(":ctSecondary", ctSecondary);
+    query.bindValue(":versionUuid", UuidUtils::generate());
 
     query.bindValue(":connectionId", m_connectionId);
     query.bindValue(":substationId", m_substationId);
@@ -287,20 +446,17 @@ bool ConnectionDialog::updateConnection()
     if (!query.exec())
     {
         QMessageBox::critical(this, "Ошибка",
-            "Не удалось изменить присоединение.\n\n" +
-            query.lastError().text());
-
+            "Не удалось изменить присоединение.\n\n"
+            + query.lastError().text());
         return false;
     }
 
-    // Проверяем успешность
     if (query.numRowsAffected() != 1)
     {
         QMessageBox::warning(this, "Конфликт изменений",
             "Не удалось сохранить присоединение.\n\n"
             "Возможно, оно было изменено или удалено "
             "другим пользователем.");
-
         return false;
     }
 
@@ -312,21 +468,21 @@ void ConnectionDialog::loadConnection()
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
-        "SELECT name, voltage_kv, ct_ratio, version_uuid "
+        "SELECT name, connection_type, cell_number, "
+        "voltage_kv, ct_primary_current, "
+        "ct_secondary_current, version_uuid "
         "FROM connections "
         "WHERE id = :connectionId "
-        "AND substation_id = :substationId");
+        "AND substation_id = :substationId;");
 
     query.bindValue(":connectionId", m_connectionId);
-
     query.bindValue(":substationId", m_substationId);
 
     if (!query.exec())
     {
         QMessageBox::critical(this, "Ошибка",
-            "Не удалось загрузить присоединение.\n\n" +
-            query.lastError().text());
-
+            "Не удалось загрузить присоединение.\n\n"
+            + query.lastError().text());
         return;
     }
 
@@ -334,24 +490,60 @@ void ConnectionDialog::loadConnection()
     {
         QMessageBox::warning(this, "Ошибка",
             "Присоединение не найдено.");
-
         return;
     }
 
+    // Название
     ui->nameLineEdit->setText(
         query.value("name").toString());
 
+    // Тип присоединения
+    const int connectionType =
+        query.value("connection_type").toInt();
+
+    const int typeIndex =
+        ui->typeComboBox->findData(connectionType);
+
+    if (typeIndex >= 0)
+        ui->typeComboBox->setCurrentIndex(typeIndex);
+
+    // Номер ячейки
+    if (!query.value("cell_number").isNull())
+    {
+        ui->cellNumberSpinBox->setValue(
+            query.value("cell_number").toInt());
+    }
+
+    // Напряжение
     if (!query.value("voltage_kv").isNull())
     {
         ui->voltageDoubleSpinBox->setValue(
             query.value("voltage_kv").toDouble());
     }
 
-    ui->ctRatioLineEdit->setText(
-        query.value("ct_ratio").toString());
+    // Параметры трансформаторов тока
+    const int ctSecondary =
+        query.value("ct_secondary_current").toInt();
 
-    // Получаем текущую UUID
-    m_originalVersionUuid = query.value("version_uuid").toString();
+    const bool directConnection = (ctSecondary == 0);
+
+    ui->directConnectionCheckBox->setChecked(directConnection);
+
+    if (!directConnection)
+    {
+        ui->ctPrimarySpinBox->setValue(
+            query.value("ct_primary_current").toInt());
+
+        const int secondaryIndex =
+            ui->ctSecondaryComboBox->findData(ctSecondary);
+
+        if (secondaryIndex >= 0)
+            ui->ctSecondaryComboBox->setCurrentIndex(secondaryIndex);
+    }
+
+    // Версия записи для защиты от конфликтов
+    m_originalVersionUuid =
+        query.value("version_uuid").toString();
 
     qDebug() << "Original connection version UUID: " << m_originalVersionUuid;
 }

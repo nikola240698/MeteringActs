@@ -45,24 +45,50 @@ CREATE TABLE substations
 
 CREATE TABLE connections
 (
-    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+    uuid                 TEXT NOT NULL UNIQUE,
+    version_uuid         TEXT NOT NULL,
 
-    uuid                TEXT NOT NULL UNIQUE,
-    version_uuid        TEXT NOT NULL,
+    substation_id        INTEGER NOT NULL,
+    connection_type      INTEGER NOT NULL
+                         CHECK (connection_type IN (1, 2, 3)),
+    cell_number          INTEGER,
+    name                 TEXT NOT NULL CHECK (length(trim(name)) > 0),
+    voltage_kv           REAL NOT NULL CHECK (voltage_kv > 0),
 
-    substation_id       INTEGER NOT NULL,
-
-    name                TEXT NOT NULL,
-    voltage_kv          REAL,
-    ct_ratio            TEXT,
+    ct_primary_current   INTEGER,
+    ct_secondary_current INTEGER NOT NULL DEFAULT 5
+                         CHECK (ct_secondary_current IN (0, 1, 5)),
 
     FOREIGN KEY (substation_id)
         REFERENCES substations(id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
 
-    UNIQUE(substation_id, name)
+    CHECK (
+        (connection_type = 1 AND cell_number IS NOT NULL AND cell_number > 0)
+        OR (connection_type IN (2, 3) AND cell_number IS NULL)
+    ),
+    CHECK (
+        (ct_secondary_current = 0 AND ct_primary_current IS NULL)
+        OR (ct_secondary_current IN (1, 5) AND
+            ct_primary_current IS NOT NULL AND ct_primary_current > 0)
+    )
 );
+
+-- Номер ячейки уникален в пределах всей ПС независимо от напряжения.
+CREATE UNIQUE INDEX ux_connections_cell_number
+    ON connections(substation_id, cell_number)
+    WHERE connection_type = 1;
+
+-- Уникальность названий ВЛ и прочих присоединений
+-- в пределах одной подстанции и одного типа.
+-- Для ячеек допускаются одинаковые названия:
+-- их уникальность определяется номером ячейки.
+CREATE UNIQUE INDEX ux_connections_type_name
+    ON connections(substation_id, connection_type, name COLLATE NOCASE)
+    WHERE connection_type IN (2, 3);
+
 
 
 -- ============================================================
@@ -148,15 +174,18 @@ CREATE TABLE acts
 
     act_type_id             INTEGER NOT NULL,
     act_date                TEXT NOT NULL,       -- YYYY-MM-DD
+    substation_id           INTEGER NOT NULL,
 
-    connection_id           INTEGER NOT NULL,
+    -- Для актов снятия показаний NULL.
+    -- Присоединения таких актов хранятся в act_meters.
+    connection_id           INTEGER,
 
     -- Исторический снимок места проведеня работ.
     -- Значения фиксируются на момент сохдания/редактирвоания акта
     -- и используются при просмотре архива и повторной генерации DOCX
     area_name               TEXT NOT NULL,
     substation_name         TEXT NOT NULL,
-    connection_name         TEXT NOT NULL,
+    connection_name         TEXT,
     connection_voltage_kv   REAL,
     connection_ct_ratio     TEXT,
 
@@ -203,6 +232,11 @@ CREATE TABLE acts
         ON UPDATE CASCADE
         ON DELETE RESTRICT,
 
+    FOREIGN KEY (substation_id)
+        REFERENCES substations(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
     FOREIGN KEY (connection_id)
         REFERENCES connections(id)
         ON UPDATE CASCADE
@@ -222,7 +256,7 @@ CREATE TABLE acts
 -- Один акт может содержать:
 --
 -- проверка     -> один прибор
--- показания    -> один прибор
+-- показания    -> по одному прибору на каждое присоединение одной ПС
 -- демонтаж     -> один прибор
 -- установка    -> один прибор
 -- замена       -> два прибора:
@@ -232,9 +266,16 @@ CREATE TABLE acts
 CREATE TABLE act_meters
 (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    uuid            TEXT NOT NULL UNIQUE,
 
     act_id          INTEGER NOT NULL,
     meter_id        INTEGER NOT NULL,
+    connection_id   INTEGER NOT NULL,
+
+    -- Снимок присоединения на момент оформления акта.
+    connection_name        TEXT NOT NULL,
+    connection_voltage_kv  REAL,
+    connection_ct_ratio    TEXT,
 
     -- Роль прибора именно в данном акте:
     --
@@ -263,6 +304,11 @@ CREATE TABLE act_meters
 
     FOREIGN KEY (meter_id)
         REFERENCES meters(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (connection_id)
+        REFERENCES connections(id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 );
@@ -486,3 +532,72 @@ CREATE INDEX idx_current_transformers_serial
 
 
 
+
+
+-- ============================================================
+-- 14. СИНХРОНИЗАЦИЯ (ОФЛАЙН)
+-- ============================================================
+-- database_uuid общий для копий одной исходной базы.
+-- Первоначальные INSERT для areas/substations/connections должны содержать
+-- заранее зафиксированные UUID и version_uuid (одинаковые для всех ПК).
+-- После начала эксплуатации справочники изменяются через приложение,
+-- которое добавляет соответствующие события в sync_changes.
+-- node_uuid конкретного ПК хранится вне распространяемой БД.
+-- Строка sync_metadata (id=1) создаётся приложением при создании базы.
+-- События из первоначальных INSERT не требуются: они являются общей основой.
+
+CREATE TABLE sync_metadata
+(
+    id               INTEGER PRIMARY KEY CHECK (id = 1),
+    database_uuid    TEXT NOT NULL UNIQUE,
+    protocol_version INTEGER NOT NULL DEFAULT 1
+                     CHECK (protocol_version >= 1)
+);
+
+-- Неизменяемые события. UUID события используется для дедупликации.
+-- payload хранит данные, необходимые для воспроизведения операции.
+-- Для acts это полный снимок акта с дочерними строками.
+-- Ссылки внутри payload передаются по UUID, а не по локальным id.
+CREATE TABLE sync_changes
+(
+    uuid              TEXT PRIMARY KEY,
+    node_uuid         TEXT NOT NULL,
+    transaction_uuid  TEXT NOT NULL,
+
+    entity_type       TEXT NOT NULL
+                      CHECK (entity_type IN
+                      ('areas', 'substations', 'connections',
+                       'employees', 'meters', 'current_transformers', 'acts')),
+    entity_uuid       TEXT NOT NULL,
+
+    operation         TEXT NOT NULL
+                      CHECK (operation IN ('insert', 'update', 'delete')),
+    old_version_uuid  TEXT,
+    new_version_uuid  TEXT,
+
+    payload           TEXT NOT NULL CHECK (json_valid(payload)),
+    created_at        TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Эталонное содержимое акта после ПЕРВОЙ успешной синхронизации.
+-- Дальнейшие локальные правки акта не заменяют этот снимок.
+-- snapshot содержит весь акт, кроме машинно-зависимых путей к DOCX.
+CREATE TABLE sync_act_baselines
+(
+    act_uuid          TEXT PRIMARY KEY,
+    version_uuid      TEXT NOT NULL,
+    snapshot          TEXT NOT NULL CHECK (json_valid(snapshot)),
+    published_at      TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_sync_changes_entity
+    ON sync_changes(entity_type, entity_uuid);
+
+CREATE INDEX idx_sync_changes_transaction
+    ON sync_changes(transaction_uuid);
+
+CREATE INDEX idx_act_meters_connection
+    ON act_meters(connection_id);
+
+-- Рекомендуемая сортировка в справочнике (используется в SELECT приложения):
+-- ORDER BY connection_type ASC, voltage_kv DESC, cell_number ASC, name COLLATE NOCASE ASC;

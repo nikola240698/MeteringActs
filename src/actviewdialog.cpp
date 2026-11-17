@@ -63,11 +63,21 @@ void ActViewDialog::fillActData()
     ui->actDateLabel->setText(
         formatActDate());
 
-    ui->connectionLabel->setText(
-        m_data.connectionName);
-
-    ui->ctRatioLabel->setText(
-        "Ктт=" + m_data.ctRatio);
+    // Для группового снятия показаний с несколькими присоединениями
+    // скрываем общие сведения, поскольку они отображаются
+    // отдельно для каждого прибора учета
+    if (m_data.actTypeId == 3 && m_data.connectionId <= 0)
+    {
+        ui->connectionLabel->hide();
+        ui->ctRatioLabel->hide();
+    }
+    else
+    {
+        // Для обычных актов и снятия показаний с одного
+        // присоединения сохраняем стандартное отображение
+        ui->connectionLabel->setText(m_data.connectionName);
+        ui->ctRatioLabel->setText("Ктт=" + m_data.ctRatio);
+    }
 
     ui->workDescriptionLabel->setText(
         workDescription());
@@ -195,7 +205,19 @@ QString ActViewDialog::meterReadingValue(const ActMeterData &meter, const QStrin
     {
         if (reading.code == code)
         {
-            return QString::number(reading.value, 'f', 2);
+            QString value = QString::number(reading.value, 'f', 3);
+
+            while (value.contains('.') && value.endsWith('0'))
+            {
+                value.chop(1);
+            }
+
+            if (value.endsWith('.'))
+            {
+                value.chop(1);
+            }
+
+            return value;
         }
     }
 
@@ -260,13 +282,46 @@ void ActViewDialog::fillMeters()
         }
         case 3:
         {
-            const ActMeterData* meter = findMeterByRole(4);
+            // Роль прибора учета при снятии показаний
+            constexpr int ReadingMeterRole = 4;
 
-            if (meter)
+            // Определяем, содержит ли акт несколько присоединений
+            const bool isGroupAct = m_data.connectionId <= 0;
+
+            // Перебираем все приборы учета, сохраненные в акте
+            for (const ActMeterData& meter : m_data.meters)
             {
+                // Пропускаем приборы с другой ролью
+                if (meter.role != ReadingMeterRole)
+                    continue;
+
+                QString title;
+
+                if (isGroupAct)
+                {
+                    // Для группового акта указываем присоединение
+                    // и коэффициент трансформации тока
+                    title = meter.connectionName;
+
+                    if (!meter.connectionCtRatio.isEmpty())
+                    {
+                        title += QString("          Ктт = %1")
+                            .arg(meter.connectionCtRatio);
+                    }
+                }
+                else
+                {
+                    // Для одного присоединения сведения уже
+                    // отображаются в верхней части акта
+                    title = "Прибор учета:";
+                }
+
+                // Создаем таблицу прибора учета
+                // с его характеристиками и показаниями
                 ui->equipmentLayout->addWidget(
-                    createMeterTable(*meter, "Пирбор учета: "));
+                    createMeterTable(meter, title));
             }
+
             break;
         }
         case 4:
@@ -395,6 +450,25 @@ QString ActViewDialog::workDescription() const
             .arg(schedule)
             .arg(work)
             .arg(m_data.voltage);
+    }
+
+    // Для группового снятия показаний напряжение
+    // получаем из сохраненных данных первого присоединения
+    if (m_data.actTypeId == 3 && m_data.connectionId <= 0)
+    {
+        for (const ActMeterData& meter : m_data.meters)
+        {
+            if (meter.role == 4 && !meter.connectionVoltage.isEmpty())
+            {
+                return QString(
+                    "Произведена работа по %1 на стороне %2кВ.")
+                    .arg(work)
+                    .arg(meter.connectionVoltage);
+            }
+        }
+
+        // Если напряжение отсутствует, не выводим пустое значение
+        return QString("Произведена работа по %1.").arg(work);
     }
 
     return QString("Произведена работа по %1 на стороне %2кВ.")

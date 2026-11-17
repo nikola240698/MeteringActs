@@ -1,5 +1,8 @@
 
 #include <QDebug>
+#include <QScrollArea>
+#include <QHash>
+#include <cmath>
 
 #include "createactwidget.h"
 #include "ui_createactwidget.h"
@@ -11,10 +14,15 @@
 #include "uuidutils.h"
 
 
+
 CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         : QWidget(parent), ui(new Ui::CreateActWidget), m_database(database)
 {
     ui->setupUi(this);
+
+    // Скрываем подсказку о выборе присоединений
+    ui->connectionInfoLabel->hide();
+
     // настраиваем виджет первого прибора и показаний
     m_primaryMeterWidget = new MeterActWidget(m_database, ui->meterContainerWidget);
     // добавляем виджет
@@ -24,6 +32,9 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
     ui->secondMeterContainerWidget->layout()->addWidget(m_secondaryMeterWidget);
     // отключаем по стандарту видимость второго прибора
     ui->secondaryMeterCard->setVisible(false);
+
+    // скрываем виджет выбора нескольких приборов для снятия показаний
+    ui->readingMetersContainer->hide();
 
     // Создаем виджеты-блоки для добавления ТТ
     m_removedCtPhasePanel = new CurrentTransformerPhasePanel(
@@ -103,6 +114,16 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         {
             // получаем данные из выбранного варианта
             QVariant data = ui->substationComboBox->currentData();
+
+            for (ReadingConnectionWidget *widget : m_readingConnectionWidgets)
+            {
+                widget->setSubstation(
+                    data.isValid() ? data.toInt() : -1
+                );
+            }
+
+            updateAvailableConnections();
+
             // очищаем поля
             ui->connectionComboBox->clear();
             ui->voltageLineEdit->clear();
@@ -195,6 +216,89 @@ CreateActWidget::CreateActWidget(Database &database, QWidget *parent)
         this, &CreateActWidget::currentTransformersChanged);
     connect(m_installedCtPhasePanel, &CurrentTransformerPhasePanel::currentTransformerCreated,
         this, &CreateActWidget::currentTransformersChanged);
+
+    /// Создаём первую пару карточек для снятия показаний
+    auto *readingWidget = new ReadingConnectionWidget(
+        m_database,
+        ui->readingMetersContainer
+    );
+
+    ui->readingMetersLayout->addWidget(readingWidget);
+    m_readingConnectionWidgets.append(readingWidget);
+
+    connect(readingWidget, &ReadingConnectionWidget::meterSelected, this,
+        [this](ReadingConnectionWidget *)
+        {
+            validateUniqueMeters();
+        }
+    );
+
+    // Подключаем удаление карточки
+    connect(readingWidget, &ReadingConnectionWidget::removeRequested,
+            this, &CreateActWidget::removeReadingWidget);
+
+    connect(readingWidget, &ReadingConnectionWidget::connectionChanged,
+        this, [this](ReadingConnectionWidget *, int)
+        {
+            updateAvailableConnections();
+        });
+
+    // Обновляем номера и кнопки удаления
+    updateReadingWidgets();
+
+    // Передаём текущую подстанцию, если она уже выбрана
+    const QVariant substationId = ui->substationComboBox->currentData();
+
+    readingWidget->setSubstation(
+        substationId.isValid() ? substationId.toInt() : -1
+    );
+
+    ui->readingMetersContainer->hide();
+
+    // Обработчик кнопки добавления прибора учета
+    // Добавление прибора учёта для группового снятия показаний
+    connect(ui->addReadingMeterButton, &QPushButton::clicked,
+            this, [this]()
+            {
+                auto *widget = new ReadingConnectionWidget(
+                    m_database,
+                    ui->readingMetersContainer
+                );
+
+                connect(widget, &ReadingConnectionWidget::meterSelected, this,
+                    [this](ReadingConnectionWidget *)
+                    {
+                        validateUniqueMeters();
+                    }
+                );
+
+                // Добавляем новую пару карточек
+                ui->readingMetersLayout->addWidget(widget);
+                m_readingConnectionWidgets.append(widget);
+
+                // Подключаем удаление новой карточки
+                connect(widget, &ReadingConnectionWidget::removeRequested,
+                        this, &CreateActWidget::removeReadingWidget);
+
+                connect(widget, &ReadingConnectionWidget::connectionChanged,
+                        this, [this](ReadingConnectionWidget *, int)
+                        {
+                            updateAvailableConnections();
+                        });
+
+                // Обновляем номера и кнопки удаления
+                updateReadingWidgets();
+
+                // Загружаем присоединения выбранной подстанции
+                const QVariant substationId =
+                    ui->substationComboBox->currentData();
+
+                widget->setSubstation(
+                    substationId.isValid() ? substationId.toInt() : -1
+                );
+
+                updateAvailableConnections();
+            });
 }
 
 CreateActWidget::CreateActWidget(Database &database, int actId, QWidget *parent) :
@@ -203,11 +307,18 @@ CreateActWidget::CreateActWidget(Database &database, int actId, QWidget *parent)
     m_mode = Mode::Edit;
     m_editActId = actId;
 
+    // Повторно загружаем сотрудников с учётом представителя,
+    // сохранённого в редактируемом акте.
+    loadEmployees();
+
     ui->createButton->setText("Сохранить изменения");
     // Прячем кнопку сохранения и формирования DOCX
     ui->createAbdDocxButton->hide();
 
     loadActForEditing(actId);
+
+    // Минимальная ширина формы редактирования
+    setMinimumWidth(1100);
 }
 
 CreateActWidget::~CreateActWidget()
@@ -351,11 +462,45 @@ void CreateActWidget::loadEmployees() const
         "Выберите представителя...", QVariant());
     // создаем запрос и пробуем его исполнить
     QSqlQuery query(m_database.getDatabase());
-    if (!query.exec(
-        "SELECT id, short_name, position "
+
+    query.prepare(
+        "SELECT id, short_name, position, is_active "
         "FROM employees "
         "WHERE is_active = 1 "
-        "ORDER BY short_name"))
+        "OR id = :employeeId "
+        "ORDER BY short_name"
+        );
+
+    // При редактировании разрешаем загрузить сотрудника,
+    // который уже указан в акте, даже если он уволен.
+    int originalEmployeeId = -1;
+
+    if (m_mode == Mode::Edit && m_editActId >= 0)
+    {
+        QSqlQuery actQuery(m_database.getDatabase());
+
+        actQuery.prepare(
+            "SELECT employee_id "
+            "FROM acts "
+            "WHERE id = :actId;");
+
+        actQuery.bindValue(":actId", m_editActId);
+
+        if (!actQuery.exec() || !actQuery.next())
+        {
+            qDebug() << "loadEmployees act error:"
+                     << actQuery.lastError().text();
+            return;
+        }
+
+        originalEmployeeId = actQuery.value("employee_id").toInt();
+    }
+
+    query.bindValue(":employeeId", originalEmployeeId);
+    query.bindValue(":isEditMode", m_mode == Mode::Edit ? 1 : 0);
+
+
+    if (!query.exec())
     {
         qDebug() << "loadEmployees error: " << query.lastError().text();
         return;
@@ -366,8 +511,18 @@ void CreateActWidget::loadEmployees() const
         int id = query.value("id").toInt();
         QString shortName = query.value("short_name").toString();
         QString position = query.value("position").toString();
+
         // склеиваем строку
         QString displayText = shortName + " - " + position;
+
+        // Отмечаем уволенного сотрудника в списке.
+        const bool isActive = query.value("is_active").toBool();
+
+        if (!isActive)
+        {
+            displayText += " (уволен)";
+        }
+
         ui->employeeComboBox->addItem(displayText, id);
     }
 }
@@ -409,26 +564,46 @@ void CreateActWidget::loadConnections(int substationId) const
     // очищаем выпадающий список и вставляем значение по-умолчанию
     ui->connectionComboBox->clear();
     ui->connectionComboBox->addItem("Выберите присоединение...", QVariant());
+
     // создаем запрос и подготавливаем его
     QSqlQuery query(m_database.getDatabase());
+
     query.prepare(
-        "SELECT id, name "
+        "SELECT "
+        "id, "
+        "CASE connection_type "
+            "WHEN 1 THEN "
+                "'яч.' || printf('%g', voltage_kv) || "
+                "'кВ №' || cell_number || ' \"' || name || '\"' "
+            "WHEN 2 THEN "
+                "'ВЛ-' || printf('%g', voltage_kv) || "
+                "'кВ \"' || name || '\"' "
+            "ELSE name "
+        "END AS display_name "
         "FROM connections "
         "WHERE substation_id = :substationId "
-        "ORDER BY name;");
+        "ORDER BY connection_type ASC, "
+        "voltage_kv DESC, cell_number ASC, "
+        "name COLLATE NOCASE ASC;"
+        );
+
     // биндим значения в запрос
     query.bindValue(":substationId", substationId);
+
     // проверяем, что запрос выполнен
     if (!query.exec())
     {
         qDebug() << "loadConnection error: " << query.lastError().text();
         return;
     }
+
     // вставляем полученные данные в выпадающий список
     while (query.next())
     {
         int id = query.value("id").toInt();
-        QString name = query.value("name").toString();
+
+        QString name = query.value("display_name").toString();
+
         ui->connectionComboBox->addItem(name, id);
     }
 }
@@ -439,25 +614,48 @@ void CreateActWidget::loadConnectionData(int connectionId) const
     // создаем запрос и подготавливаем его
     QSqlQuery query(m_database.getDatabase());
     query.prepare(
-        "SELECT voltage_kv, ct_ratio "
+        "SELECT voltage_kv, "
+        "ct_primary_current, ct_secondary_current "
         "FROM connections "
         "WHERE id = :connectionId;");
+
     // биндим переменные в запрос
     query.bindValue(":connectionId", connectionId);
+
     // проверяем, что запрос выполняется
     if (!query.exec())
     {
         qDebug() << "loadConnectionData error: " << query.lastError().text();
         return;
     }
+
     // проверяем, что есть хоть одно значение
     if (!query.next())
     {
         return;
     }
     // получаем значения и вставляем их в поля
-    QString voltage = query.value("voltage_kv").toString();
-    QString ctRatio = query.value("ct_ratio").toString();
+    const QString voltage = query.value("voltage_kv").toString();
+
+    const int secondary =
+        query.value("ct_secondary_current").toInt();
+
+    QString ctRatio;
+
+    if (secondary == 0)
+    {
+        ctRatio = "Прямого включения";
+    }
+    else
+    {
+        const int primary =
+            query.value("ct_primary_current").toInt();
+
+        ctRatio = QString("%1/%2")
+                      .arg(primary)
+                      .arg(secondary);
+    }
+
     ui->voltageLineEdit->setText(voltage + " кВ");
     ui->ctRatioLineEdit->setText(ctRatio);
 }
@@ -465,6 +663,11 @@ void CreateActWidget::loadConnectionData(int connectionId) const
 // метод проверки правильности заполнения формы
 bool CreateActWidget::validateForm()
 {
+
+    // Определяем тип акта для выбора необходимых проверок
+    const int actTypeId = ui->actTypeComboBox->currentData().toInt();
+    const bool isGroupReading = (actTypeId == 3);
+
     // 1. Проверяем тип акта
     if (!ui->actTypeComboBox->currentData().isValid())
     {
@@ -510,7 +713,8 @@ bool CreateActWidget::validateForm()
     }
 
     // 5. Проверяем присоединение
-    if (!ui->connectionComboBox->currentData().isValid())
+    // Для группового акта присоединения выбираются в отдельных карточках
+    if (!isGroupReading && !ui->connectionComboBox->currentData().isValid())
     {
         // переключаемся на нужную вкладку
         ui->actTabWidget->setCurrentWidget(ui->mainTab);
@@ -533,7 +737,8 @@ bool CreateActWidget::validateForm()
 
     // 7-10. Проверяем введенные данные прибора.
     // Объединили теперь так как это всё в одном классе
-    if (!m_primaryMeterWidget->validate())
+    // Основной прибор проверяем только для обычных актов
+    if (!isGroupReading && !m_primaryMeterWidget->validate())
     {
         // переключаемся на нужную вкладку
         ui->actTabWidget->setCurrentWidget(ui->metersTab);
@@ -542,7 +747,6 @@ bool CreateActWidget::validateForm()
 
     // добавляем проверку введенных полей второго прибора учета, если он видим
     // в данном типе акта
-    const int actTypeId = ui->actTypeComboBox->currentData().toInt();
     if (actTypeId == 2)
     {
         if (!m_secondaryMeterWidget->validate())
@@ -662,6 +866,18 @@ bool CreateActWidget::validateForm()
 // главный метод сохранения акта
 bool CreateActWidget::saveAct(bool generateDocument)
 {
+
+    const int actTypeId = ui->actTypeComboBox->currentData().toInt();
+
+    if (actTypeId == 3)
+    {
+        if (!validateUniqueMeters())
+            return false;
+
+        if (!validateReadingConnections())
+            return false;
+    }
+
     // проверяем, что форма заполнена правильно
     if (!validateForm())
         return false;
@@ -686,44 +902,56 @@ bool CreateActWidget::saveAct(bool generateDocument)
         m_database.rollback();
         return false;
     }
-    // сохраняем первый прибор
-    int primaryActMeterId = insertActMeter(actId, m_primaryMeterWidget, primaryMeterRole());
-    if (primaryActMeterId < 0)
+
+    if (actTypeId == 3)
     {
-        m_database.rollback();
-        return false;
-    }
-    // и его показания
-    if (!insertReadings(primaryActMeterId, m_primaryMeterWidget))
-    {
-        m_database.rollback();
-        return false;
-    }
-    // пробуем обновить год поверки прибора учета
-    if (!updateMeterVerificationYear(m_primaryMeterWidget))
-    {
-        m_database.rollback();
-        return false;
-    }
-    // проверяем на предмет наличия замены и сохраняем при наличии
-    int actTypeId = ui->actTypeComboBox->currentData().toInt();
-    if (actTypeId == 2)
-    {
-        int secondaryActMeterId = insertActMeter(actId, m_secondaryMeterWidget, InstalledMeter);
-        if (secondaryActMeterId < 0)
+        // Сохраняем все карточки группового снятия показаний
+        if (!insertReadingConnections(actId))
         {
             m_database.rollback();
             return false;
         }
-        if (!insertReadings(secondaryActMeterId, m_secondaryMeterWidget))
+    }
+    else
+    {
+        // сохраняем первый прибор
+        int primaryActMeterId = insertActMeter(actId, m_primaryMeterWidget, primaryMeterRole());
+        if (primaryActMeterId < 0)
         {
             m_database.rollback();
             return false;
         }
-        if (!updateMeterVerificationYear(m_secondaryMeterWidget))
+        // и его показания
+        if (!insertReadings(primaryActMeterId, m_primaryMeterWidget))
         {
             m_database.rollback();
             return false;
+        }
+        // пробуем обновить год поверки прибора учета
+        if (!updateMeterVerificationYear(m_primaryMeterWidget))
+        {
+            m_database.rollback();
+            return false;
+        }
+        // проверяем на предмет наличия замены и сохраняем при наличии
+        if (actTypeId == 2)
+        {
+            int secondaryActMeterId = insertActMeter(actId, m_secondaryMeterWidget, InstalledMeter);
+            if (secondaryActMeterId < 0)
+            {
+                m_database.rollback();
+                return false;
+            }
+            if (!insertReadings(secondaryActMeterId, m_secondaryMeterWidget))
+            {
+                m_database.rollback();
+                return false;
+            }
+            if (!updateMeterVerificationYear(m_secondaryMeterWidget))
+            {
+                m_database.rollback();
+                return false;
+            }
         }
     }
 
@@ -818,6 +1046,7 @@ bool CreateActWidget::saveAct(bool generateDocument)
 
 bool CreateActWidget::updateAct()
 {
+
     if (m_editActId < 0)
     {
         QMessageBox::critical(this, "Ошибка",
@@ -848,6 +1077,21 @@ bool CreateActWidget::updateAct()
 
     // Получаем данные текущего акта
     const ActData current = collectActData();
+
+    // Для группового акта проверяем приборы и состав присоединений.
+    const bool isGroupReading =
+        ui->actTypeComboBox->currentData().toInt() == 3;
+
+    if (isGroupReading)
+    {
+        if (!validateUniqueMeters() ||
+            !validateReadingConnections() ||
+            !validateOriginalReadingConnections(original))
+        {
+            return false;
+        }
+    }
+
     // Проверяем, изменился ли акт по сравнению с записей в БД
     const bool changed = hasActChanges(original, current);
 
@@ -879,100 +1123,115 @@ bool CreateActWidget::updateAct()
         return false;
     }
 
-    // Удаляем старые дочерние данные
-    if (!deleteActDetails())
+    if (isGroupReading)
     {
-        m_database.rollback();
-        return false;
-    }
-
-    // Сторонние представители
-    if (!insertExternalRepresentatives(m_editActId))
-    {
-        m_database.rollback();
-        return false;
-    }
-
-    // Основной прибор
-    const int primaryActMeterId =
-        insertActMeter(m_editActId, m_primaryMeterWidget, primaryMeterRole());
-
-    if (primaryActMeterId < 0)
-    {
-        m_database.rollback();
-        return false;
-    }
-
-    if (!insertReadings(primaryActMeterId, m_primaryMeterWidget))
-    {
-        m_database.rollback();
-        return false;
-    }
-
-    if (!updateMeterVerificationYear(m_primaryMeterWidget))
-    {
-        m_database.rollback();
-        return false;
-    }
-
-    const int actTypeId =
-        ui->actTypeComboBox->currentData().toInt();
-
-    // Второй прибор при замене
-    if (actTypeId == 2)
-    {
-        const int secondaryActMeterId =
-            insertActMeter(m_editActId, m_secondaryMeterWidget, InstalledMeter);
-
-        if (secondaryActMeterId < 0)
+        // Обновляем приборы и показания без удаления записей.
+        if (!updateReadingConnections(original))
         {
             m_database.rollback();
             return false;
         }
 
-        if (!insertReadings(secondaryActMeterId, m_secondaryMeterWidget))
+    }
+    else
+    {
+        // Удаляем старые дочерние данные
+        if (!deleteActDetails())
         {
             m_database.rollback();
             return false;
+        }
+
+
+
+        // Основной прибор
+        const int primaryActMeterId =
+            insertActMeter(m_editActId, m_primaryMeterWidget, primaryMeterRole());
+
+        if (primaryActMeterId < 0)
+        {
+            m_database.rollback();
+            return false;
+        }
+
+        if (!insertReadings(primaryActMeterId, m_primaryMeterWidget))
+        {
+            m_database.rollback();
+            return false;
+        }
+
+        if (!updateMeterVerificationYear(m_primaryMeterWidget))
+        {
+            m_database.rollback();
+            return false;
+        }
+
+        const int actTypeId =
+            ui->actTypeComboBox->currentData().toInt();
+
+        // Второй прибор при замене
+        if (actTypeId == 2)
+        {
+            const int secondaryActMeterId =
+                insertActMeter(m_editActId, m_secondaryMeterWidget, InstalledMeter);
+
+            if (secondaryActMeterId < 0)
+            {
+                m_database.rollback();
+                return false;
+            }
+
+            if (!insertReadings(secondaryActMeterId, m_secondaryMeterWidget))
+            {
+                m_database.rollback();
+                return false;
+            }
+        }
+
+        // ТТ - установка
+        if (actTypeId == 6)
+        {
+            const QList<ActCurrentTransformerData> installedTransformers =
+                m_installedCtPhasePanel->data(InstalledCurrentTransformer);
+
+            if (!insertActCurrentTransformers(
+                m_editActId, installedTransformers))
+            {
+                m_database.rollback();
+                return false;
+            }
+        }
+
+        // ТТ - замена
+        if (actTypeId == 7)
+        {
+            const QList <ActCurrentTransformerData> removedTransformers =
+                m_removedCtPhasePanel->data(RemovedCurrentTransformer);
+
+            if (!insertActCurrentTransformers(
+                m_editActId, removedTransformers))
+            {
+                m_database.rollback();
+                return false;
+            }
+
+            const QList<ActCurrentTransformerData> installedTransformers =
+                m_installedCtPhasePanel->data(InstalledCurrentTransformer);
+
+            if (!insertActCurrentTransformers(
+                m_editActId, installedTransformers))
+            {
+                m_database.rollback();
+                return false;
+            }
         }
     }
 
-    // ТТ - установка
-    if (actTypeId == 6)
+    // Обновляем сторонних представителей независимо от типа акта.
+    if (!updateExternalRepresentatives(original))
     {
-        const QList<ActCurrentTransformerData> installedTransformers =
-            m_installedCtPhasePanel->data(InstalledCurrentTransformer);
-
-        if (!insertActCurrentTransformers(
-            m_editActId, installedTransformers))
-        {
-            m_database.rollback();
-            return false;
-        }
-    }
-
-    // ТТ - замена
-    if (actTypeId == 7)
-    {
-        const QList <ActCurrentTransformerData> removedTransformers =
-            m_removedCtPhasePanel->data(RemovedCurrentTransformer);
-
-        if (!insertActCurrentTransformers(
-            m_editActId, removedTransformers))
-        {
-            m_database.rollback();
-            return false;
-        }
-
-        const QList<ActCurrentTransformerData> installedTransformers =
-            m_installedCtPhasePanel->data(InstalledCurrentTransformer);
-
-        if (!insertActCurrentTransformers(
-            m_editActId, installedTransformers))
-        {
-            m_database.rollback();
-            return false;
-        }
+        m_database.rollback();
+        return false;
     }
 
     // Векторная диграмма
@@ -1010,7 +1269,40 @@ bool CreateActWidget::updateActMainData()
 {
     const int actTypeId = ui->actTypeComboBox->currentData().toInt();
 
-    const int connectionId = ui->connectionComboBox->currentData().toInt();
+    // Для группового акта сохраняем исходное общее присоединение.
+    // Для остальных типов используем выбор из основной формы.
+    QVariant connectionId;
+
+    if (actTypeId == 3)
+    {
+        QSqlQuery connectionQuery(m_database.getDatabase());
+
+        connectionQuery.prepare(
+            "SELECT connection_id "
+            "FROM acts "
+            "WHERE id = :actId;");
+
+        connectionQuery.bindValue(":actId", m_editActId);
+
+        if (!connectionQuery.exec() || !connectionQuery.next())
+        {
+            QMessageBox::critical(
+                this,
+                "Ошибка базы данных",
+                "Не удалось получить присоединение акта: "
+                + connectionQuery.lastError().text());
+
+            return false;
+        }
+
+        connectionId = connectionQuery.value("connection_id");
+    }
+    else
+    {
+        connectionId = ui->connectionComboBox->currentData();
+    }
+
+    const int substationId = ui->substationComboBox->currentData().toInt();
 
     const int employeeId = ui->employeeComboBox->currentData().toInt();
 
@@ -1043,6 +1335,35 @@ bool CreateActWidget::updateActMainData()
         replacementDuration = ui->replacementDurationSpinBox->value();
     }
 
+    // Получаем исходные данные представителя из самого акта.
+    // Они сохраняют ФИО и должность на момент оформления документа.
+    QSqlQuery originalEmployeeQuery(m_database.getDatabase());
+
+    originalEmployeeQuery.prepare(
+        "SELECT employee_id, employee_name, employee_position "
+        "FROM acts "
+        "WHERE id = :actId;");
+
+    originalEmployeeQuery.bindValue(":actId", m_editActId);
+
+    if (!originalEmployeeQuery.exec() || !originalEmployeeQuery.next())
+    {
+        QMessageBox::critical(this, "Ошибка базы данных",
+            "Не удалось получить исходные данные представителя:\n"
+            + originalEmployeeQuery.lastError().text());
+
+        return false;
+    }
+
+    const int originalEmployeeId =
+        originalEmployeeQuery.value("employee_id").toInt();
+
+    const QString originalEmployeeName =
+        originalEmployeeQuery.value("employee_name").toString();
+
+    const QString originalEmployeePosition =
+        originalEmployeeQuery.value("employee_position").toString();
+
     // Получаем актуальные данные представителя
     QSqlQuery employeeQuery(m_database.getDatabase());
 
@@ -1062,11 +1383,18 @@ bool CreateActWidget::updateActMainData()
         return false;
     }
 
-    const QString employeeName =
-        employeeQuery.value("short_name").toString();
+    // Проверяем, изменился ли представитель предприятия.
+    const bool employeeChanged = (employeeId != originalEmployeeId);
 
-    const QString employeePosition =
-        employeeQuery.value("position").toString();
+    // Если представитель не изменился, сохраняем исторические данные.
+    // При выборе другого сотрудника используем его актуальные сведения.
+    const QString employeeName = employeeChanged
+        ? employeeQuery.value("short_name").toString()
+        : originalEmployeeName;
+
+    const QString employeePosition = employeeChanged
+        ? employeeQuery.value("position").toString()
+        : originalEmployeePosition;
 
     // Перед сохранением акта проверим, изменилось ли присоединение
     // которое выбрано сейчас, и которе мы выбрали
@@ -1088,11 +1416,13 @@ bool CreateActWidget::updateActMainData()
         return false;
     }
 
-    const int oldConnectionId =
-        oldConnectionQuery.value("connection_id").toInt();
+    const QVariant oldConnectionId =
+     oldConnectionQuery.value("connection_id");
 
+    // Для группового акта состав присоединений не изменяется.
+    // Для обычных актов сохраняем существующую проверку.
     const bool connectionChanged =
-        oldConnectionId != connectionId;
+        actTypeId != 3 && oldConnectionId != connectionId;
 
     // Обновляем наш акт
     QSqlQuery query(m_database.getDatabase());
@@ -1102,6 +1432,7 @@ bool CreateActWidget::updateActMainData()
         "version_uuid = :versionUuid, "
         "act_type_id = :actTypeId, "
         "act_date = :actDate, "
+        "substation_id = :substationId, "
         "connection_id = :connectionId, "
         "employee_id = :employeeId, "
         "employee_name = :employeeName, "
@@ -1118,6 +1449,7 @@ bool CreateActWidget::updateActMainData()
 
     query.bindValue(":actTypeId", actTypeId);
     query.bindValue(":actDate", actDate);
+    query.bindValue(":substationId", substationId);
     query.bindValue(":connectionId", connectionId);
 
     query.bindValue(":employeeId", employeeId);
@@ -1163,15 +1495,26 @@ bool CreateActWidget::updateActMainData()
             "SELECT "
             "ar.name AS area_name, "
             "s.name AS substation_name, "
-            "c.name AS connection_name, "
+            "CASE c.connection_type "
+                "WHEN 1 THEN "
+                    "'яч.' || printf('%g', c.voltage_kv) || "
+                    "'кВ №' || c.cell_number || ' \"' || c.name || '\"' "
+                "WHEN 2 THEN "
+                    "'ВЛ-' || printf('%g', c.voltage_kv) || "
+                    "'кВ \"' || c.name || '\"' "
+                "ELSE c.name "
+            "END AS connection_name, "
             "c.voltage_kv, "
-            "c.ct_ratio "
+            "CASE "
+                "WHEN c.ct_secondary_current = 0 THEN 'Прямого включения' "
+                "ELSE CAST(c.ct_primary_current AS TEXT) || '/' || "
+                     "CAST(c.ct_secondary_current AS TEXT) "
+            "END AS ct_ratio "
             "FROM connections c "
-            "JOIN substations s "
-                "ON s.id = c.substation_id "
-            "JOIN areas ar "
-                "ON ar.id = s.area_id "
-            "WHERE c.id = :connectionId;");
+            "JOIN substations s ON s.id = c.substation_id "
+            "JOIN areas ar ON ar.id = s.area_id "
+            "WHERE c.id = :connectionId;"
+        );
 
         connectionQuery.bindValue(":connectionId", connectionId);
 
@@ -1228,25 +1571,6 @@ bool CreateActWidget::updateActMainData()
 bool CreateActWidget::deleteActDetails()
 {
     QSqlQuery query(m_database.getDatabase());
-
-    // Показания приборов
-    query.prepare(
-        "DELETE FROM meter_readings "
-        "WHERE act_meter_id IN ("
-        "SELECT id "
-        "FROM act_meters "
-        "WHERE act_id = :actId"
-        ");");
-
-    query.bindValue(":actId", m_editActId);
-
-    if (!query.exec())
-    {
-        QMessageBox::critical(this, "Ошибка базы данных",
-            "Не удалось удалить старые показания: " + query.lastError().text());
-
-        return false;
-    }
 
     // Приборы учета
     query.prepare(
@@ -1324,7 +1648,25 @@ int CreateActWidget::insertAct()
     {
         workScheduleType = ui->workScheduleComboBox->currentData().toInt();
     }
-    const int connectionId = ui->connectionComboBox->currentData().toInt();
+
+    // Для снятия показаний с одного присоединения
+    // сохраняем его ID в основной записи акта.
+    QVariant connectionId;
+
+    if (actTypeId == 3)
+    {
+        if (m_readingConnectionWidgets.size() == 1)
+        {
+            connectionId =
+                m_readingConnectionWidgets.first()->selectedConnectionId();
+        }
+    }
+    else
+    {
+        connectionId = ui->connectionComboBox->currentData();
+    }
+
+    const int substationId = ui->substationComboBox->currentData().toInt();
     const int employeeId = ui->employeeComboBox->currentData().toInt();
     const QString actDate = ui->actDateEdit->date().toString(Qt::ISODate);
     const QString reason = ui->reasonPlainTextEdit->toPlainText().trimmed();
@@ -1364,92 +1706,129 @@ int CreateActWidget::insertAct()
     QString employeePosition = employeeQuery.value("position").toString();
 
     // Получаем данные места проведения работ для исторического снимка
-    QSqlQuery connectionQuery(m_database.getDatabase());
+    // Подготавливаем исторические сведения о месте проведения работ
+    QString areaName;
+    QString substationName;
+    QVariant connectionName;
+    QVariant connectionVoltage;
+    QVariant connectionCtRatio;
 
-    connectionQuery.prepare(
-        "SELECT "
-        "ar.name AS area_name, "
-        "s.name AS substation_name, "
-        "c.name AS connection_name, "
-        "c.voltage_kv, "
-        "c.ct_ratio "
-        "FROM connections c "
-        "JOIN substations s "
-            "ON s.id = c.substation_id "
-        "JOIN areas ar "
-            "ON ar.id = s.area_id "
-        "WHERE c.id = :connectionId;"
-    );
+    QSqlQuery locationQuery(m_database.getDatabase());
 
-    connectionQuery.bindValue(":connectionId", connectionId);
-
-    if (!connectionQuery.exec() || !connectionQuery.next())
+    if (actTypeId == 3 && connectionId.isNull())
     {
-        QMessageBox::critical(this, "Ошибка базы данных",
-            "Не удалось получить данные присоединения: "
-            + connectionQuery.lastError().text());
+        // Групповой акт: получаем только участок и подстанцию
+        locationQuery.prepare(
+            "SELECT "
+            "ar.name AS area_name, "
+            "s.name AS substation_name "
+            "FROM substations s "
+            "JOIN areas ar ON ar.id = s.area_id "
+            "WHERE s.id = :substationId;");
+
+        locationQuery.bindValue(":substationId", substationId);
+    }
+    else
+    {
+        // Обычный акт: получаем также сведения об одном присоединении
+        locationQuery.prepare(
+            "SELECT "
+            "ar.name AS area_name, "
+            "s.name AS substation_name, "
+            "CASE c.connection_type "
+                "WHEN 1 THEN "
+                    "'яч.' || printf('%g', c.voltage_kv) || "
+                    "'кВ №' || c.cell_number || ' \"' || c.name || '\"' "
+                "WHEN 2 THEN "
+                    "'ВЛ-' || printf('%g', c.voltage_kv) || "
+                    "'кВ \"' || c.name || '\"' "
+                "ELSE c.name "
+            "END AS connection_name, "
+            "c.voltage_kv, "
+            "CASE "
+                "WHEN c.ct_secondary_current = 0 THEN 'Прямого включения' "
+                "ELSE CAST(c.ct_primary_current AS TEXT) || '/' || "
+                     "CAST(c.ct_secondary_current AS TEXT) "
+            "END AS ct_ratio "
+            "FROM connections c "
+            "JOIN substations s ON s.id = c.substation_id "
+            "JOIN areas ar ON ar.id = s.area_id "
+            "WHERE c.id = :connectionId "
+            "AND s.id = :substationId;");
+
+        locationQuery.bindValue(":connectionId", connectionId);
+        locationQuery.bindValue(":substationId", substationId);
+    }
+
+    // Выполняем запрос и проверяем наличие выбранного объекта
+    if (!locationQuery.exec() || !locationQuery.next())
+    {
+        QMessageBox::critical(
+            this,
+            "Ошибка базы данных",
+            "Не удалось получить сведения о месте проведения работ:\n"
+            + locationQuery.lastError().text());
 
         return -1;
     }
 
-    const QString areaName =
-        connectionQuery.value("area_name").toString();
+    // Сохраняем названия для исторического снимка акта
+    areaName = locationQuery.value("area_name").toString();
+    substationName = locationQuery.value("substation_name").toString();
 
-    const QString substationName =
-        connectionQuery.value("substation_name").toString();
-
-    const QString connectionName =
-        connectionQuery.value("connection_name").toString();
-
-    const QVariant connectionVoltage =
-        connectionQuery.value("voltage_kv");
-
-    const QString connectionCtRatio =
-        connectionQuery.value("ct_ratio").toString();
+    if (!connectionId.isNull())
+    {
+        // Для обычного акта сохраняем параметры присоединения
+        connectionName = locationQuery.value("connection_name");
+        connectionVoltage = locationQuery.value("voltage_kv");
+        connectionCtRatio = locationQuery.value("ct_ratio");
+    }
 
     // вносим данные в базу данных
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
         "INSERT INTO acts ("
-        "uuid, "
-        "version_uuid, "
-        "act_type_id, "
-        "act_date, "
-        "connection_id, "
-        "area_name, "
-        "substation_name, "
-        "connection_name, "
-        "connection_voltage_kv, "
-        "connection_ct_ratio, "
-        "employee_id, "
-        "employee_name, "
-        "employee_position, "
-        "reason, "
-        "result, "
-        "seal_number, "
-        "replacement_duration_minutes, "
-        "work_schedule_type"
+            "uuid, "
+            "version_uuid, "
+            "act_type_id, "
+            "act_date, "
+            "substation_id, "
+            "connection_id, "
+            "area_name, "
+            "substation_name, "
+            "connection_name, "
+            "connection_voltage_kv, "
+            "connection_ct_ratio, "
+            "employee_id, "
+            "employee_name, "
+            "employee_position, "
+            "reason, "
+            "result, "
+            "seal_number, "
+            "replacement_duration_minutes, "
+            "work_schedule_type"
         ") "
         "VALUES ("
-        ":uuid, "
-        ":versionUuid, "
-        ":actTypeId, "
-        ":actDate, "
-        ":connectionId, "
-        ":areaName, "
-        ":substationName, "
-        ":connectionName, "
-        ":connectionVoltage, "
-        ":connectionCtRatio, "
-        ":employeeId, "
-        ":employeeName, "
-        ":employeePosition, "
-        ":reason, "
-        ":result, "
-        ":sealNumber,"
-        ":replacementDuration, "
-        ":workScheduleType"
+            ":uuid, "
+            ":versionUuid, "
+            ":actTypeId, "
+            ":actDate, "
+            ":substationId, "
+            ":connectionId, "
+            ":areaName, "
+            ":substationName, "
+            ":connectionName, "
+            ":connectionVoltage, "
+            ":connectionCtRatio, "
+            ":employeeId, "
+            ":employeeName, "
+            ":employeePosition, "
+            ":reason, "
+            ":result, "
+            ":sealNumber,"
+            ":replacementDuration, "
+            ":workScheduleType"
         ");");
 
     query.bindValue(":uuid", UuidUtils::generate());
@@ -1457,6 +1836,7 @@ int CreateActWidget::insertAct()
 
     query.bindValue(":actTypeId", actTypeId);
     query.bindValue(":actDate", actDate);
+    query.bindValue(":substationId", substationId);
     query.bindValue(":connectionId", connectionId);
 
     query.bindValue(":areaName", areaName);
@@ -1487,26 +1867,85 @@ int CreateActWidget::insertAct()
     return query.lastInsertId().toInt();
 }
 
-// сохраняем прибор с привязкой к акту
+// Сохраняет прибор с привязкой к указанному присоединению
 int CreateActWidget::insertActMeter(
-    const int actId, const MeterActWidget* meterWidget, const int role)
+    const int actId,
+    const MeterActWidget* meterWidget,
+    const int role,
+    int connectionId)
 {
-    // вставляем полученные данные в нашу таблицу связи акта и прибора
+    // Для обычных актов получаем присоединение из основной формы
+    if (connectionId == -1)
+    {
+        connectionId = ui->connectionComboBox->currentData().toInt();
+    }
+
+    // Получаем исторические данные присоединения.
+    QSqlQuery connectionQuery(m_database.getDatabase());
+
+    connectionQuery.prepare(
+        "SELECT "
+        "CASE connection_type "
+            "WHEN 1 THEN "
+                "'яч.' || printf('%g', voltage_kv) || "
+                "'кВ №' || cell_number || ' \"' || name || '\"' "
+            "WHEN 2 THEN "
+                "'ВЛ-' || printf('%g', voltage_kv) || "
+                "'кВ \"' || name || '\"' "
+            "ELSE name "
+        "END AS connection_name, "
+        "voltage_kv, "
+        "CASE "
+            "WHEN ct_secondary_current = 0 "
+                "THEN 'Прямого включения' "
+            "ELSE CAST(ct_primary_current AS TEXT) || '/' || "
+                 "CAST(ct_secondary_current AS TEXT) "
+        "END AS ct_ratio "
+        "FROM connections "
+        "WHERE id = :connectionId "
+        "AND substation_id = :substationId;");
+
+    connectionQuery.bindValue(":connectionId", connectionId);
+    connectionQuery.bindValue(
+        ":substationId",
+        ui->substationComboBox->currentData().toInt());
+
+    if (!connectionQuery.exec() || !connectionQuery.next())
+    {
+        QMessageBox::critical(
+            this,
+            "Ошибка базы данных",
+            "Не удалось получить данные присоединения: "
+            + connectionQuery.lastError().text());
+
+        return -1;
+    }
+
+    // Сохраняем прибор вместе с историческим снимком.
     QSqlQuery query(m_database.getDatabase());
 
     query.prepare(
         "INSERT INTO act_meters ("
+        "uuid, "
         "act_id, "
         "meter_id, "
+        "connection_id, "
+        "connection_name, "
+        "connection_voltage_kv, "
+        "connection_ct_ratio, "
         "role, "
         "meter_name, "
         "serial_number, "
         "accuracy_class, "
         "verification_year"
-        ") "
-        "VALUES ("
+        ") VALUES ("
+        ":uuid, "
         ":actId, "
         ":meterId, "
+        ":connectionId, "
+        ":connectionName, "
+        ":connectionVoltage, "
+        ":connectionCtRatio, "
         ":role, "
         ":meterName, "
         ":serialNumber, "
@@ -1514,8 +1953,23 @@ int CreateActWidget::insertActMeter(
         ":verificationYear"
         ");");
 
+    query.bindValue(":uuid", UuidUtils::generate());
     query.bindValue(":actId", actId);
     query.bindValue(":meterId", meterWidget->meterId());
+    query.bindValue(":connectionId", connectionId);
+
+    query.bindValue(
+        ":connectionName",
+        connectionQuery.value("connection_name"));
+
+    query.bindValue(
+        ":connectionVoltage",
+        connectionQuery.value("voltage_kv"));
+
+    query.bindValue(
+        ":connectionCtRatio",
+        connectionQuery.value("ct_ratio"));
+
     query.bindValue(":role", role);
     query.bindValue(":meterName", meterWidget->meterName());
     query.bindValue(":serialNumber", meterWidget->serialNumber());
@@ -1524,15 +1978,501 @@ int CreateActWidget::insertActMeter(
 
     if (!query.exec())
     {
-        QMessageBox::critical(this, "Ошибка базы данных",
-            "Не удалось сохранить данные прибора в акте: " + query.lastError().text());
+        QMessageBox::critical(
+            this,
+            "Ошибка базы данных",
+            "Не удалось сохранить данные прибора в акте: "
+            + query.lastError().text());
 
         return -1;
     }
-    // возвращаем id введенного прибора
+
+    // возвращаем ID добавленного прибора
     return query.lastInsertId().toInt();
 }
 
+// Сохраняет все присоединения, приборы и показания группового акта
+bool CreateActWidget::insertReadingConnections(int actId)
+{
+    // Последовательно обрабатываем каждую карточку
+    for (ReadingConnectionWidget* readingWidget : m_readingConnectionWidgets)
+    {
+        const int connectionId = readingWidget->selectedConnectionId();
+        MeterActWidget* meterWidget = readingWidget->meterWidget();
+
+        // Сохраняем прибор с историческими данными присоединения
+        const int actMeterId = insertActMeter(
+            actId,
+            meterWidget,
+            ReadingMeter,
+            connectionId
+        );
+
+        if (actMeterId < 0)
+            return false;
+
+        // Сохраняем выбранные показания прибора
+        if (!insertReadings(actMeterId, meterWidget))
+            return false;
+
+        // Обновляем актуальный год поверки в справочнике приборов
+        if (!updateMeterVerificationYear(meterWidget))
+            return false;
+    }
+
+    return true;
+}
+
+bool CreateActWidget::updateReadingConnections(const ActData &original)
+{
+    // Обновляем существующие приборы группового акта.
+    // Метод должен вызываться внутри общей транзакции.
+
+    QSqlQuery query(m_database.getDatabase());
+
+    query.prepare(
+        "UPDATE act_meters SET "
+        "meter_id = :meterId, "
+        "meter_name = :meterName, "
+        "serial_number = :serialNumber, "
+        "accuracy_class = :accuracyClass, "
+        "verification_year = :verificationYear "
+        "WHERE id = :actMeterId "
+        "AND act_id = :actId "
+        "AND connection_id = :connectionId "
+        "AND role = 4;");
+
+    for (ReadingConnectionWidget *widget : m_readingConnectionWidgets)
+    {
+        const ActMeterData meter = widget->data();
+
+        // При редактировании у каждой карточки
+        // должна существовать исходная запись в БД.
+        if (meter.id < 0 || meter.meterId < 0 ||
+            meter.connectionId < 0)
+        {
+            QMessageBox::warning(
+                this,
+                "Ошибка данных",
+                "Не удалось определить прибор или присоединение "
+                "редактируемого акта.");
+
+            return false;
+        }
+
+        // Ищем исходные данные прибора по ID записи акта.
+        const ActMeterData *originalMeter = nullptr;
+
+        for (const ActMeterData &item : original.meters)
+        {
+            if (item.id == meter.id)
+            {
+                originalMeter = &item;
+                break;
+            }
+        }
+
+        if (!originalMeter)
+        {
+            QMessageBox::warning(
+                this,
+                "Ошибка данных",
+                "Не удалось найти исходные данные прибора учёта.");
+
+            return false;
+        }
+
+        // Определяем, изменились ли характеристики прибора.
+        const bool meterChanged =
+            meter.meterId != originalMeter->meterId ||
+            meter.name != originalMeter->name ||
+            meter.serialNumber != originalMeter->serialNumber ||
+            meter.accuracyClass != originalMeter->accuracyClass ||
+            meter.verificationYear != originalMeter->verificationYear;
+
+        if (meterChanged)
+        {
+            query.bindValue(":meterId", meter.meterId);
+            query.bindValue(":meterName", meter.name);
+            query.bindValue(":serialNumber", meter.serialNumber);
+            query.bindValue(":accuracyClass", meter.accuracyClass);
+            query.bindValue(":verificationYear", meter.verificationYear);
+
+            query.bindValue(":actMeterId", meter.id);
+            query.bindValue(":actId", m_editActId);
+            query.bindValue(":connectionId", meter.connectionId);
+
+            if (!query.exec())
+            {
+                QMessageBox::critical(
+                    this,
+                    "Ошибка базы данных",
+                    "Не удалось обновить прибор учёта:\n"
+                    + query.lastError().text());
+
+                return false;
+            }
+
+
+            // Если запись не найдена, продолжать сохранение нельзя.
+            if (query.numRowsAffected() != 1)
+            {
+                QMessageBox::warning(
+                    this,
+                    "Ошибка данных",
+                    "Запись прибора учёта не найдена "
+                    "или её присоединение изменилось.");
+
+                return false;
+            }
+        }
+
+        // Обновляем показания прибора.
+        // Существующие записи сохраняют свои ID.
+        QSqlQuery readingQuery(m_database.getDatabase());
+
+        readingQuery.prepare(
+            "INSERT INTO meter_readings ("
+            "act_meter_id, reading_type_id, value"
+            ") VALUES ("
+            ":actMeterId, :readingTypeId, :value"
+            ") "
+            "ON CONFLICT(act_meter_id, reading_type_id) "
+            "DO UPDATE SET value = excluded.value;");
+
+        for (const ActMeterReadingData &reading : meter.readings)
+        {
+            // Ищем исходное показание того же типа.
+            const ActMeterReadingData *originalReading = nullptr;
+
+            for (const ActMeterReadingData &item : originalMeter->readings)
+            {
+                if (item.typeId == reading.typeId)
+                {
+                    originalReading = &item;
+                    break;
+                }
+            }
+
+            // Новое или изменённое показание необходимо сохранить.
+            const bool readingChanged =
+                !originalReading ||
+                std::abs(reading.value - originalReading->value) > 1e-6;
+
+            // Проверяем тип показания
+            if (reading.typeId < 1 || reading.typeId > 4)
+            {
+                QMessageBox::warning(
+                    this,
+                    "Ошибка данных",
+                    "Обнаружен неизвестный тип показания.");
+
+                return false;
+            }
+
+            if (!readingChanged)
+                continue;
+
+            readingQuery.bindValue(":actMeterId", meter.id);
+            readingQuery.bindValue(":readingTypeId", reading.typeId);
+            readingQuery.bindValue(":value", reading.value);
+
+            if (!readingQuery.exec())
+            {
+                QMessageBox::critical(
+                    this,
+                    "Ошибка базы данных",
+                    "Не удалось обновить показания прибора:\n"
+                    + readingQuery.lastError().text());
+
+                return false;
+            }
+        }
+
+        // Удаляем показания, отметки которых сняты в форме.
+        QSqlQuery deleteQuery(m_database.getDatabase());
+
+        deleteQuery.prepare(
+            "DELETE FROM meter_readings "
+            "WHERE act_meter_id = :actMeterId "
+            "AND reading_type_id = :readingTypeId;");
+
+        for (const ActMeterReadingData &oldReading : originalMeter->readings)
+        {
+            // Проверяем, осталось ли исходное показание в форме.
+            bool stillExists = false;
+
+            for (const ActMeterReadingData &currentReading : meter.readings)
+            {
+                if (currentReading.typeId == oldReading.typeId)
+                {
+                    stillExists = true;
+                    break;
+                }
+            }
+
+            // Показание осталось — удалять ничего не нужно.
+            if (stillExists)
+                continue;
+
+            // Отметка снята — удаляем только это показание.
+            deleteQuery.bindValue(":actMeterId", meter.id);
+            deleteQuery.bindValue(":readingTypeId", oldReading.typeId);
+
+            if (!deleteQuery.exec())
+            {
+                QMessageBox::critical(
+                    this,
+                    "Ошибка базы данных",
+                    "Не удалось удалить снятое показание:\n"
+                    + deleteQuery.lastError().text());
+
+                return false;
+            }
+
+            if (deleteQuery.numRowsAffected() != 1)
+            {
+                QMessageBox::warning(
+                    this,
+                    "Ошибка данных",
+                    "Исходное показание не найдено в базе данных.");
+
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+// Обновление сторонних представителей редактируемого акта.
+// Вызывается только внутри уже открытой транзакции.
+bool CreateActWidget::updateExternalRepresentatives(
+    const ActData &original)
+{
+    QSqlQuery query(m_database.getDatabase());
+
+    // Удаляем только представителей, отсутствующих в текущей форме.
+    for (const ExternalRepresentativeData &oldRepresentative :
+         original.externalRepresentatives)
+    {
+        // Проверяем, осталась ли исходная запись в форме.
+        bool exists = false;
+
+        for (ExternalRepresentativeWidget *widget :
+             m_externalRepresentativeWidgets)
+        {
+            if (widget->id() == oldRepresentative.id)
+            {
+                exists = true;
+                break;
+            }
+        }
+
+        // Существующего представителя пока не трогаем.
+        if (exists)
+            continue;
+
+        QSqlQuery query(m_database.getDatabase());
+
+        if (!query.prepare(
+            "DELETE FROM external_representatives "
+            "WHERE id = :id AND act_id = :actId;"))
+        {
+            QMessageBox::critical(this, "Ошибка базы данных",
+                "Не удалось подготовить удаление представителя:\n"
+                + query.lastError().text());
+            return false;
+        }
+
+        query.bindValue(":id", oldRepresentative.id);
+        query.bindValue(":actId", m_editActId);
+
+        if (!query.exec() || query.numRowsAffected() != 1)
+        {
+            QMessageBox::critical(this, "Ошибка базы данных",
+                "Не удалось удалить стороннего представителя:\n"
+                + query.lastError().text());
+            return false;
+        }
+    }
+
+    // Обновляем существующих и добавляем новых представителей.
+    for (ExternalRepresentativeWidget *widget :
+         m_externalRepresentativeWidgets)
+    {
+        // Новый представитель ещё не имеет идентификатора в базе данных.
+        if (widget->id() == -1)
+        {
+            QSqlQuery query(m_database.getDatabase());
+
+            if (!query.prepare(
+                "INSERT INTO external_representatives ("
+                "act_id, organization, short_name, position"
+                ") VALUES ("
+                ":actId, :organization, :shortName, :position"
+                ");"))
+            {
+                QMessageBox::critical(this, "Ошибка базы данных",
+                    "Не удалось подготовить добавление представителя:\n"
+                    + query.lastError().text());
+                return false;
+            }
+
+            query.bindValue(":actId", m_editActId);
+            query.bindValue(":organization", widget->organization());
+            query.bindValue(":shortName", widget->shortName());
+            query.bindValue(":position", widget->position());
+
+            if (!query.exec())
+            {
+                QMessageBox::critical(this, "Ошибка базы данных",
+                    "Не удалось добавить стороннего представителя:\n"
+                    + query.lastError().text());
+                return false;
+            }
+
+            continue;
+        }
+
+        // Находим исходные данные существующего представителя.
+        const ExternalRepresentativeData *originalRepresentative = nullptr;
+
+        for (const ExternalRepresentativeData &representative :
+             original.externalRepresentatives)
+        {
+            if (representative.id == widget->id())
+            {
+                originalRepresentative = &representative;
+                break;
+            }
+        }
+
+        // Не допускаем обновления записи, отсутствующей в исходном акте.
+        if (!originalRepresentative)
+        {
+            QMessageBox::critical(this, "Ошибка данных",
+                "Не найден исходный сторонний представитель.");
+            return false;
+        }
+
+        // Неизменённую запись оставляем без обновления.
+        if (originalRepresentative->organization == widget->organization() &&
+            originalRepresentative->shortName == widget->shortName() &&
+            originalRepresentative->position == widget->position())
+        {
+            continue;
+        }
+
+        QSqlQuery query(m_database.getDatabase());
+
+        if (!query.prepare(
+            "UPDATE external_representatives SET "
+            "organization = :organization, "
+            "short_name = :shortName, "
+            "position = :position "
+            "WHERE id = :id AND act_id = :actId;"))
+        {
+            QMessageBox::critical(this, "Ошибка базы данных",
+                "Не удалось подготовить обновление представителя:\n"
+                + query.lastError().text());
+            return false;
+        }
+
+        query.bindValue(":organization", widget->organization());
+        query.bindValue(":shortName", widget->shortName());
+        query.bindValue(":position", widget->position());
+        query.bindValue(":id", widget->id());
+        query.bindValue(":actId", m_editActId);
+
+        if (!query.exec() || query.numRowsAffected() != 1)
+        {
+            QMessageBox::critical(this, "Ошибка базы данных",
+                "Не удалось обновить стороннего представителя:\n"
+                + query.lastError().text());
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool CreateActWidget::validateOriginalReadingConnections(
+    const ActData &original)
+{
+    // Проверяем, что количество карточек не изменилось.
+    if (m_readingConnectionWidgets.size() != original.meters.size())
+    {
+        QMessageBox::warning(
+            this,
+            "Ошибка данных",
+            "Количество присоединений в акте изменилось.");
+
+        return false;
+    }
+
+    // Собираем исходные записи по ID.
+    QHash<int, int> originalConnections;
+
+    for (const ActMeterData &meter : original.meters)
+    {
+        if (meter.id < 0 || meter.role != 4 ||
+            originalConnections.contains(meter.id))
+        {
+            QMessageBox::warning(
+                this,
+                "Ошибка данных",
+                "Исходные данные приборов акта некорректны.");
+
+            return false;
+        }
+
+        originalConnections.insert(meter.id, meter.connectionId);
+    }
+
+    // Проверяем каждую карточку редактируемого акта.
+    for (ReadingConnectionWidget *widget : m_readingConnectionWidgets)
+    {
+        const ActMeterData meter = widget->data();
+
+        // Карточка должна соответствовать существующей записи.
+        if (!originalConnections.contains(meter.id))
+        {
+            QMessageBox::warning(
+                this,
+                "Ошибка данных",
+                "Обнаружена новая или неизвестная карточка присоединения.");
+
+            return false;
+        }
+
+        // Присоединение должно остаться прежним.
+        if (originalConnections.value(meter.id) != meter.connectionId)
+        {
+            QMessageBox::warning(
+                this,
+                "Ошибка данных",
+                "Изменение присоединений при редактировании запрещено.");
+
+            return false;
+        }
+
+        // Удаляем проверенную запись, чтобы обнаружить дубликаты.
+        originalConnections.remove(meter.id);
+    }
+
+    if (!originalConnections.isEmpty())
+    {
+        QMessageBox::warning(
+            this,
+            "Ошибка данных",
+            "Некоторые исходные присоединения отсутствуют.");
+
+        return false;
+    }
+
+    return true;
+}
 // метод вставки показаний с привязкой к прибору
 bool CreateActWidget::insertReadings(int actMeterId, MeterActWidget* meterWidget)
 {
@@ -1605,6 +2545,30 @@ bool CreateActWidget::updateMeterVerificationYear(MeterActWidget* meterWidget)
 // метод показа/скрытия поля для второго прибора учета
 void CreateActWidget::updateActTypeUi()
 {
+    // Условие выбора акта "Снятие показаний"
+    const bool isReadingAct =
+        ui->actTypeComboBox->currentData().isValid() &&
+        ui->actTypeComboBox->currentData().toInt() == 3;
+
+    // Скрываем поля присоединения и его характеристик
+    ui->connectionLabel->setVisible(!isReadingAct);
+    ui->connectionComboBox->setVisible(!isReadingAct);
+
+    ui->voltageLabel->setVisible(!isReadingAct);
+    ui->voltageLineEdit->setVisible(!isReadingAct);
+
+    ui->ctRatioLabel->setVisible(!isReadingAct);
+    ui->ctRatioLineEdit->setVisible(!isReadingAct);
+
+    // Новый интерфейс для снятия показаний
+    ui->readingMetersContainer->setVisible(isReadingAct);
+    ui->addReadingMeterButton->setVisible(isReadingAct);
+    // Скрываем старую карточку при групповом снятии показаний
+    ui->primaryMeterCard->setVisible(!isReadingAct);
+
+    // Показываем или скрываем подсказку
+    ui->connectionInfoLabel->setVisible(isReadingAct);
+
     // Временно для проверки скрываем панели
     ui->removedCtCard->setVisible(false);
     ui->installedCtCard->setVisible(false);
@@ -2202,6 +3166,12 @@ void CreateActWidget::loadActForEditing(int actId)
         ui->substationComboBox->setCurrentIndex(substationIndex);
     }
 
+    // При редактировании запрещаем изменять
+    // тип акта и место проведения работ
+    ui->actTypeComboBox->setEnabled(false);
+    ui->areaComboBox->setEnabled(false);
+    ui->substationComboBox->setEnabled(false);
+
     // Загружаем присоединение
     const int connectionIndex =
         ui->connectionComboBox->findData(data.connectionId);
@@ -2209,6 +3179,59 @@ void CreateActWidget::loadActForEditing(int actId)
     if (connectionIndex >= 0)
     {
         ui->connectionComboBox->setCurrentIndex(connectionIndex);
+    }
+
+    // Восстанавливаем карточки группового снятия показаний
+    if (data.actTypeId == 3)
+    {
+        int readingIndex = 0;
+
+        for (const ActMeterData& meter : data.meters)
+        {
+            // Обрабатываем только приборы снятия показаний
+            if (meter.role != ReadingMeter)
+                continue;
+
+            // Первая карточка уже создана в конструкторе
+            if (readingIndex > 0)
+            {
+                // Создаём следующую карточку штатным обработчиком
+                ui->addReadingMeterButton->click();
+            }
+
+            ReadingConnectionWidget* widget =
+                m_readingConnectionWidgets.at(readingIndex);
+
+            // Восстанавливаем присоединение, прибор и показания
+            if (!widget->setData(meter))
+            {
+                QMessageBox::warning(
+                    this,
+                    "Ошибка загрузки",
+                    QString(
+                        "Не удалось восстановить присоединение "
+                        "для карточки № %1.\n"
+                        "ID присоединения: %2"
+                    )
+                        .arg(readingIndex + 1)
+                        .arg(meter.connectionId)
+                );
+            }
+
+            // При редактировании существующего акта запрещаем
+            // изменение присоединения и удаление его карточки
+            widget->setConnectionLocked(true);
+
+            ++readingIndex;
+        }
+
+        // Запрещаем добавление новых присоединений
+        // при редактировании существующего акта
+        ui->addReadingMeterButton->hide();
+
+        // Обновляем номера и доступность присоединений
+        updateReadingWidgets();
+        updateAvailableConnections();
     }
 
     // Загружаем представителя
@@ -2233,13 +3256,16 @@ void CreateActWidget::loadActForEditing(int actId)
     }
 
     // Загружаем основной прибор учета
-    const int primaryRole = primaryMeterRole();
-
-    if (const ActMeterData* meter = meterByRole(data, primaryRole))
+    // Основной прибор восстанавливаем только для обычных актов
+    if (data.actTypeId != 3)
     {
-        m_primaryMeterWidget->setData(*meter);
-    }
+        const int primaryRole = primaryMeterRole();
 
+        if (const ActMeterData* meter = meterByRole(data, primaryRole))
+        {
+            m_primaryMeterWidget->setData(*meter);
+        }
+    }
     // Загружаем дополнительный прибор учета если имеется
     if (data.actTypeId == 2)
     {
@@ -2335,8 +3361,21 @@ ActData CreateActWidget::collectActData() const
     data.substationId =
         ui->substationComboBox->currentData().toInt();
 
-    data.connectionId =
-        ui->connectionComboBox->currentData().toInt();
+    // Для акта снятия показаний с одним присоединением
+    // сохраняем его ID в основных данных.
+    // Для нескольких присоединений общего ID нет.
+    if (data.actTypeId == 3)
+    {
+        data.connectionId =
+            m_readingConnectionWidgets.size() == 1
+                ? m_readingConnectionWidgets.first()->selectedConnectionId()
+                : -1;
+    }
+    else
+    {
+        data.connectionId =
+            ui->connectionComboBox->currentData().toInt();
+    }
 
     data.employeeId =
         ui->employeeComboBox->currentData().toInt();
@@ -2381,6 +3420,9 @@ ActData CreateActWidget::collectActData() const
         representative.shortName = widget->shortName();
         representative.position = widget->position();
 
+        // Сохраняем идентификатор существующего представителя.
+        representative.id = widget->id();
+
         data.externalRepresentatives.append(representative);
     }
 
@@ -2410,15 +3452,27 @@ ActData CreateActWidget::collectActData() const
         return meter;
     };
 
-    // Основной прибор
-    data.meters.append(
-        collectMeter(m_primaryMeterWidget, primaryMeterRole()));
-
-    // Второй прибор при замене
-    if (data.actTypeId == 2)
+    if (data.actTypeId == 3)
     {
+        // Групповой акт: собираем приборы из всех карточек
+        for (const ReadingConnectionWidget* widget :
+             m_readingConnectionWidgets)
+        {
+            data.meters.append(widget->data());
+        }
+    }
+    else
+    {
+        // Обычный акт: основной прибор
         data.meters.append(
-            collectMeter(m_secondaryMeterWidget, InstalledMeter));
+            collectMeter(m_primaryMeterWidget, primaryMeterRole()));
+
+        // Второй прибор при замене
+        if (data.actTypeId == 2)
+        {
+            data.meters.append(
+                collectMeter(m_secondaryMeterWidget, InstalledMeter));
+        }
     }
 
     // Трансформаторы тока
@@ -2469,8 +3523,11 @@ ActData CreateActWidget::collectActData() const
     return data;
 }
 
-bool CreateActWidget::hasActChanges(const ActData &original, const ActData &current) const
+bool CreateActWidget::hasActChanges(
+    const ActData &original,
+    const ActData &current) const
 {
+
     // 1. Основные данные
     if (original.actTypeId != current.actTypeId ||
         original.date != current.date ||
@@ -2487,20 +3544,41 @@ bool CreateActWidget::hasActChanges(const ActData &original, const ActData &curr
     }
 
     // 2. Сторонние представители.
+    // Сравниваем записи по ID, независимо от порядка карточек.
     if (original.externalRepresentatives.size() !=
         current.externalRepresentatives.size())
     {
         return true;
     }
 
-    for (qsizetype i = 0; i < original.externalRepresentatives.size(); ++i)
+    for (const ExternalRepresentativeData &representative :
+         current.externalRepresentatives)
     {
-        const auto &a = original.externalRepresentatives[i];
-        const auto &b = current.externalRepresentatives[i];
+        // Новый представитель означает изменение состава акта.
+        if (representative.id == -1)
+            return true;
 
-        if (a.organization != b.organization ||
-            a.shortName != b.shortName ||
-            a.position != b.position)
+        const ExternalRepresentativeData *originalRepresentative = nullptr;
+
+        // Находим исходную запись по её идентификатору.
+        for (const ExternalRepresentativeData &oldRepresentative :
+             original.externalRepresentatives)
+        {
+            if (oldRepresentative.id == representative.id)
+            {
+                originalRepresentative = &oldRepresentative;
+                break;
+            }
+        }
+
+        // Представитель отсутствовал в исходном акте.
+        if (!originalRepresentative)
+            return true;
+
+        // Проверяем изменения данных найденного представителя.
+        if (originalRepresentative->organization != representative.organization ||
+            originalRepresentative->shortName != representative.shortName ||
+            originalRepresentative->position != representative.position)
         {
             return true;
         }
@@ -2524,10 +3602,41 @@ bool CreateActWidget::hasActChanges(const ActData &original, const ActData &curr
 
     for (const auto &a : original.meters)
     {
-        const auto *b = findMeter(current.meters, a.role);
+        // Для группового акта сопоставляем приборы по присоединению
+        const ActMeterData* b = nullptr;
+
+        if (original.actTypeId == 3 && current.actTypeId == 3)
+        {
+            for (const auto& meter : current.meters)
+            {
+                if (meter.connectionId == a.connectionId)
+                {
+                    b = &meter;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // Для обычных актов сохраняем сравнение по роли
+            b = findMeter(current.meters, a.role);
+        }
 
         if (!b)
             return true;
+
+        // Для группового снятия показаний проверяем
+        // исторические параметры присоединения
+        if (original.actTypeId == 3 && current.actTypeId == 3)
+        {
+            if (a.connectionId != b->connectionId ||
+                a.connectionName != b->connectionName ||
+                a.connectionVoltage != b->connectionVoltage ||
+                a.connectionCtRatio != b->connectionCtRatio)
+            {
+                return true;
+            }
+        }
 
         if (a.meterId != b->meterId ||
             a.name != b->name ||
@@ -2549,7 +3658,7 @@ bool CreateActWidget::hasActChanges(const ActData &original, const ActData &curr
             {
                 if (readingA.typeId == readingB.typeId)
                 {
-                    if (readingA.value != readingB.value)
+                    if (std::abs(readingA.value - readingB.value) > 0.000001)
                         return true;
 
                     found = true;
@@ -2671,6 +3780,142 @@ bool CreateActWidget::checkActVersion()
     return true;
 }
 
+void CreateActWidget::updateReadingWidgets()
+{
+    const bool canRemove = m_readingConnectionWidgets.size() > 1;
+
+    for (int i = 0; i < m_readingConnectionWidgets.size(); ++i) {
+        auto *widget = m_readingConnectionWidgets.at(i);
+
+        widget->setNumber(i + 1);
+        widget->setRemoveEnabled(canRemove);
+    }
+}
+
+void CreateActWidget::removeReadingWidget(ReadingConnectionWidget *widget)
+{
+    if (m_readingConnectionWidgets.size() <= 1)
+        return;
+
+    m_readingConnectionWidgets.removeOne(widget);
+
+    ui->readingMetersLayout->removeWidget(widget);
+
+    widget->hide();
+    widget->deleteLater();
+
+    updateReadingWidgets();
+    updateAvailableConnections();
+}
+
+void CreateActWidget::updateAvailableConnections()
+{
+    QSet<int> selectedIds;
+
+    // Собираем ID всех выбранных присоединений
+    for (ReadingConnectionWidget *widget : m_readingConnectionWidgets) {
+        const int id = widget->selectedConnectionId();
+
+        if (id >= 0)
+            selectedIds.insert(id);
+    }
+
+    // Обновляем доступность присоединений во всех карточках
+    for (ReadingConnectionWidget *widget : m_readingConnectionWidgets) {
+        widget->setUnavailableConnections(selectedIds);
+    }
+}
+
+bool CreateActWidget::validateReadingConnections()
+{
+    for (int i = 0; i < m_readingConnectionWidgets.size(); ++i) {
+        ReadingConnectionWidget *widget =
+            m_readingConnectionWidgets.at(i);
+
+        // Проверяем присоединение
+        if (widget->selectedConnectionId() < 0) {
+            scrollToReadingWidget(widget);
+
+            QMessageBox::warning(
+                this,
+                "Не заполнено присоединение",
+                QString(
+                    "В карточке «Присоединение № %1» "
+                    "не выбрано присоединение."
+                ).arg(i + 1)
+            );
+
+            return false;
+        }
+
+        // Проверяем прибор учёта и показания
+        if (!widget->validateMeter())
+        {
+            scrollToReadingWidget(widget);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void CreateActWidget::scrollToReadingWidget(
+    ReadingConnectionWidget *widget)
+{
+    if (!widget)
+        return;
+
+    // Переключаемся на вкладку «Оборудование»
+    ui->actTabWidget->setCurrentWidget(ui->metersTab);
+
+    // Прокручиваем область к нужной карточке
+    ui->ctScrollArea->ensureWidgetVisible(widget, 0, 20);
+}
+
+bool CreateActWidget::validateUniqueMeters()
+{
+    QHash<QString, int> serialNumbers;
+
+    for (int i = 0; i < m_readingConnectionWidgets.size(); ++i) {
+        ReadingConnectionWidget *widget =
+            m_readingConnectionWidgets.at(i);
+
+        const QString serial =
+            widget->meterSerialNumber();
+
+        if (serial.isEmpty())
+            continue;
+
+        // Нормализуем серийный номер
+        const QString key = serial.toUpper();
+
+        if (serialNumbers.contains(key)) {
+            const int previousNumber = serialNumbers.value(key);
+
+            scrollToReadingWidget(widget);
+
+            QMessageBox::warning(
+                this,
+                "Повторяющийся прибор учёта",
+                QString(
+                    "Прибор учёта с серийным номером «%1» "
+                    "уже используется в карточке № %2.\n\n"
+                    "Повторное использование обнаружено "
+                    "в карточке № %3."
+                )
+                .arg(serial)
+                .arg(previousNumber)
+                .arg(i + 1)
+            );
+
+            return false;
+        }
+
+        serialNumbers.insert(key, i + 1);
+    }
+
+    return true;
+}
 
 
 

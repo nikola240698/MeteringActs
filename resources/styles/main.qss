@@ -411,6 +411,22 @@ QWidget[cardBody="true"] {
     background-color: transparent;
 }
 
+/* ===========================
+    ReadingConnectionWidget
+   =========================== */
+
+
+#ReadingConnectionWidget,
+#headerWidget,
+#cardWidget {
+    background-color: transparent;
+}
+
+#connectionCardContainer,
+#meterCardContainer {
+    background-color: transparent;
+    border: none;
+}
 
 /* ===========================
     Карточки CreateActWidget
@@ -1335,7 +1351,8 @@ SettingsWidget QLineEdit[readOnly="true"] {
 }
 
 /* Информационное сообщение восстановления */
-SettingsWidget QLabel#restoreInformationLabel {
+SettingsWidget QLabel#restoreInformationLabel,
+CreateActWidget QLabel#connectionInfoLabel {
     padding: 10px 12px;
 
     background-color: #EFF6FF;

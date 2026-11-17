@@ -64,6 +64,7 @@ public:
 
 signals:
     void meterCreated();
+    void meterSelected();
 
 private:
     Ui::MeterActWidget *ui;

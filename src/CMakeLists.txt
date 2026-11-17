@@ -33,6 +33,7 @@ add_executable(MeteringActs # WIN32
         docxservice.cpp
         nowheelspinbox.cpp
         aboutdialog.cpp
+        readingconnectionwidget.cpp
 
         ${MY_INCLUDE_DIR}/database.h
         ${MY_INCLUDE_DIR}/mainwindow.h
@@ -65,6 +66,7 @@ add_executable(MeteringActs # WIN32
         ${MY_INCLUDE_DIR}/nowheelspinbox.h
         ${MY_INCLUDE_DIR}/aboutdialog.h
         ${MY_INCLUDE_DIR}/uuidutils.h
+        ${MY_INCLUDE_DIR}/readingconnectionwidget.h
 
         ${MY_UI_DIR}/mainwindow.ui
         ${MY_UI_DIR}/createactwidget.ui
@@ -87,6 +89,7 @@ add_executable(MeteringActs # WIN32
         ${MY_UI_DIR}/settingswidget.ui
         ${MY_UI_DIR}/currenttransformerphasewidget.ui
         ${MY_UI_DIR}/aboutdialog.ui
+        ${MY_UI_DIR}/readingconnectionwidget.ui
 
 
         ${CMAKE_SOURCE_DIR}/resources/resources.qrc

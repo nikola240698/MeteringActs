@@ -99,6 +99,12 @@
        </property>
        <item>
         <widget class="QWidget" name="mainContentWidget" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -106,6 +112,181 @@
           </size>
          </property>
          <layout class="QGridLayout" name="gridLayout">
+          <item row="2" column="1">
+           <widget class="QFrame" name="locationCard">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>280</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Shape::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Shadow::Raised</enum>
+            </property>
+            <property name="card" stdset="0">
+             <bool>true</bool>
+            </property>
+            <layout class="QVBoxLayout" name="locationCardLayout">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="locationCardTitle">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>42</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>42</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Место проведения работ</string>
+               </property>
+               <property name="cardTitle" stdset="0">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QWidget" name="locationCardBody" native="true">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="cardBody" stdset="0">
+                <bool>true</bool>
+               </property>
+               <layout class="QFormLayout" name="locationCardBodyLayout">
+                <property name="horizontalSpacing">
+                 <number>12</number>
+                </property>
+                <property name="verticalSpacing">
+                 <number>10</number>
+                </property>
+                <property name="leftMargin">
+                 <number>20</number>
+                </property>
+                <property name="topMargin">
+                 <number>16</number>
+                </property>
+                <property name="rightMargin">
+                 <number>20</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>18</number>
+                </property>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="areaLabel">
+                  <property name="text">
+                   <string>Участок:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QComboBox" name="areaComboBox"/>
+                </item>
+                <item row="3" column="0">
+                 <widget class="QLabel" name="substationLabel">
+                  <property name="text">
+                   <string>Подстанция:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="1">
+                 <widget class="QComboBox" name="substationComboBox"/>
+                </item>
+                <item row="5" column="0">
+                 <widget class="QLabel" name="connectionLabel">
+                  <property name="text">
+                   <string>Присоединение:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="5" column="1">
+                 <widget class="QComboBox" name="connectionComboBox"/>
+                </item>
+                <item row="7" column="0">
+                 <widget class="QLabel" name="voltageLabel">
+                  <property name="text">
+                   <string>Напряжение:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="7" column="1">
+                 <widget class="QLineEdit" name="voltageLineEdit">
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item row="8" column="0">
+                 <widget class="QLabel" name="ctRatioLabel">
+                  <property name="text">
+                   <string>Ктт:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="8" column="1">
+                 <widget class="QLineEdit" name="ctRatioLineEdit">
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="connectionInfoLabel">
+               <property name="text">
+                <string>ⓘ  Выбор присоединений осуществляется на вкладке 
+ «Приборы учёта» отдельно для каждого прибора.</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+               <property name="wordWrap">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
           <item row="0" column="2">
            <widget class="QFrame" name="employeeCard">
             <property name="minimumSize">
@@ -211,364 +392,6 @@
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QFrame" name="locationCard">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>280</height>
-             </size>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Shape::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Shadow::Raised</enum>
-            </property>
-            <property name="card" stdset="0">
-             <bool>true</bool>
-            </property>
-            <layout class="QVBoxLayout" name="locationCardLayout">
-             <property name="spacing">
-              <number>0</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLabel" name="locationCardTitle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>42</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>42</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Место проведения работ</string>
-               </property>
-               <property name="cardTitle" stdset="0">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QWidget" name="locationCardBody" native="true">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="cardBody" stdset="0">
-                <bool>true</bool>
-               </property>
-               <layout class="QFormLayout" name="locationCardBodyLayout">
-                <property name="horizontalSpacing">
-                 <number>12</number>
-                </property>
-                <property name="verticalSpacing">
-                 <number>10</number>
-                </property>
-                <property name="leftMargin">
-                 <number>20</number>
-                </property>
-                <property name="topMargin">
-                 <number>16</number>
-                </property>
-                <property name="rightMargin">
-                 <number>20</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>18</number>
-                </property>
-                <item row="1" column="1">
-                 <widget class="QComboBox" name="areaComboBox"/>
-                </item>
-                <item row="3" column="1">
-                 <widget class="QComboBox" name="substationComboBox"/>
-                </item>
-                <item row="5" column="1">
-                 <widget class="QComboBox" name="connectionComboBox"/>
-                </item>
-                <item row="7" column="1">
-                 <widget class="QLineEdit" name="voltageLineEdit">
-                  <property name="readOnly">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="8" column="1">
-                 <widget class="QLineEdit" name="ctRatioLineEdit">
-                  <property name="readOnly">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QLabel" name="areaLabel">
-                  <property name="text">
-                   <string>Участок:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="0">
-                 <widget class="QLabel" name="substationLabel">
-                  <property name="text">
-                   <string>Подстанция:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="0">
-                 <widget class="QLabel" name="connectionLabel">
-                  <property name="text">
-                   <string>Присоединение:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="7" column="0">
-                 <widget class="QLabel" name="voltageLabel">
-                  <property name="text">
-                   <string>Напряжение:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="8" column="0">
-                 <widget class="QLabel" name="ctRatioLabel">
-                  <property name="text">
-                   <string>Ктт:</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QFrame" name="externalRepresentativesCard">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>100</height>
-             </size>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Shape::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Shadow::Raised</enum>
-            </property>
-            <property name="card" stdset="0">
-             <bool>true</bool>
-            </property>
-            <layout class="QVBoxLayout" name="externalrepresentativesCardLayout">
-             <property name="spacing">
-              <number>0</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLabel" name="externalRepresentativesTitle">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>42</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>42</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Сторонние представители</string>
-               </property>
-               <property name="cardTitle" stdset="0">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QWidget" name="externalRepresentativesCadBody" native="true">
-               <property name="cardBody" stdset="0">
-                <bool>true</bool>
-               </property>
-               <layout class="QVBoxLayout" name="externalRepresentativesCardBodyLayout">
-                <property name="spacing">
-                 <number>12</number>
-                </property>
-                <property name="leftMargin">
-                 <number>20</number>
-                </property>
-                <property name="topMargin">
-                 <number>16</number>
-                </property>
-                <property name="rightMargin">
-                 <number>20</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>18</number>
-                </property>
-                <item>
-                 <layout class="QVBoxLayout" name="scrollVerticalLayout">
-                  <property name="spacing">
-                   <number>0</number>
-                  </property>
-                  <item>
-                   <widget class="QScrollArea" name="externalRepresentativesScrollArea">
-                    <property name="minimumSize">
-                     <size>
-                      <width>0</width>
-                      <height>200</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>260</height>
-                     </size>
-                    </property>
-                    <property name="horizontalScrollBarPolicy">
-                     <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-                    </property>
-                    <property name="widgetResizable">
-                     <bool>true</bool>
-                    </property>
-                    <widget class="QWidget" name="externalRepresentativesScrollContents">
-                     <property name="geometry">
-                      <rect>
-                       <x>0</x>
-                       <y>0</y>
-                       <width>385</width>
-                       <height>196</height>
-                      </rect>
-                     </property>
-                     <layout class="QVBoxLayout" name="verticalLayout_8">
-                      <property name="spacing">
-                       <number>0</number>
-                      </property>
-                      <property name="leftMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="topMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="rightMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="bottomMargin">
-                       <number>0</number>
-                      </property>
-                      <item>
-                       <widget class="QWidget" name="externalRepresentativesContainer" native="true">
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>0</height>
-                         </size>
-                        </property>
-                        <property name="externalRepresentative" stdset="0">
-                         <bool>false</bool>
-                        </property>
-                        <layout class="QVBoxLayout" name="externalRepresentativesContainerLayout">
-                         <property name="spacing">
-                          <number>12</number>
-                         </property>
-                         <property name="leftMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="topMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="rightMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="bottomMargin">
-                          <number>0</number>
-                         </property>
-                         <item>
-                          <spacer name="verticalSpacer_5">
-                           <property name="orientation">
-                            <enum>Qt::Orientation::Vertical</enum>
-                           </property>
-                           <property name="sizeHint" stdset="0">
-                            <size>
-                             <width>20</width>
-                             <height>40</height>
-                            </size>
-                           </property>
-                          </spacer>
-                         </item>
-                        </layout>
-                       </widget>
-                      </item>
-                     </layout>
-                    </widget>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="addExternalRepresentativeButton">
-                  <property name="text">
-                   <string>Добавить представителя</string>
-                  </property>
-                  <property name="buttonRole" stdset="0">
-                   <string>add</string>
                   </property>
                  </widget>
                 </item>
@@ -759,8 +582,218 @@
             </layout>
            </widget>
           </item>
+          <item row="2" column="2">
+           <widget class="QFrame" name="externalRepresentativesCard">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Shape::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Shadow::Raised</enum>
+            </property>
+            <property name="card" stdset="0">
+             <bool>true</bool>
+            </property>
+            <layout class="QVBoxLayout" name="externalrepresentativesCardLayout">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="externalRepresentativesTitle">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>42</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>42</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Сторонние представители</string>
+               </property>
+               <property name="cardTitle" stdset="0">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QWidget" name="externalRepresentativesCadBody" native="true">
+               <property name="cardBody" stdset="0">
+                <bool>true</bool>
+               </property>
+               <layout class="QVBoxLayout" name="externalRepresentativesCardBodyLayout">
+                <property name="spacing">
+                 <number>12</number>
+                </property>
+                <property name="leftMargin">
+                 <number>20</number>
+                </property>
+                <property name="topMargin">
+                 <number>16</number>
+                </property>
+                <property name="rightMargin">
+                 <number>20</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>18</number>
+                </property>
+                <item>
+                 <layout class="QVBoxLayout" name="scrollVerticalLayout">
+                  <property name="spacing">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <widget class="QScrollArea" name="externalRepresentativesScrollArea">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>200</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>260</height>
+                     </size>
+                    </property>
+                    <property name="horizontalScrollBarPolicy">
+                     <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+                    </property>
+                    <property name="widgetResizable">
+                     <bool>true</bool>
+                    </property>
+                    <widget class="QWidget" name="externalRepresentativesScrollContents">
+                     <property name="geometry">
+                      <rect>
+                       <x>0</x>
+                       <y>0</y>
+                       <width>385</width>
+                       <height>198</height>
+                      </rect>
+                     </property>
+                     <layout class="QVBoxLayout" name="verticalLayout_8">
+                      <property name="spacing">
+                       <number>0</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>0</number>
+                      </property>
+                      <item>
+                       <widget class="QWidget" name="externalRepresentativesContainer" native="true">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="externalRepresentative" stdset="0">
+                         <bool>false</bool>
+                        </property>
+                        <layout class="QVBoxLayout" name="externalRepresentativesContainerLayout">
+                         <property name="spacing">
+                          <number>12</number>
+                         </property>
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <spacer name="verticalSpacer_5">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Vertical</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>20</width>
+                             <height>40</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="addExternalRepresentativeButton">
+                  <property name="text">
+                   <string>Добавить представителя</string>
+                  </property>
+                  <property name="buttonRole" stdset="0">
+                   <string>add</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -804,7 +837,7 @@
             <x>0</x>
             <y>0</y>
             <width>883</width>
-            <height>482</height>
+            <height>508</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -823,6 +856,44 @@
            <property name="bottomMargin">
             <number>0</number>
            </property>
+           <item>
+            <widget class="QWidget" name="readingMetersContainer" native="true">
+             <layout class="QVBoxLayout" name="readingMetersLayout">
+              <property name="spacing">
+               <number>12</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="addReadingMeterButtonLayout">
+             <property name="spacing">
+              <number>12</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="addReadingMeterButton">
+               <property name="text">
+                <string>+ Добавить прибор учёта</string>
+               </property>
+               <property name="buttonRole" stdset="0">
+                <string>secondary</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
            <item>
             <widget class="QFrame" name="primaryMeterCard">
              <property name="minimumSize">
@@ -1300,8 +1371,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>911</width>
-            <height>510</height>
+            <width>298</width>
+            <height>226</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="measurementScrollAreaContentLayout">
@@ -1833,19 +1904,6 @@
       </layout>
      </widget>
     </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Orientation::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item>
     <widget class="QFrame" name="actionBarSeparator">
